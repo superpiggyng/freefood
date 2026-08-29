@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FreeFood{% endblock %}</title>
+    <style>
+        :root {
+            --green-50: #f2fff8;
+            --green-100: #dff9ea;
+            --green-200: #baf0d2;
+            --green-300: #7ad7a1;
+            --green-500: #2a9d63;
+            --green-700: #1f7748;
+            --green-900: #153f2b;
+            --sage-800: #214d3d;
+            --cream: #fbfff9;
+            --text: #173529;
+            --muted: #4d665d;
+            --card: rgba(255,255,255,0.82);
+            --glow: rgba(42, 157, 99, 0.18);
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #effff5 0%, #dff7e8 28%, #bfe9cb 58%, #d9f7dd 100%);
+            color: var(--text);
+        }
+
+        .shell {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 4px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--green-500), var(--green-700));
+            color: white;
+            box-shadow: 0 16px 44px var(--glow);
+        }
+
+        .nav {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .primary-btn, .secondary-btn {
+            border: none;
+            border-radius: 999px;
+            padding: 12px 22px;
+            font-size: 0.98rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--green-500), var(--green-700));
+            color: white;
+            box-shadow: 0 18px 34px rgba(35, 117, 76, 0.28);
+        }
+
+        .secondary-btn {
+            background: rgba(255,255,255,0.6);
+            color: var(--green-900);
+            border: 1px solid rgba(28,103,63,0.12);
+        }
+
+        .primary-btn:hover, .secondary-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 32px;
+            align-items: center;
+            padding: 32px 0 26px;
+        }
+
+        .title {
+            font-size: clamp(2.3rem, 5vw, 4.3rem);
+            line-height: 1.04;
+            margin: 0 0 18px;
+            font-weight: 800;
+            letter-spacing: -0.06em;
+        }
+
+        .lead {
+            font-size: 1.08rem;
+            color: var(--muted);
+            margin-bottom: 24px;
+            max-width: 650px;
+        }
+
+        .cta-row {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 26px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 26px;
+            flex-wrap: wrap;
+            color: var(--muted);
+        }
+
+        .stat strong {
+            display: block;
+            color: var(--green-900);
+            font-size: 1.4rem;
+        }
+
+        .glass {
+            background: var(--card);
+            border: 1px solid rgba(29,96,60,0.08);
+            backdrop-filter: blur(8px);
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: 0 24px 70px rgba(20, 82, 49, 0.12);
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(42, 157, 99, 0.12);
+            color: var(--green-700);
+            border-radius: 999px;
+            font-weight: 700;
+            padding: 8px 12px;
+            margin-bottom: 14px;
+            font-size: 0.8rem;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-top: 22px;
+        }
+
+        .mini-card {
+            background: rgba(255,255,255,0.55);
+            border: 1px solid rgba(28,103,63,0.08);
+            border-radius: 20px;
+            padding: 18px;
+        }
+
+        .form-wrap {
+            padding: 28px 0 40px;
+        }
+
+        form {
+            display: grid;
+            gap: 18px;
+            background: rgba(255,255,255,0.72);
+            border-radius: 28px;
+            border: 1px solid rgba(31,119,72,0.10);
+            box-shadow: 0 22px 56px rgba(16, 67, 44, 0.08);
+            padding: 28px;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .field {
+            display: grid;
+            gap: 8px;
+        }
+
+        .field label {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--green-900);
+        }
+
+        .field input, .field select, .field textarea {
+            width: 100%;
+            border: 1px solid rgba(20,70,45,0.15);
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.92);
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .checkbox-row input {
+            width: 16px;
+            height: 16px;
+        }
+
+        .role-choice {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .role-card {
+            display: block;
+            background: rgba(255,255,255,0.74);
+            border: 1px solid rgba(20,70,45,0.10);
+            border-radius: 22px;
+            padding: 22px 18px;
+            text-decoration: none;
+            color: var(--text);
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .role-card strong {
+            display: block;
+            font-size: 1.15rem;
+            margin-bottom: 8px;
+        }
+
+        .role-card span {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .alert {
+            background: rgba(51, 158, 93, 0.12);
+            border: 1px solid rgba(42, 157, 99, 0.2);
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: var(--green-900);
+            font-weight: 600;
+        }
+
+        @media (max-width: 800px) {
+            .hero, .two-col, .role-choice {
+                grid-template-columns: 1fr;
+            }
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

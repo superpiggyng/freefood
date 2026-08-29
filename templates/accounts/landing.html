@@ -1,0 +1,58 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}FreeFood | Affordable surplus food{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div class="brand">
+        <div class="brand-mark">F</div>
+        <span>FreeFood</span>
+    </div>
+    <div class="nav">
+        <a href="#">How it works</a>
+        <a href="#">Community</a>
+        <a href="#" class="secondary-btn">Login</a>
+    </div>
+</div>
+
+<section class="hero">
+    <div>
+        <div class="badge">Fresh food, fair access</div>
+        <h1 class="title">Turning surplus food into someone’s next meal.</h1>
+        <p class="lead">
+            FreeFood connects low-income families with nearby grocers, bakeries, and restaurants that still have safe, unsold food at the end of the day.
+        </p>
+        <div class="cta-row">
+            <a href="{% url 'user_signup' %}" class="primary-btn">Create user profile</a>
+            <a href="{% url 'vendor_signup' %}" class="secondary-btn">Register as vendor</a>
+        </div>
+        <div class="stats">
+            <div class="stat"><strong>2x</strong> less food waste</div>
+            <div class="stat"><strong>24/7</strong> local listings</div>
+            <div class="stat"><strong>Fair</strong> priority matching</div>
+        </div>
+    </div>
+
+    <div class="glass">
+        <div class="badge">Today’s availability</div>
+        <div class="card-grid">
+            <div class="mini-card">
+                <strong>Fresh produce</strong><br>
+                23 listings
+            </div>
+            <div class="mini-card">
+                <strong>Bakeries</strong><br>
+                14 listings
+            </div>
+            <div class="mini-card">
+                <strong>Meals</strong><br>
+                8 listings
+            </div>
+            <div class="mini-card">
+                <strong>Groceries</strong><br>
+                18 listings
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

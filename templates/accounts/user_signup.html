@@ -1,0 +1,93 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}User registration{% endblock %}
+
+{% block content %}
+<div class="form-wrap">
+    <div class="topbar">
+        <div class="brand">
+            <div class="brand-mark">F</div>
+            <span>FreeFood</span>
+        </div>
+        <div class="nav">
+            <a href="{% url 'landing' %}" class="secondary-btn">Back home</a>
+        </div>
+    </div>
+
+    <h2 style="margin: 18px 0 8px; font-size: 2.2rem;">Create your user profile</h2>
+    <p style="color: var(--muted); max-width: 760px; margin-bottom: 22px;">Eligibility is reviewed using income, household details, address, and optional documentation. Your information is kept secure.</p>
+
+    {% if form.errors %}
+    <div class="alert">Please fix the highlighted fields below.</div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="role-choice">
+            <div class="role-card" style="background: rgba(42,157,99,0.08); border-color: rgba(42,157,99,0.2);">
+                <strong>For people</strong>
+                <span>Access affordable groceries and meals</span>
+            </div>
+            <div class="role-card">
+                <strong>For vendors</strong>
+                <span>List surplus items and reduce waste</span>
+            </div>
+        </div>
+
+        <div class="two-col">
+            <div class="field">
+                {{ form.username.label_tag }}
+                {{ form.username }}
+            </div>
+            <div class="field">
+                {{ form.email.label_tag }}
+                {{ form.email }}
+            </div>
+            <div class="field">
+                {{ form.first_name.label_tag }}
+                {{ form.first_name }}
+            </div>
+            <div class="field">
+                {{ form.last_name.label_tag }}
+                {{ form.last_name }}
+            </div>
+            <div class="field">
+                {{ form.income.label_tag }}
+                {{ form.income }}
+            </div>
+            <div class="field">
+                {{ form.zip_code.label_tag }}
+                {{ form.zip_code }}
+            </div>
+            <div class="field" style="grid-column: 1 / -1;">
+                {{ form.address.label_tag }}
+                {{ form.address }}
+            </div>
+            <div class="field" style="grid-column: 1 / -1;">
+                {{ form.rural_area.label_tag }}
+                {{ form.rural_area }}
+            </div>
+            <div class="field" style="grid-column: 1 / -1;">
+                {{ form.bank_slip.label_tag }}
+                {{ form.bank_slip }}
+            </div>
+            <div class="field">
+                {{ form.password1.label_tag }}
+                {{ form.password1 }}
+            </div>
+            <div class="field">
+                {{ form.password2.label_tag }}
+                {{ form.password2 }}
+            </div>
+        </div>
+
+        <label class="checkbox-row">
+            <input type="checkbox" required>
+            I confirm my information is accurate and I am eligible for support.
+        </label>
+
+        <button type="submit" class="primary-btn">Create account</button>
+    </form>
+</div>
+{% endblock %}
