@@ -77,6 +77,9 @@ def allocate_listing(listing: MarketplaceListing | int, *, now=None) -> Allocati
             allocated_quantity=quantity,
             pickup_code=_unique_pickup_code(),
         )
+        interest.user.previous_allocations_count += 1
+        interest.user.needy_metric = interest.user.calculate_need_score()
+        interest.user.save(update_fields=["previous_allocations_count", "needy_metric"])
         interest.status = Interest.STATUS_ALLOCATED
         interest.save(update_fields=["status", "updated_at"])
         remaining -= quantity

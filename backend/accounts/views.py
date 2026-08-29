@@ -46,8 +46,8 @@ def _user_json(user):
         "maxDistanceKm": user.max_distance_km,
         "postcode": user.zip_code,
         "ruralArea": user.rural_area,
-        "needyMetric": user.needy_metric,
         "needScore": user.calculate_need_score(),
+        "needScoreBreakdown": user.calculate_need_score_breakdown(),
         "needyMetric": user.needy_metric,
     }
 

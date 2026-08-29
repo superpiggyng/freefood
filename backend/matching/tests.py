@@ -75,3 +75,24 @@ class MatchingServiceTests(TestCase):
             list(Allocation.objects.order_by("created_at").values_list("user__username", flat=True)),
             ["first", "second"],
         )
+
+    def test_allocation_updates_user_allocation_count_and_need_score(self):
+        recipient = get_user_model().objects.create_user(
+            username="recipient",
+            password="password12345",
+            role="user",
+            income_level="under-25000",
+            current_food_access="very-limited",
+            previous_allocations_count=0,
+        )
+        recipient.needy_metric = recipient.calculate_need_score()
+        recipient.save(update_fields=["needy_metric"])
+        original_score = recipient.needy_metric
+        Interest.objects.create(listing=self.listing, user=recipient)
+
+        allocate_listing(self.listing)
+
+        recipient.refresh_from_db()
+        self.assertEqual(recipient.previous_allocations_count, 1)
+        self.assertEqual(recipient.needy_metric, recipient.calculate_need_score())
+        self.assertLess(recipient.needy_metric, original_score)

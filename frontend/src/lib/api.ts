@@ -1,5 +1,17 @@
 import type { Listing } from '../types';
 
+export interface NeedScoreBreakdown {
+  income: number;
+  foodAccess: number;
+  dependents: number;
+  householdSize: number;
+  employment: number;
+  housingPressure: number;
+  debtPressure: number;
+  ruralAccess: number;
+  previousAllocationsPenalty: number;
+}
+
 export interface SavrUser {
   id: number;
   username: string;
@@ -26,6 +38,7 @@ export interface SavrUser {
   postcode: string;
   ruralArea: boolean;
   needScore: number;
+  needScoreBreakdown: NeedScoreBreakdown;
   needyMetric: number;
 }
 

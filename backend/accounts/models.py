@@ -132,53 +132,82 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
-    def calculate_need_score(self):
-        """Weighted need score (0-100) combining income, household, employment, access and cost factors."""
-        income_weight = {
+    def _annual_income_for_need_score(self):
+        if self.income is not None:
+            return float(self.income)
+        return {
+            "under-25000": 25000,
+            "25000-49999": 37500,
+            "50000-74999": 62500,
+            "75000-plus": 90000,
+        }.get(self.income_level)
+
+    def calculate_need_score_breakdown(self):
+        """Explainable 0-100 priority score used only for oversubscribed allocations."""
+        income_score = {
             "under-25000": 25,
             "25000-49999": 17,
             "50000-74999": 8,
             "75000-plus": 2,
-        }.get(self.income_level, 12)
-        household_weight = min(15, max(0, self.household_size - 1) * 3)
-        dependents_weight = min(15, self.dependents * 3)
-        employment_weight = {
-            "unemployed": 15,
-            "unable-to-work": 15,
-            "student": 8,
-            "employed-part-time": 6,
-            "retired": 5,
-            "employed-full-time": 0,
-        }.get(self.employment_status, 6)
-        access_weight = {
-            "very-limited": 15,
-            "often-limited": 10,
-            "sometimes-limited": 5,
+        }.get(self.income_level, 10)
+        food_access_score = {
+            "very-limited": 20,
+            "often-limited": 14,
+            "sometimes-limited": 7,
             "reliable": 0,
-        }.get(self.current_food_access, 6)
-        housing_weight = 0
-        if self.housing_cost is not None and self.income:
-            monthly_income = self.income / 12
-            if monthly_income > 0:
-                ratio = self.housing_cost / monthly_income
-                housing_weight = min(10, float(ratio) * 20)
-        debt_weight = 0
-        if self.debt is not None and self.income:
-            if self.income > 0:
-                debt_ratio = self.debt / self.income
-                debt_weight = min(10, float(debt_ratio) * 10)
-        rural_weight = 5 if self.rural_area else 0
-        allocation_penalty = min(10, self.previous_allocations_count * 2)
+        }.get(self.current_food_access, 8)
+        dependents_score = min(15, (self.dependents or 0) * 5)
+        household_score = min(10, max(0, (self.household_size or 1) - 1) * 3)
+        employment_score = {
+            "unemployed": 10,
+            "unable-to-work": 10,
+            "student": 6,
+            "retired": 5,
+            "employed-part-time": 5,
+            "employed-full-time": 0,
+        }.get(self.employment_status, 4)
 
-        score = (
-            income_weight
-            + household_weight
-            + dependents_weight
-            + employment_weight
-            + access_weight
-            + housing_weight
-            + debt_weight
-            + rural_weight
-            - allocation_penalty
-        )
+        annual_income = self._annual_income_for_need_score()
+        housing_score = 0
+        if self.housing_cost is not None and annual_income is not None:
+            housing_cost = float(self.housing_cost)
+            if annual_income <= 0:
+                housing_score = 10 if housing_cost > 0 else 0
+            else:
+                housing_ratio = housing_cost / (annual_income / 12)
+                if housing_ratio >= 0.6:
+                    housing_score = 10
+                elif housing_ratio >= 0.45:
+                    housing_score = 7
+                elif housing_ratio >= 0.3:
+                    housing_score = 4
+
+        debt_score = 0
+        if self.debt is not None and annual_income is not None:
+            debt = float(self.debt)
+            if annual_income <= 0:
+                debt_score = 5 if debt > 0 else 0
+            else:
+                debt_ratio = debt / annual_income
+                if debt_ratio >= 1:
+                    debt_score = 5
+                elif debt_ratio >= 0.5:
+                    debt_score = 3
+                elif debt_ratio >= 0.2:
+                    debt_score = 1
+
+        return {
+            "income": income_score,
+            "foodAccess": food_access_score,
+            "dependents": dependents_score,
+            "householdSize": household_score,
+            "employment": employment_score,
+            "housingPressure": housing_score,
+            "debtPressure": debt_score,
+            "ruralAccess": 5 if self.rural_area else 0,
+            "previousAllocationsPenalty": -min(15, (self.previous_allocations_count or 0) * 3),
+        }
+
+    def calculate_need_score(self):
+        score = sum(self.calculate_need_score_breakdown().values())
         return max(0, min(100, round(score)))

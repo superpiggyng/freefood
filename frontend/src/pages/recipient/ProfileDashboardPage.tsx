@@ -81,6 +81,17 @@ const clampPercent = (value: number) => Math.max(0, Math.min(100, value));
 const fieldNumber = (value: string, fallback = 0) => Number(value || fallback);
 const optionalNumber = (value: string) => value === "" ? null : Number(value);
 const optionalString = (value: string) => value.trim() === "" ? null : value.trim();
+const needScoreLabels = [
+  { key: "income", label: "Income level" },
+  { key: "foodAccess", label: "Food access" },
+  { key: "dependents", label: "Dependants" },
+  { key: "householdSize", label: "Household size" },
+  { key: "employment", label: "Employment" },
+  { key: "housingPressure", label: "Housing pressure" },
+  { key: "debtPressure", label: "Debt pressure" },
+  { key: "ruralAccess", label: "Low-access area" },
+  { key: "previousAllocationsPenalty", label: "Previous allocations" },
+] as const;
 
 export default function ProfileDashboardPage() {
   const { user, refresh } = useAuth();
@@ -128,6 +139,11 @@ export default function ProfileDashboardPage() {
   );
 
   if (!user) return null;
+
+  const needScoreRows = needScoreLabels.map((item) => ({
+    ...item,
+    value: user.needScoreBreakdown?.[item.key] ?? 0,
+  }));
 
   const update = (key: keyof ProfileForm, value: string | boolean) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -230,6 +246,19 @@ export default function ProfileDashboardPage() {
           </form>
 
           <aside className="profile-analytics">
+            <section className="dashboard-panel">
+              <div className="panel-heading"><h2><BarChart3 size={15}/> Need score breakdown</h2><span>{user.needScore}/100</span></div>
+              <div className="need-breakdown-list">
+                {needScoreRows.map((item) => (
+                  <div className={`need-breakdown-row${item.value < 0 ? " need-breakdown-row--penalty" : ""}`} key={item.key}>
+                    <span>{item.label}</span>
+                    <strong>{item.value > 0 ? `+${item.value}` : item.value}</strong>
+                  </div>
+                ))}
+              </div>
+              <p className="panel-copy">Used only when requests exceed available food. Request time breaks ties.</p>
+            </section>
+
             <section className="dashboard-panel">
               <div className="panel-heading"><h2><Activity size={15}/> Daily targets</h2><span>Estimated</span></div>
               <div className="nutrition-targets nutrition-targets--compact" aria-label="Estimated daily nutrition targets">
