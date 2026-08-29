@@ -6,7 +6,7 @@ from django.views.decorators.http import require_http_methods
 from freefood.auth import login_required_json
 
 from .models import FoodPreferenceProfile, PreferenceResponse, RestaurantMeal
-from .services import score_meal
+from .services import calculate_daily_targets, score_meal
 
 
 @login_required_json
@@ -34,10 +34,11 @@ def preferences(request):
 @login_required_json
 def matches(request):
     profile, _ = FoodPreferenceProfile.objects.get_or_create(user=request.user)
+    targets = calculate_daily_targets(request.user)
     results = []
     for meal in RestaurantMeal.objects.filter(is_available=True).select_related("vendor"):
-        result = score_meal(profile, meal)
+        result = score_meal(profile, meal, user=request.user)
         if result.eligible:
-            results.append({"id": meal.id, "name": meal.name, "restaurant": meal.vendor.vendor_name or meal.vendor.username, "image": meal.image_url, "price": str(meal.price), "score": result.score, "reasons": result.reasons, "warnings": result.warnings, "allergens": meal.allergens})
+            results.append({"id": meal.id, "name": meal.name, "restaurant": meal.vendor.vendor_name or meal.vendor.username, "image": meal.image_url, "price": str(meal.price), "score": result.score, "reasons": result.reasons, "warnings": result.warnings, "allergens": meal.allergens, "nutrition": meal.nutrition})
     results.sort(key=lambda item: item["score"], reverse=True)
-    return JsonResponse({"results": results, "disclaimer": "Suggestions use optional food preferences and are not medical advice."})
+    return JsonResponse({"results": results, "dailyTargets": targets, "disclaimer": "Suggestions use optional food preferences and estimated nutrition targets. This is not medical advice."})

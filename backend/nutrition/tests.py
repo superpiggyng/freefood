@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 from django.test import SimpleTestCase
 
-from .services import score_meal
+from .services import calculate_daily_targets, score_meal
 
 
 class MealSuggestionTests(SimpleTestCase):
@@ -12,7 +12,7 @@ class MealSuggestionTests(SimpleTestCase):
         return SimpleNamespace(**values)
 
     def meal(self, **overrides):
-        values = {"allergens": [], "possible_cross_contact": [], "dietary_tags": [], "price": 0}
+        values = {"allergens": [], "possible_cross_contact": [], "dietary_tags": [], "price": 0, "nutrition": {}}
         values.update(overrides)
         return SimpleNamespace(**values)
 
@@ -28,3 +28,23 @@ class MealSuggestionTests(SimpleTestCase):
         result = score_meal(self.profile(allergens_to_avoid=["sesame"]), self.meal(possible_cross_contact=["Sesame"]))
         self.assertTrue(result.eligible)
         self.assertTrue(result.warnings)
+
+    def test_calculates_daily_targets_from_body_metrics(self):
+        user = SimpleNamespace(age=30, height_cm=170, weight_kg=70)
+
+        targets = calculate_daily_targets(user)
+
+        self.assertEqual(targets["proteinG"], 56)
+        self.assertGreater(targets["calories"], 1200)
+
+    def test_nutrition_contribution_improves_score(self):
+        user = SimpleNamespace(age=30, height_cm=170, weight_kg=70)
+
+        result = score_meal(
+            self.profile(),
+            self.meal(nutrition={"calories": 520, "proteinG": 28, "fiberG": 7}),
+            user=user,
+        )
+
+        self.assertGreater(result.score, 70)
+        self.assertIn("protein", " ".join(result.reasons).lower())

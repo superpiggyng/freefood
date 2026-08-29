@@ -39,6 +39,9 @@ def _user_json(user):
         "currentFoodAccess": user.current_food_access,
         "housingCost": str(user.housing_cost) if user.housing_cost is not None else None,
         "debt": str(user.debt) if user.debt is not None else None,
+        "age": user.age,
+        "heightCm": user.height_cm,
+        "weightKg": str(user.weight_kg) if user.weight_kg is not None else None,
         "preferredCategory": user.preferred_category,
         "maxDistanceKm": user.max_distance_km,
         "postcode": user.zip_code,
@@ -136,6 +139,12 @@ def profile(request):
             user.housing_cost = data["housingCost"]
         if "debt" in data:
             user.debt = data["debt"]
+        if "age" in data:
+            user.age = data["age"]
+        if "heightCm" in data:
+            user.height_cm = data["heightCm"]
+        if "weightKg" in data:
+            user.weight_kg = data["weightKg"]
         if "preferredCategory" in data:
             user.preferred_category = data["preferredCategory"]
         if "maxDistanceKm" in data:

@@ -21,6 +21,12 @@ class Item(models.Model):
         blank=True,
         help_text="Comma-separated tags such as vegetarian, halal, gluten-free.",
     )
+    calories = models.PositiveIntegerField(blank=True, null=True)
+    protein_g = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
+    carbs_g = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
+    fat_g = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
+    fiber_g = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
+    sodium_mg = models.PositiveIntegerField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

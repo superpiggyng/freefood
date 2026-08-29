@@ -89,6 +89,23 @@ class User(AbstractUser):
     current_food_access = models.CharField(max_length=30, choices=FOOD_ACCESS_CHOICES, blank=True)
     housing_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     debt = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    age = models.PositiveSmallIntegerField(
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(0), MaxValueValidator(120)],
+    )
+    height_cm = models.PositiveSmallIntegerField(
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(30), MaxValueValidator(260)],
+    )
+    weight_kg = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(0), MaxValueValidator(500)],
+    )
     preferred_category = models.CharField(max_length=20, choices=ITEM_CATEGORY_CHOICES, blank=True)
     max_distance_km = models.PositiveSmallIntegerField(default=5)
     address = SecureEncryptedTextField(blank=True, null=True)

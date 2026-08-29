@@ -18,6 +18,9 @@ export interface SavrUser {
   currentFoodAccess: string;
   housingCost: string | null;
   debt: string | null;
+  age: number | null;
+  heightCm: number | null;
+  weightKg: string | null;
   preferredCategory: string;
   maxDistanceKm: number;
   postcode: string;
@@ -89,6 +92,9 @@ export interface RegisterPayload {
   previousAllocationsCount: number;
   housingCost: string;
   debt: string;
+  age: string;
+  heightCm: string;
+  weightKg: string;
 }
 
 export function registerUser(payload: RegisterPayload): Promise<SavrUser> {
@@ -111,6 +117,9 @@ export function registerUser(payload: RegisterPayload): Promise<SavrUser> {
       previous_allocations_count: payload.previousAllocationsCount,
       housing_cost: payload.housingCost || null,
       debt: payload.debt || null,
+      age: payload.age || null,
+      height_cm: payload.heightCm || null,
+      weight_kg: payload.weightKg || null,
     }),
   });
 }
@@ -153,7 +162,7 @@ export function fetchSession(): Promise<{ user: SavrUser | null }> {
   return apiFetch('/api/accounts/session/');
 }
 
-export function updateProfile(patch: Partial<Pick<SavrUser, 'householdSize' | 'incomeLevel' | 'dependents' | 'employmentStatus' | 'currentFoodAccess' | 'previousAllocationsCount' | 'housingCost' | 'debt' | 'preferredCategory' | 'maxDistanceKm' | 'postcode' | 'ruralArea'>>): Promise<SavrUser> {
+export function updateProfile(patch: Partial<Pick<SavrUser, 'householdSize' | 'incomeLevel' | 'dependents' | 'employmentStatus' | 'currentFoodAccess' | 'previousAllocationsCount' | 'housingCost' | 'debt' | 'age' | 'heightCm' | 'weightKg' | 'preferredCategory' | 'maxDistanceKm' | 'postcode' | 'ruralArea'>>): Promise<SavrUser> {
   return apiFetch('/api/accounts/profile/', { method: 'PATCH', body: JSON.stringify(patch) });
 }
 
@@ -175,6 +184,7 @@ export interface CreateListingPayload {
   pickupStart?: string;
   pickupEnd?: string;
   interestDeadline?: string;
+  nutrition?: Listing['nutrition'];
 }
 
 export function fetchListings(): Promise<ListingCollection> {

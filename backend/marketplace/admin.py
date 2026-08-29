@@ -5,7 +5,7 @@ from .models import Allocation, Interest, Item, MarketplaceListing
 
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
-    list_display = ("name", "category", "created_at")
+    list_display = ("name", "category", "calories", "protein_g", "created_at")
     search_fields = ("name", "description", "dietary_tags")
     list_filter = ("category",)
 

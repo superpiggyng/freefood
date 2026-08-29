@@ -43,6 +43,7 @@ const toListing = (item: StockMatch, pickupWindow: string, index: number): Listi
   partnerTier: 'Silver Partner',
   description: `Surplus from ${currentVendor.name}, uploaded today and matched to nearby demand.`,
   servings: `${item.quantity} serves`,
+  nutrition: item.nutrition,
 });
 
 const fundedSuburbs = ['Marrickville', 'Blacktown', 'Parramatta', 'Auburn'];

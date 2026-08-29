@@ -72,6 +72,17 @@ def _tag_list(value):
     return [tag.strip() for tag in (value or "").split(",") if tag.strip()]
 
 
+def _nutrition_json(item):
+    return {
+        "calories": item.calories,
+        "proteinG": _money_value(item.protein_g),
+        "carbsG": _money_value(item.carbs_g),
+        "fatG": _money_value(item.fat_g),
+        "fiberG": _money_value(item.fiber_g),
+        "sodiumMg": item.sodium_mg,
+    }
+
+
 def _listing_json(listing):
     category = _category_label(listing.item.category)
     original_value = _money_value(listing.original_value)
@@ -97,6 +108,7 @@ def _listing_json(listing):
         "description": listing.item.description,
         "servings": f"{listing.quantity_available} available",
         "weight": "",
+        "nutrition": _nutrition_json(listing.item),
     }
 
 
@@ -165,12 +177,19 @@ def vendor_listing_collection(request):
         dietary_tags = ", ".join(tag for tag in tags if tag != _category_label(category))
     else:
         dietary_tags = str(tags)
+    nutrition = data.get("nutrition") or {}
 
     item = Item.objects.create(
         name=data.get("name") or data.get("title") or "Surplus food",
         description=data.get("description", ""),
         category=category,
         dietary_tags=dietary_tags,
+        calories=data.get("calories") or nutrition.get("calories"),
+        protein_g=data.get("proteinG") or nutrition.get("proteinG"),
+        carbs_g=data.get("carbsG") or nutrition.get("carbsG"),
+        fat_g=data.get("fatG") or nutrition.get("fatG"),
+        fiber_g=data.get("fiberG") or nutrition.get("fiberG"),
+        sodium_mg=data.get("sodiumMg") or nutrition.get("sodiumMg"),
     )
     listing = MarketplaceListing.objects.create(
         vendor=request.user,

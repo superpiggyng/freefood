@@ -53,6 +53,9 @@ const initialForm = {
   previousAllocationsCount: 0,
   housingCost: '',
   debt: '',
+  age: '',
+  heightCm: '',
+  weightKg: '',
 };
 
 type RegisterForm = typeof initialForm;
@@ -75,6 +78,9 @@ const fieldMap: Record<string, { key: keyof RegisterForm; step: number }> = {
   previous_allocations_count: { key: 'previousAllocationsCount', step: 3 },
   housing_cost: { key: 'housingCost', step: 3 },
   debt: { key: 'debt', step: 3 },
+  age: { key: 'age', step: 2 },
+  height_cm: { key: 'heightCm', step: 2 },
+  weight_kg: { key: 'weightKg', step: 2 },
 };
 
 function RecipientRegister({ redirectTo }: { redirectTo: string }) {
@@ -203,6 +209,9 @@ function RecipientRegister({ redirectTo }: { redirectTo: string }) {
                   <label className={`form-field${fieldErrors.dependents ? ' form-field--invalid' : ''}`}>Number of dependents<input type="number" min={0} value={form.dependents} onChange={(event) => update('dependents', Number(event.target.value))} />{fieldErrors.dependents && <small className="field-error">{fieldErrors.dependents}</small>}</label>
                   <label className={`form-field${fieldErrors.incomeLevel ? ' form-field--invalid' : ''}`}>Household income (before tax)<select value={form.incomeLevel} onChange={(event) => update('incomeLevel', event.target.value)}>{incomeLevels.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select>{fieldErrors.incomeLevel && <small className="field-error">{fieldErrors.incomeLevel}</small>}</label>
                   <label className={`form-field${fieldErrors.employmentStatus ? ' form-field--invalid' : ''}`}>Employment status<select value={form.employmentStatus} onChange={(event) => update('employmentStatus', event.target.value)}>{employmentStatuses.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select>{fieldErrors.employmentStatus && <small className="field-error">{fieldErrors.employmentStatus}</small>}</label>
+                  <label className={`form-field${fieldErrors.age ? ' form-field--invalid' : ''}`}>Age<input type="number" min={0} max={120} value={form.age} onChange={(event) => update('age', event.target.value)} />{fieldErrors.age && <small className="field-error">{fieldErrors.age}</small>}</label>
+                  <label className={`form-field${fieldErrors.heightCm ? ' form-field--invalid' : ''}`}>Height (cm)<input type="number" min={30} max={260} value={form.heightCm} onChange={(event) => update('heightCm', event.target.value)} />{fieldErrors.heightCm && <small className="field-error">{fieldErrors.heightCm}</small>}</label>
+                  <label className={`form-field${fieldErrors.weightKg ? ' form-field--invalid' : ''}`}>Weight (kg)<input type="number" min={0} max={500} step="0.1" value={form.weightKg} onChange={(event) => update('weightKg', event.target.value)} />{fieldErrors.weightKg && <small className="field-error">{fieldErrors.weightKg}</small>}</label>
                   <label className={`form-field${fieldErrors.postcode ? ' form-field--invalid' : ''}`}>Postcode<input required value={form.postcode} onChange={(event) => update('postcode', event.target.value)} />{fieldErrors.postcode && <small className="field-error">{fieldErrors.postcode}</small>}</label>
                   <label className="toggle-field"><input type="checkbox" checked={form.ruralArea} onChange={(event) => update('ruralArea', event.target.checked)} /><span>I live in a rural area</span></label>
                 </div>
@@ -229,6 +238,9 @@ function RecipientRegister({ redirectTo }: { redirectTo: string }) {
                     <li><span>Dependents</span><strong>{form.dependents}</strong></li>
                     <li><span>Household income</span><strong>{incomeLevels.find((item) => item.value === form.incomeLevel)?.label}</strong></li>
                     <li><span>Employment status</span><strong>{employmentStatuses.find((item) => item.value === form.employmentStatus)?.label}</strong></li>
+                    <li><span>Age</span><strong>{form.age || 'Not provided'}</strong></li>
+                    <li><span>Height</span><strong>{form.heightCm ? `${form.heightCm} cm` : 'Not provided'}</strong></li>
+                    <li><span>Weight</span><strong>{form.weightKg ? `${form.weightKg} kg` : 'Not provided'}</strong></li>
                     <li><span>Postcode</span><strong>{form.postcode}</strong></li>
                     <li><span>Rural area</span><strong>{form.ruralArea ? 'Yes' : 'No'}</strong></li>
                     <li><span>Current food access</span><strong>{foodAccessLevels.find((item) => item.value === form.currentFoodAccess)?.label}</strong></li>
