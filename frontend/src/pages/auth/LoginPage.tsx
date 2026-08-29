@@ -29,7 +29,7 @@ export default function LoginPage() {
 
   return (
     <main className="health-page">
-      <header className="health-header"><Link className="logo" to="/"><img src="/savr-icon.png" alt="" /><span>SAVR</span></Link><Link to="/register">Create account</Link></header>
+      <header className="health-header"><Link className="logo" to="/"><span className="logo__mark" aria-hidden="true"><img src="/carrot-icon.png" alt="" /></span><span className="logo__word">SAVR</span></Link><Link to="/register">Create account</Link></header>
       <div className="health-shell preference-shell">
         <div className="health-intro"><p className="eyebrow">Welcome back</p><h1>Log in to SAVR</h1></div>
         <form className="preference-card" onSubmit={submit}>

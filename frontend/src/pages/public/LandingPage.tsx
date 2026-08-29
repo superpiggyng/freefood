@@ -11,7 +11,6 @@ export interface ImpactStats {
 
 interface LandingPageProps {
   featuredListings?: FoodListing[];
-  heroImageUrl?: string;
   impact?: Partial<ImpactStats>;
 }
 
@@ -29,13 +28,15 @@ const impactCards = [
   { key: "co2Avoided", icon: Building2, label: "CO₂ avoided this week" },
 ] as const;
 
-export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }: LandingPageProps) {
+export function LandingPage({ featuredListings = [], impact = {} }: LandingPageProps) {
   const stats = { ...defaultImpact, ...impact };
 
   return (
     <main className="page-home" id="main-content">
-      <section className="hero page-shell" aria-labelledby="hero-title">
+      <section className="hero hero--home" aria-labelledby="hero-title">
+        <div className="hero__inner page-shell">
         <div className="hero__content">
+          <span className="hero__badge" aria-hidden="true"><img src="/carrot-icon.png" alt="" /></span>
           <p className="eyebrow">Local food. Local impact.</p>
           <h1 id="hero-title">Good food shouldn’t go to waste when someone nearby needs it.</h1>
           <p className="hero__lead">SAVR connects surplus food from local businesses with the people who need it most, matched fairly by household need rather than first come, first served.</p>
@@ -50,9 +51,11 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
           </dl>
         </div>
         <div className="hero__visual">
-          <div className="hero__frame">
-            {heroImageUrl && <img src={heroImageUrl} alt="" />}
-          </div>
+          <picture>
+            <source srcSet="/carrot.webp" type="image/webp" />
+            <img className="hero__mascot" src="/carrot-poster.png" alt="A carrot character waving and holding a coin" width={300} height={412} />
+          </picture>
+        </div>
         </div>
       </section>
 
