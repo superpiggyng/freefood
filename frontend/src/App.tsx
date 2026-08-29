@@ -1,9 +1,10 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
+import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import { Header } from './components/Header';
 import type { FoodListing } from './components/ListingCard';
 import { listings as sourceListings } from './data/listings';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AccessDeniedPage from './pages/public/AccessDeniedPage';
 import LandingPage from './pages/public/LandingPage';
 import ListingDetailPage, { type ListingDetail } from './pages/public/ListingDetailPage';
 import MarketplacePage from './pages/public/MarketplacePage';
@@ -41,27 +42,21 @@ function PublicLayout({ children, marketplace = false }: { children: ReactNode; 
   return <><Header marketplace={marketplace}/>{children}</>;
 }
 
-function AuthMessage({ title, body }: { title: string; body: string }) {
-  return <PublicLayout><main className="page-shell"><header className="page-heading"><h1>{title}</h1><p>{body}</p></header><a className="button button--primary" href="/">Go back home</a></main></PublicLayout>;
-}
-
 function ProtectedRoute({ auth, children, allowedRoles, staffOnly = false }: { auth: AuthState; children: ReactNode; allowedRoles?: AuthUser['role'][]; staffOnly?: boolean }) {
-  const location = useLocation();
-
   if (auth.loading) {
-    return <AuthMessage title="Checking access" body="Please wait while we confirm your sign-in status." />;
+    return <PublicLayout><AccessDeniedPage reason="loading" /></PublicLayout>;
   }
 
   if (!auth.user) {
-    return <Navigate to="/" replace state={{ from: location.pathname, authRequired: true }} />;
+    return <PublicLayout><AccessDeniedPage reason="login" /></PublicLayout>;
   }
 
   if (staffOnly && !auth.user.isStaff && !auth.user.isSuperuser) {
-    return <AuthMessage title="Access restricted" body="This area is only available to staff accounts." />;
+    return <PublicLayout><AccessDeniedPage reason="staff" /></PublicLayout>;
   }
 
   if (allowedRoles && !allowedRoles.includes(auth.user.role)) {
-    return <AuthMessage title="Access restricted" body="Your account type does not have access to this area." />;
+    return <PublicLayout><AccessDeniedPage reason="role" /></PublicLayout>;
   }
 
   return children;
@@ -69,15 +64,16 @@ function ProtectedRoute({ auth, children, allowedRoles, staffOnly = false }: { a
 
 function DetailRoute({ auth }: { auth: AuthState }) {
   const { id } = useParams();
+  const navigate = useNavigate();
   const base = listings.find((item) => String(item.id) === id) ?? listings[0];
   const detail: ListingDetail = { ...base, description: 'A surprise box of delicious baked goods that couldn’t be sold today. Typically includes a mix of bread, rolls, pastries and muffins.', dietaryTags: ['Vegetarian', 'Nut-free'], allergenInformation: 'May contain gluten', servings: '4-6 servings', weight: '1.8 kg', co2Avoided: '3.2 kg', vendorVerified: true, isAvailable: true };
   return <PublicLayout><ListingDetailPage listing={detail} onRequest={(item) => {
     if (!auth.user) {
-      window.location.assign('/');
+      navigate('/access-denied');
       return;
     }
     saveRequest({ id: String(item.id), title: item.title, vendor: item.vendorName, pickupWindow: item.pickupWindow });
-    window.location.assign('/requests');
+    navigate('/requests');
   }}/></PublicLayout>;
 }
 
@@ -105,6 +101,7 @@ export default function App() {
     <Route path="/" element={<PublicLayout><LandingPage heroImageUrl="/savr-icon.png"/></PublicLayout>}/>
     <Route path="/marketplace" element={<PublicLayout marketplace><MarketplacePage listings={listings} categories={[{slug:'bakery',name:'Bakery'},{slug:'groceries',name:'Groceries'},{slug:'meals',name:'Meals'},{slug:'snacks',name:'Snacks'}]} initialLocation="Marrickville, NSW"/></PublicLayout>}/>
     <Route path="/marketplace/:id" element={<DetailRoute auth={auth}/>}/>
+    <Route path="/access-denied" element={<PublicLayout><AccessDeniedPage reason="login" /></PublicLayout>}/>
     <Route path="/eligibility" element={<EligibilityPage/>}/>
     <Route path="/requests" element={<ProtectedRoute auth={auth} allowedRoles={['user']}><RequestsPage/></ProtectedRoute>}/>
     <Route path="/health-profile" element={<ProtectedRoute auth={auth} allowedRoles={['user']}><HealthProfilePage/></ProtectedRoute>}/>
