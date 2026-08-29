@@ -1,7 +1,12 @@
 from types import SimpleNamespace
 
+from django.contrib.auth import get_user_model
 from django.test import SimpleTestCase
+from django.test import TestCase
+from django.urls import reverse
+from django.utils import timezone
 
+from marketplace.models import Allocation, Item, MarketplaceListing
 from .services import calculate_daily_targets, score_meal
 
 
@@ -49,3 +54,60 @@ class MealSuggestionTests(SimpleTestCase):
         self.assertGreater(result.score, 70)
         self.assertIn("protein", " ".join(result.reasons).lower())
         self.assertIn("carbohydrates", " ".join(result.reasons).lower())
+
+
+class WeeklyNutritionSummaryTests(TestCase):
+    def test_allocated_food_counts_toward_weekly_nutrition(self):
+        user_model = get_user_model()
+        user = user_model.objects.create_user(
+            username="recipient",
+            password="SecurePass123!",
+            role="user",
+            age=30,
+            height_cm=170,
+            weight_kg=70,
+        )
+        vendor = user_model.objects.create_user(
+            username="vendor",
+            password="SecurePass123!",
+            role="vendor",
+            vendor_name="Bakers Lane",
+        )
+        item = Item.objects.create(
+            name="Dinner Pack",
+            category="meals",
+            calories=500,
+            protein_g=25,
+            carbs_g=60,
+            fat_g=12,
+            fiber_g=7,
+        )
+        listing = MarketplaceListing.objects.create(
+            vendor=vendor,
+            item=item,
+            quantity_available=0,
+            original_value=12,
+            price=2,
+            pickup_location="123 Main Street",
+            pickup_start=timezone.now(),
+            pickup_end=timezone.now(),
+            interest_deadline=timezone.now(),
+            status=MarketplaceListing.STATUS_ALLOCATED,
+        )
+        Allocation.objects.create(
+            listing=listing,
+            user=user,
+            allocated_quantity=2,
+            pickup_code="TESTCODE",
+        )
+        self.client.force_login(user)
+
+        response = self.client.get(reverse("nutrition:weekly-summary"))
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["totals"]["calories"], 1000)
+        self.assertEqual(payload["totals"]["proteinG"], 50)
+        self.assertEqual(payload["impact"]["servings"], 2)
+        self.assertEqual(payload["impact"]["savedAmount"], 20)
+        self.assertIn("allocated food", payload["assumption"].lower())

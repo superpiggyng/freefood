@@ -6,7 +6,7 @@ from django.views.decorators.http import require_http_methods
 from freefood.auth import login_required_json
 
 from .models import FoodPreferenceProfile, PreferenceResponse, RestaurantMeal
-from .services import calculate_daily_targets, score_meal
+from .services import calculate_daily_targets, score_meal, weekly_nutrition_summary
 
 
 @login_required_json
@@ -42,3 +42,9 @@ def matches(request):
             results.append({"id": meal.id, "name": meal.name, "restaurant": meal.vendor.vendor_name or meal.vendor.username, "image": meal.image_url, "price": str(meal.price), "score": result.score, "reasons": result.reasons, "warnings": result.warnings, "allergens": meal.allergens, "nutrition": meal.nutrition})
     results.sort(key=lambda item: item["score"], reverse=True)
     return JsonResponse({"results": results, "dailyTargets": targets, "disclaimer": "Suggestions use optional food preferences and estimated nutrition targets. This is not medical advice."})
+
+
+@login_required_json
+@require_http_methods(["GET"])
+def weekly_summary(request):
+    return JsonResponse(weekly_nutrition_summary(request.user))

@@ -123,7 +123,7 @@ export default function VendorStockUpload() {
           ? 'Gemini image nutrition estimate'
           : estimate.source === 'gemini_text'
             ? 'Gemini item-name nutrition estimate'
-            : 'MVP fallback nutrition estimate';
+            : 'Local nutrition estimate';
         const model = estimate.model ? ` via ${estimate.model}` : '';
         return {
           ...item,
@@ -139,7 +139,7 @@ export default function VendorStockUpload() {
         };
       }));
     } catch (error) {
-      setEstimateError(error instanceof Error ? error.message : 'AI nutrition estimate failed. Using MVP fallback nutrition.');
+      setEstimateError(error instanceof Error ? error.message : 'AI nutrition estimate failed. Using local nutrition estimate.');
       setResults(parsed);
     } finally {
       setEstimating(false);
@@ -208,7 +208,7 @@ export default function VendorStockUpload() {
                   <span><small>Sponsor covers</small><strong>{money(item.split.sponsorCovers)}</strong></span>
                   <span className="price-split__total"><small>You receive</small><strong>{money(item.split.vendorReceives)}</strong></span>
                 </div>
-                <p className="stock-item__nutrition">{item.nutrition.calories} kcal · {Math.round(item.nutrition.proteinG)}g protein · {Math.round(item.nutrition.carbsG)}g carbs · {Math.round(item.nutrition.fiberG)}g fiber</p>
+                <p className="stock-item__nutrition">{item.nutrition.calories} kcal · {Math.round(item.nutrition.proteinG)}g protein · {Math.round(item.nutrition.carbsG)}g carbs · {Math.round(item.nutrition.fiberG)}g fibre</p>
                 <p className="stock-item__demand"><Users size={14}/> <strong>{item.matches}</strong> nearby people can safely eat this · <strong>{item.greatFit}</strong> a great dietary fit</p>
                 {item.notes.map((note) => <p className="stock-item__note" key={note}>{note}</p>)}
                 <button className="button button--quiet button--small" type="button" onClick={() => toggle(item.id)}>{off ? 'Include' : 'Skip this item'}</button>

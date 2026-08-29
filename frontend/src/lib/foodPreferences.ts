@@ -48,19 +48,19 @@ function nutritionFit(listing: Listing, targets: DailyNutritionTargets) {
   if (protein > 0) {
     const coverage = Math.min(1, protein / targets.proteinG);
     score += Math.round(16 * coverage);
-    if (coverage >= 0.2) reasons.push(`${Math.round(protein)}g protein toward your daily target`);
+    if (coverage >= 0.2) reasons.push(`${Math.round(protein)}g protein toward estimated daily target`);
   }
 
   if (fiber > 0) {
     const coverage = Math.min(1, fiber / targets.fiberG);
     score += Math.round(8 * coverage);
-    if (coverage >= 0.15) reasons.push(`${Math.round(fiber)}g fiber`);
+    if (coverage >= 0.15) reasons.push(`${Math.round(fiber)}g fibre`);
   }
 
   if (carbs > 0) {
     const coverage = Math.min(1, carbs / targets.carbsG);
     score += Math.round(6 * coverage);
-    if (coverage >= 0.15) reasons.push(`${Math.round(carbs)}g carbohydrates for energy`);
+    if (coverage >= 0.15) reasons.push(`${Math.round(carbs)}g carbs for energy`);
   }
 
   if (calories >= 250 && calories <= 800) {

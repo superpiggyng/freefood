@@ -223,3 +223,48 @@ export function submitListingInterest(slug: string, requestedQuantity = 1) {
     body: JSON.stringify({ requestedQuantity }),
   });
 }
+
+export interface NutritionTotals {
+  calories: number;
+  proteinG: number;
+  carbsG: number;
+  fatG: number;
+  fiberG: number;
+}
+
+export interface WeeklyNutritionSummary {
+  weekStart: string;
+  weekEnd: string;
+  dailyTargets: NutritionTotals;
+  weeklyTargets: NutritionTotals;
+  totals: NutritionTotals;
+  targetProgress: NutritionTotals;
+  impact: {
+    allocatedAsEaten: number;
+    servings: number;
+    savedAmount: number;
+    foodRescuedKg: number;
+  };
+  days: Array<{
+    date: string;
+    label: string;
+    totals: NutritionTotals;
+  }>;
+  items: Array<{
+    id: number;
+    date: string;
+    name: string;
+    vendor: string;
+    quantity: number;
+    nutrition: NutritionTotals;
+    savedAmount: number;
+    pickupCode: string;
+    status: string;
+  }>;
+  assumption: string;
+  disclaimer: string;
+}
+
+export function fetchWeeklyNutritionSummary(): Promise<WeeklyNutritionSummary> {
+  return apiFetch('/api/nutrition/weekly-summary/');
+}

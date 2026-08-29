@@ -16,7 +16,7 @@ export function Header({ marketplace = false }: { marketplace?: boolean }) {
       {user?.role === 'vendor' ? <>
         <Link to="/vendor">Dashboard</Link><Link to="/vendor/upload">Upload stock</Link><Link to="/vendor/partner">Partner status</Link><Link to="/sponsors">For sponsors</Link>
       </> : <>
-        <Link to="/marketplace">Find food</Link><Link to="/suggested">Suggested</Link>{user && <Link to="/requests">My requests</Link>}<Link to="/vendors/signup">For businesses</Link><Link to="/sponsors">For sponsors</Link>
+        <Link to="/marketplace">Find food</Link><Link to="/suggested">Suggested</Link>{user && <><Link to="/requests">My requests</Link><Link to="/profile">Profile</Link></>}<Link to="/vendors/signup">For businesses</Link><Link to="/sponsors">For sponsors</Link>
       </>}
     </nav>
     <div className="header-actions">

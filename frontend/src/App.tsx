@@ -9,6 +9,7 @@ import LandingPage from './pages/public/LandingPage';
 import ListingDetailPage, { type ListingDetail } from './pages/public/ListingDetailPage';
 import MarketplacePage from './pages/public/MarketplacePage';
 import EligibilityPage from './pages/recipient/EligibilityPage';
+import ProfileDashboardPage from './pages/recipient/ProfileDashboardPage';
 import RequestsPage from './pages/recipient/RequestsPage';
 import VendorAllocations from './pages/vendor/VendorAllocations';
 import VendorDashboard from './pages/vendor/VendorDashboard';
@@ -24,6 +25,7 @@ import LoginPage from './pages/auth/LoginPage';
 import { useAuth } from './lib/authContext';
 import { submitListingInterest, type SavrUser } from './lib/api';
 import type { Listing } from './types';
+import { calculateDailyTargets } from './lib/foodPreferences';
 
 const toCard = (item: Listing): FoodListing => ({
   id: item.slug, title: item.name, vendorName: item.vendor, category: item.category,
@@ -32,6 +34,7 @@ const toCard = (item: Listing): FoodListing => ({
   quantityRemaining: item.quantityLeft, pickupWindow: item.pickupTime, distance: item.distance,
   tags: item.tags.filter((tag) => tag !== item.category),
   vendorPrice: item.vendorPrice, sponsored: item.sponsored, partnerTier: item.partnerTier,
+  nutrition: item.nutrition,
 });
 
 function PublicLayout({ children, marketplace = false }: { children: ReactNode; marketplace?: boolean }) {
@@ -80,6 +83,7 @@ function DetailRoute({ user }: { user: SavrUser | null }) {
     servings: source.servings, weight: source.weight,
     co2Avoided: `${(source.quantityLeft * 0.9).toFixed(1)} kg`,
     vendorVerified: true, isAvailable: source.quantityLeft > 0,
+    nutritionTargets: user ? calculateDailyTargets(user) : undefined,
   };
   return <PublicLayout><ListingDetailPage listing={detail} onRequest={async (item) => {
     if (!user) {
@@ -112,6 +116,7 @@ export default function App() {
     <Route path="/sponsors" element={<PublicLayout><SponsorsPage/></PublicLayout>}/>
     <Route path="/sponsor" element={<SponsorDashboard/>}/>
     <Route path="/eligibility" element={<ProtectedRoute allowedRoles={['user']}><EligibilityPage/></ProtectedRoute>}/>
+    <Route path="/profile" element={<ProtectedRoute allowedRoles={['user']}><ProfileDashboardPage/></ProtectedRoute>}/>
     <Route path="/requests" element={<ProtectedRoute allowedRoles={['user']}><RequestsPage/></ProtectedRoute>}/>
     <Route path="/health-profile" element={<ProtectedRoute allowedRoles={['user']}><HealthProfilePage/></ProtectedRoute>}/>
     <Route path="/preferences" element={<ProtectedRoute allowedRoles={['user']}><HealthProfilePage/></ProtectedRoute>}/>

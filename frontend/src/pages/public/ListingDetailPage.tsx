@@ -1,4 +1,5 @@
 import type { FoodListing } from "../../components/ListingCard";
+import type { DailyNutritionTargets } from "../../lib/foodPreferences";
 import { money } from "../../lib/sponsorship";
 
 export interface ListingDetail extends FoodListing {
@@ -10,6 +11,7 @@ export interface ListingDetail extends FoodListing {
   co2Avoided?: string;
   vendorVerified?: boolean;
   isAvailable: boolean;
+  nutritionTargets?: DailyNutritionTargets;
 }
 
 interface ListingDetailPageProps {
@@ -20,6 +22,18 @@ interface ListingDetailPageProps {
 
 export function ListingDetailPage({ listing, onRequest, onSave }: ListingDetailPageProps) {
   const sponsorCovers = listing.sponsored && listing.vendorPrice != null ? Math.max(0, listing.vendorPrice - listing.price) : 0;
+  const nutritionFacts = [
+    { key: "calories", label: "Energy", unit: "kcal", target: listing.nutritionTargets?.calories },
+    { key: "proteinG", label: "Protein", unit: "g", target: listing.nutritionTargets?.proteinG },
+    { key: "carbsG", label: "Carbs", unit: "g", target: listing.nutritionTargets?.carbsG },
+    { key: "fatG", label: "Fat", unit: "g", target: listing.nutritionTargets?.fatG },
+    { key: "fiberG", label: "Fibre", unit: "g", target: listing.nutritionTargets?.fiberG },
+  ].flatMap((fact) => {
+    const value = listing.nutrition?.[fact.key as keyof NonNullable<typeof listing.nutrition>];
+    if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) return [];
+    const percent = fact.target ? Math.min(100, Math.round((value / fact.target) * 100)) : null;
+    return [{ ...fact, value: Math.round(value), percent }];
+  });
 
   return (
     <main className="page-shell detail-page" id="main-content">
@@ -40,6 +54,21 @@ export function ListingDetailPage({ listing, onRequest, onSave }: ListingDetailP
             <div><dt>Availability</dt><dd>{listing.quantityRemaining} left</dd></div>
           </dl>
           <section className="detail-copy" aria-labelledby="about-food"><h2 id="about-food">About this food</h2><p>{listing.description}</p></section>
+          {nutritionFacts.length > 0 && (
+            <section className="detail-copy nutrition-detail" aria-labelledby="nutrition-info">
+              <h2 id="nutrition-info">{listing.nutritionTargets ? "How this helps today" : "Estimated nutrition"}</h2>
+              <div className="nutrition-detail__grid">
+                {nutritionFacts.map((fact) => (
+                  <span key={fact.key}>
+                    <small>{fact.label}</small>
+                    <strong>{fact.value}{fact.unit === "kcal" ? " kcal" : "g"}</strong>
+                    <em>{fact.percent !== null ? `${fact.percent}% of estimated daily target` : "Estimated per serve"}</em>
+                  </span>
+                ))}
+              </div>
+              <p className="fine-print">Nutrition is estimated per serve and used to support matching. It is not medical advice.</p>
+            </section>
+          )}
           <section className="detail-copy" aria-labelledby="dietary-info">
             <h2 id="dietary-info">Dietary information</h2>
             <ul className="tag-list">{listing.dietaryTags?.length ? listing.dietaryTags.map((tag) => <li key={tag}>{tag}</li>) : <li>Ask the vendor for dietary details</li>}</ul>

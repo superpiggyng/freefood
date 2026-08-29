@@ -1,3 +1,5 @@
+import type { Listing } from "../types";
+
 export interface FoodListing {
   id: string | number;
   title: string;
@@ -14,6 +16,7 @@ export interface FoodListing {
   vendorPrice?: number;
   sponsored?: boolean;
   partnerTier?: string;
+  nutrition?: Listing["nutrition"];
 }
 
 interface ListingCardProps {
@@ -28,7 +31,20 @@ const formatPrice = (price: number) =>
 const sponsorShare = (listing: FoodListing) =>
   listing.sponsored && listing.vendorPrice != null ? Math.max(0, listing.vendorPrice - listing.price) : 0;
 
+const nutritionLine = (listing: FoodListing) => {
+  const values = listing.nutrition;
+  if (!values) return null;
+  const parts = [
+    values.calories ? `${Math.round(values.calories)} kcal` : null,
+    values.proteinG ? `${Math.round(values.proteinG)}g protein` : null,
+    values.carbsG ? `${Math.round(values.carbsG)}g carbs` : null,
+  ].filter(Boolean);
+  return parts.length ? parts.join(" · ") : null;
+};
+
 export function ListingCard({ listing, href = `/marketplace/${listing.id}`, className = "" }: ListingCardProps) {
+  const estimatedNutrition = nutritionLine(listing);
+
   return (
     <article className={`listing-card ${className}`.trim()}>
       <a className="listing-card__media" href={href} aria-label={`View ${listing.title}`}>
@@ -47,6 +63,9 @@ export function ListingCard({ listing, href = `/marketplace/${listing.id}`, clas
         <p className="listing-card__vendor">{listing.vendorName}{listing.partnerTier && <span className="partner-chip" title={`SAVR ${listing.partnerTier}`}>★ {listing.partnerTier.replace(" Partner", "")} partner</span>}</p>
         {sponsorShare(listing) > 0 && (
           <p className="listing-card__sponsor">Sponsor covers ${sponsorShare(listing).toFixed(2)} · {listing.vendorName} is paid ${listing.vendorPrice?.toFixed(2)}</p>
+        )}
+        {estimatedNutrition && (
+          <p className="listing-card__nutrition"><span>Estimated</span>{estimatedNutrition}</p>
         )}
         {(listing.category || listing.tags?.length) && (
           <ul className="tag-list" aria-label="Listing categories">
