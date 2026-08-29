@@ -45,7 +45,6 @@ def _user_json(user):
         "ruralArea": user.rural_area,
         "needyMetric": user.needy_metric,
         "needScore": user.calculate_need_score(),
-        "needyMetric": user.needy_metric,
     }
 
 

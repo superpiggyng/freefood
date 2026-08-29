@@ -40,7 +40,7 @@ export default function SponsorDashboard() {
       <MetricCard label="Restaurants paid" value={String(partnerVendors.length * 4)} detail="Local businesses"/>
       <MetricCard label="Suburbs reached" value={String(suburbImpact.length)} detail="Greater Sydney"/>
       <MetricCard label="Value delivered" value={currency(valueDelivered)} detail="Retail value of food"/>
-      <MetricCard label="Cost per meal" value={delivered ? `$${(spent / delivered).toFixed(2)}` : '—'} detail="Sponsor contribution"/>
+      <MetricCard label="Cost per meal" value={delivered ? `$${(spent / delivered).toFixed(2)}` : 'n/a'} detail="Sponsor contribution"/>
     </section>
 
     <div className="dashboard-columns">

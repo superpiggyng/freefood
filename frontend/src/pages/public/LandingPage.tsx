@@ -83,7 +83,7 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
           </div>
           <ul className="funding-points">
             <li><strong>Restaurants earn</strong> on food that would have been binned, cut disposal costs, and get community partner status and featured placement.</li>
-            <li><strong>Enterprises fund</strong> something countable — 1,000 meals in Western Sydney — and get a live dashboard of meals, suburbs, partners and dollars delivered.</li>
+            <li><strong>Enterprises fund</strong> something countable, like 1,000 meals in Western Sydney, and get a live dashboard of meals, suburbs, partners and dollars delivered.</li>
             <li><strong>People pay</strong> a capped $1 to $2 for real food from normal shops, with allergen and dietary filtering built in.</li>
           </ul>
         </div>
