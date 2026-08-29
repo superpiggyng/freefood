@@ -8,6 +8,7 @@ __pycache__/
 .venv/
 venv/
 env/
+backend/.venv/
 
 # Django/local database
 db.sqlite3
@@ -41,3 +42,8 @@ htmlcov/
 
 # Logs
 *.log
+
+# Frontend dependencies and generated output
+node_modules/
+frontend/dist/
+*.tsbuildinfo
