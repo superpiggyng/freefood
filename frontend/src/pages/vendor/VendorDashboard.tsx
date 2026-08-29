@@ -8,10 +8,9 @@ const listings: Listing[] = [
   { id: 3, title: "Muffin Box", emoji: "🧁", pickupWindow: "Tomorrow, 5:30-6:30 PM", remaining: 6, total: 8 },
 ];
 const nav: DashboardNavItem[] = [
-  { label: "Dashboard", icon: "▦", href: "/vendor", active: true }, { label: "Upload stock", icon: "⇪", href: "/vendor/upload" }, { label: "Partner status", icon: "★", href: "/vendor/partner" },
-  { label: "Requests", icon: "♡", href: "/vendor/allocations" }, { label: "Pickups", icon: "⌖", href: "/vendor/pickups" },
-  { label: "Impact", icon: "♧", href: "/vendor/impact" }, { label: "Payouts", icon: "$", href: "/vendor/payouts" },
-  { label: "Profile", icon: "♙", href: "/vendor/profile" }, { label: "Settings", icon: "⚙", href: "/vendor/settings" },
+  { label: "Dashboard", icon: "▦", href: "/vendor", active: true }, { label: "Upload stock", icon: "⇪", href: "/vendor/upload" },
+  { label: "Requests", icon: "♡", href: "/vendor/allocations" }, { label: "Partner status", icon: "★", href: "/vendor/partner" },
+  { label: "Marketplace", icon: "⌖", href: "/marketplace" },
 ];
 
 export default function VendorDashboard() {
@@ -23,7 +22,7 @@ export default function VendorDashboard() {
       <MetricCard label="Active listings" value="8" detail="Available now"/><MetricCard label="Requests received" value="42" detail="Today"/><MetricCard label="Allocated pickups" value="27" detail="Ready to collect"/><MetricCard label="Food rescued" value="86 kg" detail="+12% this week"/><MetricCard label="Earnings recovered" value="$412" detail="Estimated value"/><MetricCard label="Sponsor funded" value="82%" detail="Of listings this month"/>
     </section>
     <div className="dashboard-columns">
-      <section className="dashboard-panel"><div className="panel-heading"><h2>Active listings</h2><a href="/vendor/listings">View all</a></div>
+      <section className="dashboard-panel"><div className="panel-heading"><h2>Active listings</h2><a href="/marketplace">View in marketplace</a></div>
         <div className="listing-list">{listings.map((listing) => <article className="listing-row" key={listing.id}><span className="food-thumbnail" aria-hidden="true">{listing.emoji}</span><div><h3>{listing.title}</h3><p>{listing.pickupWindow}</p></div><span>{listing.remaining} left / {listing.total}</span><StatusBadge>Active</StatusBadge></article>)}</div>
       </section>
       <section className="dashboard-panel" id="create-listing"><div className="panel-heading"><h2>Create new listing</h2></div><form className="listing-form" onSubmit={publishListing}><div className="form-grid"><label>Food type<select name="foodType"><option>Bakery</option><option>Groceries</option><option>Meals</option></select></label><label>Original value<input name="originalValue" defaultValue="$34.00"/></label><label>Price<select name="price"><option>Free</option><option>$2.00</option></select></label><label>Quantity<input name="quantity" type="number" min="1" defaultValue="10"/></label><label className="form-field--wide">Pickup window<input name="pickupWindow" defaultValue="Today, 5:30 PM - 6:30 PM"/></label><fieldset className="form-field--wide"><legend>Dietary tags</legend><div className="tag-list"><span className="tag">Vegetarian</span><span className="tag">Nut-free</span></div></fieldset><label className="form-field--wide">Reservation deadline<input name="deadline" defaultValue="Today, 2:00 PM"/></label></div>{published && <p className="form-success" role="status">Listing published and visible to nearby recipients.</p>}<button className="button button--primary form-submit" type="submit">{published ? "Published" : "Publish listing"}</button></form></section>

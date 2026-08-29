@@ -1,24 +1,20 @@
 export type RecipientNavItem =
-  | "overview"
   | "browse"
+  | "suggested"
   | "requests"
-  | "saved"
   | "profile"
-  | "settings"
-  | "help";
+  | "preferences";
 
 interface RecipientSidebarProps {
   activeItem: RecipientNavItem;
 }
 
 const navigation: Array<{ id: RecipientNavItem; label: string; href: string }> = [
-  { id: "overview", label: "Overview", href: "/recipient" },
   { id: "browse", label: "Browse food", href: "/marketplace" },
-  { id: "requests", label: "My requests", href: "/recipient/requests" },
-  { id: "saved", label: "Saved", href: "/recipient/saved" },
-  { id: "profile", label: "Profile", href: "/recipient/profile" },
-  { id: "settings", label: "Settings", href: "/recipient/settings" },
-  { id: "help", label: "Help", href: "/help" },
+  { id: "suggested", label: "Suggested for you", href: "/suggested" },
+  { id: "requests", label: "My requests", href: "/requests" },
+  { id: "profile", label: "Household profile", href: "/eligibility" },
+  { id: "preferences", label: "Food preferences", href: "/preferences" },
 ];
 
 export function RecipientSidebar({ activeItem }: RecipientSidebarProps) {

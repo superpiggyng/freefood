@@ -4,4 +4,5 @@ export interface Listing {
   quantityLeft: number; pickupTime: string; distance: string;
   allergens: string[]; possibleCrossContact?: string[]; traits: string[];
   vendorPrice: number; sponsored: boolean; partnerTier?: string;
+  description?: string; servings?: string; weight?: string;
 }

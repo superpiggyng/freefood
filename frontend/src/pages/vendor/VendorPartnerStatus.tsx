@@ -7,7 +7,7 @@ import { tierFor, tierLadder } from '../../lib/sponsorship';
 const nav: DashboardNavItem[] = [
   { label: 'Dashboard', icon: '▦', href: '/vendor' }, { label: 'Upload stock', icon: '⇪', href: '/vendor/upload' },
   { label: 'Requests', icon: '♡', href: '/vendor/allocations' }, { label: 'Partner status', icon: '★', href: '/vendor/partner', active: true },
-  { label: 'Impact', icon: '♧', href: '/vendor/impact' }, { label: 'Payouts', icon: '$', href: '/vendor/payouts' },
+  { label: 'Marketplace', icon: '⌖', href: '/marketplace' },
 ];
 
 const badgeSnippet = '<a href="https://savr.app/partners/bakers-lane"><img src="https://savr.app/badge/silver.svg" alt="SAVR Silver Community Partner"></a>';

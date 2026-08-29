@@ -241,3 +241,8 @@ body{background:#fbfaf3}.site-header{background:#fffdf8}.hero{position:relative}
 .header-user{font-size:13px;color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .eligibility-page__layout--single{grid-template-columns:1fr;max-width:760px}
 .auth-message{padding-block:80px;text-align:center}.auth-message .page-heading{margin-bottom:18px}
+
+/* Funding shown to recipients at the point of choosing */
+.funding-card{background:#f7faf4}.funding-card .price-split{margin:12px 0 10px}.funding-card .price-split strong{font-size:15px}.funding-card p{font-size:11px;color:var(--muted);margin:0}
+.meal-match__sponsor{font-size:11px;color:var(--green);background:#f1f8ea;border-radius:5px;padding:6px 8px;margin:0 0 12px}
+.request-card__funding{font-size:11px;color:var(--green);margin:3px 0 0}

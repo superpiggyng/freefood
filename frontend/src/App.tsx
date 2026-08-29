@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Header } from './components/Header';
 import type { FoodListing } from './components/ListingCard';
-import { listings as sourceListings } from './data/listings';
+import { findListing, useListings } from './lib/listingStore';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import LandingPage from './pages/public/LandingPage';
 import ListingDetailPage, { type ListingDetail } from './pages/public/ListingDetailPage';
@@ -22,15 +22,16 @@ import RegisterPage from './pages/auth/RegisterPage';
 import LoginPage from './pages/auth/LoginPage';
 import { useAuth } from './lib/authContext';
 import type { SavrUser } from './lib/api';
+import type { Listing } from './types';
 
-const listings: FoodListing[] = sourceListings.map((item) => ({
+const toCard = (item: Listing): FoodListing => ({
   id: item.slug, title: item.name, vendorName: item.vendor, category: item.category,
   imageUrl: item.image, price: item.price === 'FREE' ? 0 : Number(item.price.replace('$', '')),
   originalValue: item.originalPrice ? Number(item.originalPrice.replace('$', '')) : undefined,
   quantityRemaining: item.quantityLeft, pickupWindow: item.pickupTime, distance: item.distance,
   tags: item.tags.filter((tag) => tag !== item.category),
   vendorPrice: item.vendorPrice, sponsored: item.sponsored, partnerTier: item.partnerTier,
-}));
+});
 
 function PublicLayout({ children, marketplace = false }: { children: ReactNode; marketplace?: boolean }) {
   return <><Header marketplace={marketplace}/>{children}</>;
@@ -55,8 +56,20 @@ function ProtectedRoute({ children, allowedRoles, staffOnly = false }: { childre
 function DetailRoute({ user }: { user: SavrUser | null }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const base = listings.find((item) => String(item.id) === id) ?? listings[0];
-  const detail: ListingDetail = { ...base, description: 'A surprise box of delicious baked goods that couldn’t be sold today. Typically includes a mix of bread, rolls, pastries and muffins.', dietaryTags: ['Vegetarian', 'Nut-free'], allergenInformation: 'May contain gluten', servings: '4-6 servings', weight: '1.8 kg', co2Avoided: '3.2 kg', vendorVerified: true, isAvailable: true };
+  const all = useListings();
+  const source = findListing(all, id) ?? all[0];
+  const base = toCard(source);
+  const allergens = source.allergens.length ? `Contains ${source.allergens.join(', ')}` : 'No major allergens declared';
+  const crossContact = source.possibleCrossContact?.length ? ` · Possible cross-contact with ${source.possibleCrossContact.join(', ')}` : '';
+  const detail: ListingDetail = {
+    ...base,
+    description: source.description ?? `Surplus ${source.category.toLowerCase()} from ${source.vendor}, ready to collect today.`,
+    dietaryTags: source.tags.filter((tag) => tag !== source.category),
+    allergenInformation: `${allergens}${crossContact}. Confirm with the business if you have an allergy.`,
+    servings: source.servings, weight: source.weight,
+    co2Avoided: `${(source.quantityLeft * 0.9).toFixed(1)} kg`,
+    vendorVerified: true, isAvailable: source.quantityLeft > 0,
+  };
   return <PublicLayout><ListingDetailPage listing={detail} onRequest={(item) => {
     if (!user) {
       navigate('/register', { state: { from: `/marketplace/${id}`, authRequired: true } });
@@ -69,6 +82,7 @@ function DetailRoute({ user }: { user: SavrUser | null }) {
 
 export default function App() {
   const { user } = useAuth();
+  const listings = useListings().map(toCard);
 
   return <Routes>
     <Route path="/" element={<PublicLayout><LandingPage heroImageUrl="/savr-icon.png"/></PublicLayout>}/>

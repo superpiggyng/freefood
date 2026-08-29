@@ -25,6 +25,21 @@ const rules: FoodRule[] = [
 
 const fallback: FoodRule = { keywords: [], category: 'Meals', allergens: [], crossContact: [], tags: [], unitValue: 7 };
 
+const allergenWords: Array<{ allergen: string; words: string[] }> = [
+  { allergen: 'Peanut', words: ['peanut', 'satay'] },
+  { allergen: 'Tree nuts', words: ['nut', 'almond', 'cashew', 'walnut', 'pistachio', 'hazelnut', 'pecan', 'macadamia'] },
+  { allergen: 'Milk', words: ['milk', 'cheese', 'butter', 'cream', 'yoghurt', 'yogurt', 'custard'] },
+  { allergen: 'Egg', words: ['egg', 'mayo', 'meringue', 'frittata'] },
+  { allergen: 'Wheat', words: ['wheat', 'flour', 'bread', 'pasta', 'pastry', 'croissant', 'bun', 'cake', 'biscuit'] },
+  { allergen: 'Soy', words: ['soy', 'tofu', 'edamame', 'miso'] },
+  { allergen: 'Sesame', words: ['sesame', 'tahini', 'hummus'] },
+  { allergen: 'Fish', words: ['fish', 'salmon', 'tuna', 'anchovy'] },
+  { allergen: 'Shellfish', words: ['prawn', 'shrimp', 'crab', 'lobster', 'shellfish', 'oyster'] },
+];
+
+const detectAllergens = (name: string) =>
+  allergenWords.filter((entry) => entry.words.some((word) => name.includes(word))).map((entry) => entry.allergen);
+
 export interface StockMatch {
   id: number; name: string; quantity: number; category: string;
   tags: string[]; allergens: string[]; crossContact: string[];
@@ -43,13 +58,14 @@ export const sampleStock = `12 x butter croissants
 const parseLine = (line: string) => {
   const quantityMatch = line.match(/(\d+(?:\.\d+)?)/);
   const quantity = quantityMatch ? Math.max(1, Math.round(Number(quantityMatch[1]))) : 1;
-  const name = line.replace(/^\s*\d+(?:\.\d+)?\s*(x|kg|g|pcs|pieces|packs?)?\s*/i, '').trim();
-  return { quantity, name: name || line.trim() };
+  const byWeight = /\d\s*(kg|g)\b/i.test(line);
+  const name = line.replace(/^\s*\d+(?:\.\d+)?\s*(?:(?:x|kg|g|pcs|pieces?|packs?)\b\s*)?/i, '').trim();
+  return { quantity, name: name || line.trim(), byWeight };
 };
 
 export function analyseStock(input: string, sponsorFundAvailable = true): StockMatch[] {
   return input.split('\n').map((line) => line.trim()).filter(Boolean).map((line, index) => {
-    const { quantity, name } = parseLine(line);
+    const { quantity, name, byWeight } = parseLine(line);
     const lower = name.toLowerCase();
     const rule = rules.find((item) => item.keywords.some((keyword) => lower.includes(keyword)));
     const resolved = rule ?? fallback;
@@ -59,13 +75,17 @@ export function analyseStock(input: string, sponsorFundAvailable = true): StockM
     const vendorPrice = Number(Math.max(2, Math.round(originalValue * 0.55 * 2) / 2).toFixed(2));
     const split = splitPrice(vendorPrice, sponsorFundAvailable);
 
-    const allergens = resolved.allergens;
-    const crossContact = resolved.crossContact ?? [];
+    const detected = detectAllergens(lower);
+    const extra = detected.filter((item) => !resolved.allergens.includes(item));
+    const allergens = [...resolved.allergens, ...extra];
+    const crossContact = (resolved.crossContact ?? []).filter((item) => !allergens.includes(item));
     const nearby = demandPool.filter((profile) => profile.distance <= 5);
     const safe = nearby.filter((profile) => !profile.avoid.some((item) => allergens.includes(item)));
     const greatFit = safe.filter((profile) => profile.preferences.length && profile.preferences.every((item) => resolved.tags.includes(item)));
 
+    if (byWeight) notes.push(`Read as ${quantity} serves from a weight. Set the real number of serves before publishing.`);
     if (!rule) notes.push('No confident category match. Confirm the details before publishing.');
+    if (extra.length) notes.push(`Found ${extra.join(', ')} in the item name and added it to the declared allergens.`);
     if (allergens.length) notes.push(`Declares ${allergens.join(', ')}. ${nearby.length - safe.length} nearby people filtered out.`);
     if (crossContact.length) notes.push(`Flag possible cross-contact: ${crossContact.join(', ')}.`);
     if (split.sponsored) notes.push(`Sponsor fund covers ${`$${split.sponsorCovers.toFixed(2)}`} per serve in this suburb.`);

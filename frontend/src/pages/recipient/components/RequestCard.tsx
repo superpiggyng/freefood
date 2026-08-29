@@ -7,6 +7,7 @@ export interface FoodRequest {
   pickupWindow: string;
   imageUrl?: string;
   requestedOn?: string;
+  funding?: string;
   status: RequestStatus;
 }
 
@@ -32,6 +33,7 @@ export function RequestCard({ request }: RequestCardProps) {
         <h3 className="request-card__title">{request.title}</h3>
         <p className="request-card__vendor">{request.vendor}</p>
         <p className="request-card__pickup">{request.pickupWindow}</p>
+        {request.funding && <p className="request-card__funding">{request.funding}</p>}
       </div>
       <div className="request-card__details">
         <span className={`status-badge status-badge--${request.status}`}>{statusLabels[request.status]}</span>
