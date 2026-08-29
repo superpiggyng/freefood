@@ -4,16 +4,16 @@ import { RecipientSidebar } from "./components/RecipientSidebar";
 import { getSavedRequest, hasEligibility } from "../../lib/mvpStore";
 
 const pendingRequests: FoodRequest[] = [
-  { id: "thai-dinner", title: "Thai Dinner Pack", vendor: "Thai on Tark", pickupWindow: "Today, 5:00–6:00 PM", requestedOn: "Requested 10 May", status: "pending" },
+  { id: "thai-dinner", title: "Thai Dinner Pack", vendor: "Thai on Tark", pickupWindow: "Today, 5:00-6:00 PM", requestedOn: "Requested 10 May", status: "pending" },
 ];
 
 const allocatedRequests: FoodRequest[] = [
-  { id: "bakery-box", title: "Bakery Rescue Box", vendor: "Bakers Lane", pickupWindow: "Today, 5:30–6:30 PM", status: "allocated" },
+  { id: "bakery-box", title: "Bakery Rescue Box", vendor: "Bakers Lane", pickupWindow: "Today, 5:30-6:30 PM", status: "allocated" },
 ];
 
 const otherRequests: FoodRequest[] = [
-  { id: "fruit-box", title: "Fruit & Veg Box", vendor: "Wholehearted Metro", pickupWindow: "Tuesday, 6:00–7:00 PM", requestedOn: "10 May", status: "not-selected" },
-  { id: "pantry-bag", title: "Pantry Essentials Bag", vendor: "Local Grocer", pickupWindow: "Today, 6:00–7:30 PM", requestedOn: "9 May", status: "not-selected" },
+  { id: "fruit-box", title: "Fruit & Veg Box", vendor: "Wholehearted Metro", pickupWindow: "Tuesday, 6:00-7:00 PM", requestedOn: "10 May", status: "not-selected" },
+  { id: "pantry-bag", title: "Pantry Essentials Bag", vendor: "Local Grocer", pickupWindow: "Today, 6:00-7:30 PM", requestedOn: "9 May", status: "not-selected" },
 ];
 
 interface RequestSectionProps {
