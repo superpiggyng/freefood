@@ -70,6 +70,7 @@ class MarketplaceApiTests(TestCase):
 
     def test_vendor_can_create_listing(self):
         self.client.force_login(self.vendor)
+        image_url = "data:image/jpeg;base64,abc123"
 
         response = self.client.post(
             reverse("marketplace:vendor-listings"),
@@ -77,6 +78,7 @@ class MarketplaceApiTests(TestCase):
                 "name": "Dinner Surprise Pack",
                 "category": "Meals",
                 "description": "Prepared meals left after service.",
+                "imageUrl": image_url,
                 "quantityAvailable": 4,
                 "price": 2,
                 "originalValue": 12,
@@ -87,6 +89,8 @@ class MarketplaceApiTests(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(MarketplaceListing.objects.count(), 2)
         self.assertEqual(response.json()["name"], "Dinner Surprise Pack")
+        self.assertEqual(response.json()["image"], image_url)
+        self.assertEqual(MarketplaceListing.objects.latest("id").item.image_url, image_url)
 
     def test_vendor_can_request_ai_nutrition_estimate(self):
         self.client.force_login(self.vendor)

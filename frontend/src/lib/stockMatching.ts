@@ -1,10 +1,10 @@
 import { demandPool } from '../data/recipients';
 import { splitPrice, type PriceSplit } from './sponsorship';
 
-/* Deterministic, explainable stock analysis. A business pastes or uploads what is
-   left over; SAVR reads each line, infers category, dietary tags and declared
-   allergens, prices it against the sponsor fund and counts the anonymous nearby
-   demand it would match. Allergen rules are fixed, never generated. */
+/* Deterministic, explainable stock analysis. A business enters each surplus item
+   with quantity; SAVR infers category, dietary tags and declared allergens,
+   prices it against the sponsor fund and counts the anonymous nearby demand it
+   would match. Allergen rules are fixed, never generated. */
 
 interface NutritionEstimate { calories: number; proteinG: number; carbsG: number; fatG: number; fiberG: number; sodiumMg: number }
 interface FoodRule { keywords: string[]; category: string; allergens: string[]; crossContact?: string[]; tags: string[]; unitValue: number; nutrition: NutritionEstimate }
@@ -49,13 +49,6 @@ export interface StockMatch {
   matches: number; greatFit: number; confidence: 'High' | 'Medium' | 'Needs review';
   notes: string[];
 }
-
-export const sampleStock = `12 x butter croissants
-8 sourdough loaves
-6 chicken pad thai
-10 garden salad bowls
-4 kg tomatoes
-9 fruit and nut snack packs`;
 
 const parseLine = (line: string) => {
   const quantityMatch = line.match(/(\d+(?:\.\d+)?)/);

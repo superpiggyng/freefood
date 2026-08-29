@@ -46,6 +46,7 @@ function listingToPayload(item: Listing): CreateListingPayload {
     pickupStart: pickupStart.toISOString(),
     pickupEnd: pickupEnd.toISOString(),
     interestDeadline: interestDeadline.toISOString(),
+    imageUrl: item.image,
     nutrition: item.nutrition,
   };
 }

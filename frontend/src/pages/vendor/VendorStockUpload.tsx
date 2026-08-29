@@ -1,7 +1,7 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react';
-import { AlertTriangle, Check, CloudUpload, Sparkles, Users } from 'lucide-react';
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { AlertTriangle, Check, CloudUpload, Plus, Sparkles, Trash2, Users } from 'lucide-react';
 import { DashboardShell, StatusBadge, type DashboardNavItem } from '../../components/dashboard/DashboardShell';
-import { analyseStock, sampleStock, totalServes, totalSponsorCover, totalVendorPayout, type StockMatch } from '../../lib/stockMatching';
+import { analyseStock, totalServes, totalSponsorCover, totalVendorPayout, type StockMatch } from '../../lib/stockMatching';
 import { money } from '../../lib/sponsorship';
 import { publishListings } from '../../lib/listingStore';
 import type { Listing } from '../../types';
@@ -23,7 +23,7 @@ const categoryImages: Record<string, string> = {
   Snacks: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=900&q=85',
 };
 
-const toListing = (item: StockMatch, pickupWindow: string, index: number): Listing => ({
+const toListing = (item: StockMatch, pickupWindow: string, index: number, listingImageUrl?: string): Listing => ({
   id: Date.now() + index,
   slug: `${slugify(item.name)}-${Date.now().toString(36)}${index}`,
   name: item.name.replace(/^./, (character) => character.toUpperCase()),
@@ -31,7 +31,7 @@ const toListing = (item: StockMatch, pickupWindow: string, index: number): Listi
   category: item.category,
   price: item.split.userPays === 0 ? 'FREE' : `$${item.split.userPays.toFixed(2)}`,
   originalPrice: `$${item.originalValue.toFixed(2)}`,
-  image: categoryImages[item.category] ?? categoryImages.Meals,
+  image: listingImageUrl || categoryImages[item.category] || categoryImages.Meals,
   tags: [item.category, ...item.tags],
   quantityLeft: item.quantity,
   pickupTime: pickupWindow,
@@ -48,6 +48,25 @@ const toListing = (item: StockMatch, pickupWindow: string, index: number): Listi
 });
 
 const fundedSuburbs = ['Marrickville', 'Blacktown', 'Parramatta', 'Auburn'];
+
+interface StockInputRow {
+  id: number;
+  name: string;
+  quantity: string;
+}
+
+const emptyStockRow = (id: number): StockInputRow => ({ id, name: '', quantity: '1' });
+
+const normaliseQuantity = (value: string) => Math.max(1, Math.round(Number(value) || 1));
+
+const rowToStockLine = (row: StockInputRow) => `${normaliseQuantity(row.quantity)} x ${row.name.trim()}`;
+
+const fileToDataUrl = (file: File) => new Promise<string>((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(String(reader.result || ''));
+  reader.onerror = () => reject(reader.error);
+  reader.readAsDataURL(file);
+});
 
 const compressImage = (file: File) => new Promise<File>((resolve) => {
   const image = new Image();
@@ -72,10 +91,13 @@ const compressImage = (file: File) => new Promise<File>((resolve) => {
 });
 
 export default function VendorStockUpload() {
-  const [text, setText] = useState('');
+  const [stockRows, setStockRows] = useState<StockInputRow[]>([emptyStockRow(1)]);
+  const [nextRowId, setNextRowId] = useState(2);
   const [suburb, setSuburb] = useState('Marrickville');
   const [fileName, setFileName] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [listingImageUrl, setListingImageUrl] = useState<string | null>(null);
   const [pickupWindow, setPickupWindow] = useState('Today, 5:30 - 6:30 PM');
   const [results, setResults] = useState<StockMatch[] | null>(null);
   const [skipped, setSkipped] = useState<number[]>([]);
@@ -83,26 +105,69 @@ export default function VendorStockUpload() {
   const [publishError, setPublishError] = useState<string | null>(null);
   const [estimateError, setEstimateError] = useState<string | null>(null);
   const [estimating, setEstimating] = useState(false);
+  const [imageProcessing, setImageProcessing] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const funded = fundedSuburbs.includes(suburb);
+
+  useEffect(() => {
+    if (!imagePreviewUrl) return undefined;
+    return () => URL.revokeObjectURL(imagePreviewUrl);
+  }, [imagePreviewUrl]);
 
   const readFile = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     setFileName(file.name);
     setEstimateError(null);
-    if (file.type.startsWith('image/')) {
-      compressImage(file).then(setImageFile);
+    setImageFile(null);
+    setListingImageUrl(null);
+    if (!file.type.startsWith('image/')) {
+      setImagePreviewUrl(null);
+      setImageProcessing(false);
+      setEstimateError('Upload a food photo file.');
       return;
     }
-    setImageFile(null);
-    file.text().then((contents) => setText(contents.trim()));
+    setImagePreviewUrl(URL.createObjectURL(file));
+    setImageProcessing(true);
+    compressImage(file).then((compressed) => {
+      setImageFile(compressed);
+      return fileToDataUrl(compressed);
+    }).then(setListingImageUrl).catch(() => {
+      setListingImageUrl(null);
+    }).finally(() => {
+      setImageProcessing(false);
+    });
+  };
+
+  const updateStockRow = (id: number, values: Partial<Omit<StockInputRow, 'id'>>) => {
+    setPublished(0);
+    setEstimateError(null);
+    setStockRows((current) => current.map((row) => row.id === id ? { ...row, ...values } : row));
+  };
+
+  const addStockRow = () => {
+    setPublished(0);
+    setEstimateError(null);
+    setStockRows((current) => [...current, emptyStockRow(nextRowId)]);
+    setNextRowId((current) => current + 1);
+  };
+
+  const removeStockRow = (id: number) => {
+    setPublished(0);
+    setEstimateError(null);
+    setStockRows((current) => current.length === 1 ? current : current.filter((row) => row.id !== id));
   };
 
   const analyse = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setPublished(0); setSkipped([]); setEstimateError(null);
-    const parsed = analyseStock(text.trim() || sampleStock, funded);
+    const validRows = stockRows.filter((row) => row.name.trim());
+    if (!validRows.length) {
+      setResults(null);
+      setEstimateError('Add at least one item name and quantity.');
+      return;
+    }
+    const parsed = analyseStock(validRows.map(rowToStockLine).join('\n'), funded);
     if (!imageFile) {
       setResults(parsed);
       return;
@@ -152,7 +217,7 @@ export default function VendorStockUpload() {
     setPublishError(null);
     setPublishing(true);
     try {
-      await publishListings(included.map((item, index) => toListing(item, pickupWindow, index)));
+      await publishListings(included.map((item, index) => toListing(item, pickupWindow, index, listingImageUrl || undefined)));
       setPublished(included.length);
     } catch (error) {
       setPublishError(error instanceof Error ? error.message : 'Could not publish listings.');
@@ -162,30 +227,49 @@ export default function VendorStockUpload() {
   };
 
   return <DashboardShell productLabel="for Business" navItems={nav} userName="Bakers Lane" userRole="Silver Partner">
-    <header className="dashboard-heading"><div><h1>Upload today’s surplus</h1><p>Paste or upload what is left over. SAVR prices it against the sponsor fund and matches it to nearby demand.</p></div><a className="button button--secondary" href="/vendor">Back to overview</a></header>
+    <header className="dashboard-heading"><div><h1>Upload today’s surplus</h1><p>Upload a food photo, add item names and quantities, then match available stock to nearby demand.</p></div><a className="button button--secondary" href="/vendor">Back to overview</a></header>
 
     <form className="stock-upload" onSubmit={analyse}>
       <section className="dashboard-panel stock-upload__input">
-        <div className="panel-heading"><h2>1. What is left over?</h2><button className="button button--quiet button--small" type="button" onClick={() => setText(sampleStock)}>Use today’s POS export</button></div>
-        <label className="upload-zone">
-          <CloudUpload size={22}/><strong>{fileName || 'Upload stock list or food photo'}</strong><span>CSV/text for item names, image for AI nutrition estimate</span>
-          <input type="file" accept=".csv,.txt,text/plain,image/*" onChange={readFile}/>
+        <div className="panel-heading"><h2>1. What is left over?</h2></div>
+        <label className={imagePreviewUrl ? 'upload-zone upload-zone--preview' : 'upload-zone'}>
+          {imagePreviewUrl ? <img src={imagePreviewUrl} alt="Selected food preview"/> : <CloudUpload size={22}/>}
+          <strong>{fileName || 'Upload food photo'}</strong><span>Used for AI nutrition estimate</span>
+          <input type="file" accept="image/*" onChange={readFile}/>
         </label>
         {imageFile && <p className="stock-item__note">Food photo attached. SAVR will estimate nutrition when you match stock.</p>}
-        <label className="form-field stock-upload__textarea">One item per line
-          <textarea rows={7} value={text} onChange={(event) => setText(event.target.value)} placeholder={sampleStock}/>
-        </label>
+        <div className="stock-entry-list">
+          <div className="stock-entry-list__head">
+            <h3>Items in this upload</h3>
+            <button className="button button--quiet button--small" type="button" onClick={addStockRow}><Plus size={14}/> Add item</button>
+          </div>
+          <div className="stock-entry-rows">
+            {stockRows.map((row, index) => (
+              <div className="stock-entry-row" key={row.id}>
+                <label className="form-field">Item name
+                  <input value={row.name} onChange={(event) => updateStockRow(row.id, { name: event.target.value })} placeholder="Butter croissants"/>
+                </label>
+                <label className="form-field stock-entry-row__quantity">Qty
+                  <input type="number" min="1" step="1" inputMode="numeric" value={row.quantity} onChange={(event) => updateStockRow(row.id, { quantity: event.target.value })}/>
+                </label>
+                <button className="button button--quiet stock-entry-row__remove" type="button" onClick={() => removeStockRow(row.id)} disabled={stockRows.length === 1} aria-label={`Remove ${row.name || `item ${index + 1}`}`}>
+                  <Trash2 size={16}/>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
         <div className="stock-upload__controls">
           <label className="form-field">Pickup window<input value={pickupWindow} onChange={(event) => setPickupWindow(event.target.value)}/></label>
           <label className="form-field">Pickup suburb<select value={suburb} onChange={(event) => setSuburb(event.target.value)}>{['Marrickville', 'Blacktown', 'Parramatta', 'Auburn', 'Newtown', 'Liverpool'].map((item) => <option key={item}>{item}</option>)}</select></label>
-          <button className="button button--primary" type="submit" disabled={estimating}><Sparkles size={16}/> {estimating ? 'Estimating…' : 'Match stock'}</button>
+          <button className="button button--primary" type="submit" disabled={estimating || imageProcessing}><Sparkles size={16}/> {imageProcessing ? 'Preparing image…' : estimating ? 'Estimating…' : 'Match stock'}</button>
         </div>
         {estimateError && <p className="form-error" role="alert">{estimateError}</p>}
         <p className={funded ? 'fund-status fund-status--on' : 'fund-status'}>{funded ? <><Check size={14}/> Atlas Bank sponsor fund is active in {suburb}. Recipients pay a capped contribution and you are still paid in full.</> : <><AlertTriangle size={14}/> No sponsor fund in {suburb} yet. Listings will be priced as a straight discount.</>}</p>
       </section>
 
       <section className="dashboard-panel stock-upload__result" aria-live="polite">
-        {!results && <div className="stock-empty"><Sparkles size={26}/><h2>Nothing matched yet</h2><p>Add your leftover stock and SAVR will infer the category, dietary tags and declared allergens, then show how many nearby people it suits.</p></div>}
+        {!results && <div className="stock-empty"><Sparkles size={26}/><h2>Nothing matched yet</h2><p>Add leftover items and quantities. SAVR will infer the category, dietary tags and declared allergens, then show how many nearby people it suits.</p></div>}
         {results && <>
           <div className="panel-heading"><h2>2. Matched and priced</h2><span>{included.length} of {results.length} selected</span></div>
           <div className="stock-summary">
@@ -221,6 +305,6 @@ export default function VendorStockUpload() {
         </>}
       </section>
     </form>
-    <p className="stock-method">Categories, dietary tags and pricing are suggestions you can edit. Declared allergens are always shown to recipients and are never inferred away.</p>
+    <p className="stock-method">Each item row becomes its own marketplace listing. Categories, dietary tags and pricing are suggestions you can edit.</p>
   </DashboardShell>;
 }

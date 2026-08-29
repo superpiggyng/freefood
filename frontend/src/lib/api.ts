@@ -239,6 +239,7 @@ export interface CreateListingPayload {
   pickupStart?: string;
   pickupEnd?: string;
   interestDeadline?: string;
+  imageUrl?: string;
   nutrition?: Listing['nutrition'];
 }
 

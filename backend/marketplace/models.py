@@ -21,6 +21,7 @@ class Item(models.Model):
         blank=True,
         help_text="Comma-separated tags such as vegetarian, halal, gluten-free.",
     )
+    image_url = models.TextField(blank=True)
     calories = models.PositiveIntegerField(blank=True, null=True)
     protein_g = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
     carbs_g = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
