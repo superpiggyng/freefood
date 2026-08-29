@@ -53,12 +53,6 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
           <div className="hero__frame">
             {heroImageUrl && <img src={heroImageUrl} alt="" />}
           </div>
-          <figure className="hero__price-card" aria-label="How a six dollar meal is paid for">
-            <figcaption>A $6.00 surplus meal</figcaption>
-            <div><span>You pay</span><strong>$1.00</strong></div>
-            <div><span>Sponsor covers</span><strong>$5.00</strong></div>
-            <div className="hero__price-card__total"><span>Business is paid</span><strong>$6.00</strong></div>
-          </figure>
         </div>
       </section>
 
