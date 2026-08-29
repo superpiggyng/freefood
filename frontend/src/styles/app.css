@@ -357,6 +357,10 @@ body,.site-header,.eligibility-page,.dashboard-main,.health-page,.match-page{bac
   pointer-events:none;
   box-shadow:inset 0 0 18px 12px var(--cream);
 }
+.hero__frame--motion{width:min(100%,540px);aspect-ratio:540/304;border-radius:24px;box-shadow:0 18px 40px #20301f1f}
+.hero__frame--motion picture,.hero__frame--motion img{width:100%;height:100%}
+.hero__frame--motion img{object-fit:cover;mix-blend-mode:normal!important;transform:none}
+.hero__frame--motion:after{box-shadow:inset 0 0 10px 5px var(--cream)}
 
 /* Funder strip: duplicated track for a seamless loop, edge fade, pause on hover */
 .sponsor-strip{border-block:1px solid #dfd7c5;background:var(--cream);padding-block:46px}

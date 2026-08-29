@@ -57,8 +57,13 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
           </dl>
         </div>
         <div className="hero__visual">
-          <div className="hero__frame">
-            {heroImageUrl && <img src={heroImageUrl} alt="" />}
+          <div className="hero__frame hero__frame--motion">
+            {heroImageUrl && (
+              <picture>
+                <source media="(prefers-reduced-motion: reduce)" srcSet="/savr-grocery-motion-poster.png" />
+                <img src={heroImageUrl} alt="A grocery basket being filled with rescued food" width={540} height={304} />
+              </picture>
+            )}
           </div>
         </div>
       </section>

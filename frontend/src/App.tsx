@@ -140,7 +140,7 @@ function HomeRoute() {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (user) return <Navigate to={homePathForUser(user)} replace />;
-  return <PublicLayout><LandingPage heroImageUrl="/savr-icon.png"/></PublicLayout>;
+  return <PublicLayout><LandingPage heroImageUrl="/savr-grocery-motion.gif"/></PublicLayout>;
 }
 
 export default function App() {
