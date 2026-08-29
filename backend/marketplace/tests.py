@@ -92,6 +92,34 @@ class MarketplaceApiTests(TestCase):
         self.assertEqual(response.json()["image"], image_url)
         self.assertEqual(MarketplaceListing.objects.latest("id").item.image_url, image_url)
 
+    def test_vendor_listing_collection_only_returns_own_listings(self):
+        other_vendor = get_user_model().objects.create_user(
+            username="other-vendor",
+            email="other@example.com",
+            password="SecurePass123!",
+            role="vendor",
+            vendor_name="Other Cafe",
+        )
+        other_item = Item.objects.create(name="Other Cafe Pack", category="meals")
+        MarketplaceListing.objects.create(
+            vendor=other_vendor,
+            item=other_item,
+            quantity_available=3,
+            price=1,
+            pickup_location="456 Other Street",
+            pickup_start=timezone.now() + timedelta(hours=2),
+            pickup_end=timezone.now() + timedelta(hours=3),
+            interest_deadline=timezone.now() + timedelta(hours=1),
+        )
+        self.client.force_login(self.vendor)
+
+        response = self.client.get(reverse("marketplace:vendor-listings"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["count"], 1)
+        self.assertEqual(response.json()["results"][0]["vendor"], "Bakers Lane")
+        self.assertEqual(response.json()["results"][0]["name"], "Bakery Rescue Box")
+
     def test_vendor_can_request_ai_nutrition_estimate(self):
         self.client.force_login(self.vendor)
 

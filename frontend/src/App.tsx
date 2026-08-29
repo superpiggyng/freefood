@@ -26,6 +26,7 @@ import { useAuth } from './lib/authContext';
 import { submitListingInterest, type SavrUser } from './lib/api';
 import type { Listing } from './types';
 import { calculateDailyTargets } from './lib/foodPreferences';
+import { homePathForUser } from './lib/homePath';
 
 const toCard = (item: Listing): FoodListing => ({
   id: item.slug, title: item.name, vendorName: item.vendor, category: item.category,
@@ -36,6 +37,8 @@ const toCard = (item: Listing): FoodListing => ({
   vendorPrice: item.vendorPrice, sponsored: item.sponsored, partnerTier: item.partnerTier,
   nutrition: item.nutrition,
 });
+
+const marketplaceCategories = [{slug:'bakery',name:'Bakery'},{slug:'groceries',name:'Groceries'},{slug:'meals',name:'Meals'},{slug:'snacks',name:'Snacks'}];
 
 function PublicLayout({ children, marketplace = false, authOnly = false }: { children: ReactNode; marketplace?: boolean; authOnly?: boolean }) {
   return <><Header marketplace={marketplace} authOnly={authOnly}/>{children}</>;
@@ -64,10 +67,14 @@ function ProtectedRoute({ children, allowedRoles, staffOnly = false }: { childre
   return children;
 }
 
-function DetailRoute({ user }: { user: SavrUser | null }) {
+function DetailRoute({ user, loading }: { user: SavrUser | null; loading: boolean }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const all = useListings();
+  const isVendor = user?.role === 'vendor';
+  const all = useListings(isVendor ? 'vendor' : 'public', !loading);
+  if (loading) {
+    return <PublicLayout authOnly><AccessDeniedPage reason="loading" /></PublicLayout>;
+  }
   const source = findListing(all, id);
   if (!source) {
     return <PublicLayout><main className="page-shell detail-page"><header className="page-heading"><h1>Listing not found</h1><p>This food listing is no longer available.</p></header><a className="button button--primary" href="/marketplace">Back to marketplace</a></main></PublicLayout>;
@@ -83,9 +90,9 @@ function DetailRoute({ user }: { user: SavrUser | null }) {
     servings: source.servings, weight: source.weight,
     co2Avoided: `${(source.quantityLeft * 0.9).toFixed(1)} kg`,
     vendorVerified: true, isAvailable: source.quantityLeft > 0,
-    nutritionTargets: user ? calculateDailyTargets(user) : undefined,
+    nutritionTargets: user?.role === 'user' ? calculateDailyTargets(user) : undefined,
   };
-  return <PublicLayout><ListingDetailPage listing={detail} onRequest={async (item) => {
+  return <PublicLayout><ListingDetailPage listing={detail} onRequest={isVendor ? undefined : async (item) => {
     if (!user) {
       navigate('/register', { state: { from: `/marketplace/${id}` } });
       return;
@@ -101,14 +108,48 @@ function DetailRoute({ user }: { user: SavrUser | null }) {
   }}/></PublicLayout>;
 }
 
+function MarketplaceRoute() {
+  const { user, loading } = useAuth();
+  const isVendor = user?.role === 'vendor';
+  const listings = useListings(isVendor ? 'vendor' : 'public', !loading).map(toCard);
+  if (loading) {
+    return <PublicLayout authOnly><AccessDeniedPage reason="loading" /></PublicLayout>;
+  }
+  return (
+    <PublicLayout marketplace={!isVendor}>
+      <MarketplacePage
+        listings={listings}
+        categories={marketplaceCategories}
+        initialLocation={isVendor ? "" : "Marrickville, NSW"}
+        eyebrow={isVendor ? "Business marketplace view" : undefined}
+        title={isVendor ? "My listings" : undefined}
+        description={isVendor ? "Surplus food listings published by your business." : undefined}
+        showLocationSearch={!isVendor}
+        resultLabel={isVendor ? "listings from your business" : undefined}
+        searchPlaceholder={isVendor ? "Search your listings…" : undefined}
+        emptyTitle={isVendor ? "No listings yet" : undefined}
+        emptyMessage={isVendor ? "Upload today’s surplus stock to publish listings here." : undefined}
+        emptyActionLabel={isVendor ? "Upload stock" : undefined}
+        emptyActionHref={isVendor ? "/vendor/upload" : undefined}
+      />
+    </PublicLayout>
+  );
+}
+
+function HomeRoute() {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (user) return <Navigate to={homePathForUser(user)} replace />;
+  return <PublicLayout><LandingPage heroImageUrl="/savr-icon.png"/></PublicLayout>;
+}
+
 export default function App() {
-  const { user } = useAuth();
-  const listings = useListings().map(toCard);
+  const { user, loading } = useAuth();
 
   return <Routes>
-    <Route path="/" element={<PublicLayout><LandingPage heroImageUrl="/savr-icon.png"/></PublicLayout>}/>
-    <Route path="/marketplace" element={<PublicLayout marketplace><MarketplacePage listings={listings} categories={[{slug:'bakery',name:'Bakery'},{slug:'groceries',name:'Groceries'},{slug:'meals',name:'Meals'},{slug:'snacks',name:'Snacks'}]} initialLocation="Marrickville, NSW"/></PublicLayout>}/>
-    <Route path="/marketplace/:id" element={<DetailRoute user={user}/>}/>
+    <Route path="/" element={<HomeRoute/>}/>
+    <Route path="/marketplace" element={<MarketplaceRoute/>}/>
+    <Route path="/marketplace/:id" element={<DetailRoute user={user} loading={loading}/>}/>
     <Route path="/access-denied" element={<PublicLayout authOnly><AccessDeniedPage reason="login" /></PublicLayout>}/>
     <Route path="/register" element={<RegisterPage/>}/>
     <Route path="/login" element={<LoginPage/>}/>

@@ -11,7 +11,7 @@ import { estimateNutritionFromImage } from '../../lib/api';
 const nav: DashboardNavItem[] = [
   { label: 'Dashboard', icon: '▦', href: '/vendor' }, { label: 'Upload stock', icon: '⇪', href: '/vendor/upload', active: true },
   { label: 'Requests', icon: '♡', href: '/vendor/allocations' }, { label: 'Partner status', icon: '★', href: '/vendor/partner' },
-  { label: 'Marketplace', icon: '⌖', href: '/marketplace' },
+  { label: 'My listings', icon: '⌖', href: '/marketplace' },
 ];
 
 const slugify = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'surplus-item';

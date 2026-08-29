@@ -1,32 +1,37 @@
 import { useEffect, useState } from 'react';
-import { createMarketplaceListing, fetchListings, type CreateListingPayload } from './api';
+import { createMarketplaceListing, fetchListings, fetchVendorListings, type CreateListingPayload } from './api';
 import type { Listing } from '../types';
+
+type ListingScope = 'public' | 'vendor';
 
 const EVENT = 'savr:listings';
 
-let cache: Listing[] = [];
-let loaded = false;
-let inflight: Promise<Listing[]> | null = null;
+const stores: Record<ListingScope, { cache: Listing[]; loaded: boolean; inflight: Promise<Listing[]> | null }> = {
+  public: { cache: [], loaded: false, inflight: null },
+  vendor: { cache: [], loaded: false, inflight: null },
+};
 
-function notify() {
-  window.dispatchEvent(new Event(EVENT));
+function notify(scope: ListingScope) {
+  window.dispatchEvent(new Event(`${EVENT}:${scope}`));
 }
 
-async function loadListings() {
-  if (inflight) return inflight;
+async function loadListings(scope: ListingScope) {
+  const store = stores[scope];
+  if (store.inflight) return store.inflight;
 
-  inflight = fetchListings()
+  const fetcher = scope === 'vendor' ? fetchVendorListings : fetchListings;
+  store.inflight = fetcher()
     .then(({ results }) => {
-      cache = results;
-      loaded = true;
-      notify();
-      return cache;
+      store.cache = results;
+      store.loaded = true;
+      notify(scope);
+      return store.cache;
     })
     .finally(() => {
-      inflight = null;
+      store.inflight = null;
     });
 
-  return inflight;
+  return store.inflight;
 }
 
 function listingToPayload(item: Listing): CreateListingPayload {
@@ -53,36 +58,49 @@ function listingToPayload(item: Listing): CreateListingPayload {
 
 export async function publishListings(items: Listing[]) {
   const created = await Promise.all(items.map((item) => createMarketplaceListing(listingToPayload(item))));
-  cache = [...created, ...cache];
-  loaded = true;
-  notify();
+  stores.public.cache = [...created, ...stores.public.cache];
+  stores.public.loaded = true;
+  stores.vendor.cache = [...created, ...stores.vendor.cache];
+  stores.vendor.loaded = true;
+  notify('public');
+  notify('vendor');
   return created;
 }
 
 export function clearPublished() {
-  cache = [];
-  loaded = false;
-  notify();
+  stores.public.cache = [];
+  stores.public.loaded = false;
+  stores.vendor.cache = [];
+  stores.vendor.loaded = false;
+  notify('public');
+  notify('vendor');
 }
 
-export function useListings(): Listing[] {
-  const [listings, setListings] = useState<Listing[]>(cache);
+export function useListings(scope: ListingScope = 'public', enabled = true): Listing[] {
+  const [listings, setListings] = useState<Listing[]>(stores[scope].cache);
 
   useEffect(() => {
-    const sync = () => setListings([...cache]);
-    window.addEventListener(EVENT, sync);
+    if (!enabled) {
+      setListings([]);
+      return undefined;
+    }
 
-    if (!loaded) {
-      loadListings().catch(() => {
-        cache = [];
-        loaded = true;
+    const store = stores[scope];
+    const eventName = `${EVENT}:${scope}`;
+    const sync = () => setListings([...store.cache]);
+    window.addEventListener(eventName, sync);
+
+    if (!store.loaded) {
+      loadListings(scope).catch(() => {
+        store.cache = [];
+        store.loaded = true;
         sync();
       });
     }
 
     sync();
-    return () => window.removeEventListener(EVENT, sync);
-  }, []);
+    return () => window.removeEventListener(eventName, sync);
+  }, [enabled, scope]);
 
   return listings;
 }

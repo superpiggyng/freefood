@@ -2,9 +2,10 @@ import { useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Building2, HandHeart } from 'lucide-react';
 import { useAuth } from '../../lib/authContext';
+import { homePathForUser } from '../../lib/homePath';
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from;
@@ -19,7 +20,7 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       const account = await login(username, password);
-      const home = account.role === 'vendor' ? '/vendor' : account.isStaff || account.isSuperuser ? '/platform' : '/marketplace';
+      const home = homePathForUser(account);
       navigate(from && from !== '/login' ? from : home);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Log in failed.');
@@ -30,7 +31,7 @@ export default function LoginPage() {
 
   return (
     <main className="health-page">
-      <header className="health-header"><Link className="logo" to="/"><img src="/savr-icon.png" alt="" /><span>SAVR</span></Link><nav aria-label="Account options"><Link to="/register">Recipient signup</Link><Link to="/vendors/signup">Business signup</Link></nav></header>
+      <header className="health-header"><Link className="logo" to={homePathForUser(user)}><img src="/savr-icon.png" alt="" /><span>SAVR</span></Link><nav aria-label="Account options"><Link to="/register">Recipient signup</Link><Link to="/vendors/signup">Business signup</Link></nav></header>
       <div className="health-shell preference-shell">
         <div className="health-intro"><p className="eyebrow">Shared login</p><h1>Log in to SAVR</h1><p>Recipients and businesses use the same login portal. We will send you to the right dashboard after login.</p></div>
         <form className="preference-card" onSubmit={submit}>

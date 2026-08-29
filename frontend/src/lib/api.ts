@@ -247,6 +247,10 @@ export function fetchListings(): Promise<ListingCollection> {
   return apiFetch('/api/listings/');
 }
 
+export function fetchVendorListings(): Promise<ListingCollection> {
+  return apiFetch('/api/vendor/listings/');
+}
+
 export function fetchListing(slug: string): Promise<Listing> {
   return apiFetch(`/api/listings/${slug}/`);
 }

@@ -91,8 +91,12 @@ export function ListingDetailPage({ listing, onRequest, onSave }: ListingDetailP
             </section>
           )}
           <section className="request-card">
-            <h2 id="request-title">Request this food</h2>
-            {listing.isAvailable ? <><button className="button button--primary button--wide" type="button" onClick={() => onRequest?.(listing)}>Request this food</button><p className="fine-print">{listing.price === 0 ? "It’s free. No payment required." : `You pay ${money(listing.price)} at pickup. Nothing is charged now.`}</p></> : <><p>This listing is no longer available.</p><a className="button button--secondary button--wide" href="/marketplace">Find similar food</a></>}
+            <h2 id="request-title">{onRequest ? "Request this food" : "Listing status"}</h2>
+            {onRequest ? (
+              listing.isAvailable ? <><button className="button button--primary button--wide" type="button" onClick={() => onRequest(listing)}>Request this food</button><p className="fine-print">{listing.price === 0 ? "It’s free. No payment required." : `You pay ${money(listing.price)} at pickup. Nothing is charged now.`}</p></> : <><p>This listing is no longer available.</p><a className="button button--secondary button--wide" href="/marketplace">Find similar food</a></>
+            ) : (
+              <><p>This listing is visible to recipients while quantity remains available.</p><a className="button button--secondary button--wide" href="/vendor/upload">Upload more stock</a></>
+            )}
           </section>
         </aside>
       </div>

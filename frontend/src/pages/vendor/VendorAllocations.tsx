@@ -10,7 +10,7 @@ const requests: FoodRequest[] = [
 const nav: DashboardNavItem[] = [
   { label: "Dashboard", icon: "▦", href: "/vendor" }, { label: "Upload stock", icon: "⇪", href: "/vendor/upload" },
   { label: "Requests", icon: "♡", href: "/vendor/allocations", active: true }, { label: "Partner status", icon: "★", href: "/vendor/partner" },
-  { label: "Marketplace", icon: "⌖", href: "/marketplace" },
+  { label: "My listings", icon: "⌖", href: "/marketplace" },
 ];
 
 export default function VendorAllocations() {

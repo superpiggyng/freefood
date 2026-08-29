@@ -1,4 +1,7 @@
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../lib/authContext";
+import { homePathForUser } from "../../lib/homePath";
 
 export interface DashboardNavItem {
   label: string;
@@ -16,10 +19,13 @@ interface DashboardShellProps {
 }
 
 export function DashboardShell({ productLabel, navItems, userName, userRole, children }: DashboardShellProps) {
+  const { user } = useAuth();
+  const homePath = homePathForUser(user);
+
   return (
     <div className="dashboard-shell">
       <aside className="dashboard-sidebar" aria-label={`${productLabel} navigation`}>
-        <a className="dashboard-logo" href="/" aria-label="SAVR home">SAVR <small>{productLabel}</small></a>
+        <Link className="dashboard-logo" to={homePath} aria-label="SAVR home">SAVR <small>{productLabel}</small></Link>
         <nav className="dashboard-nav">
           {navItems.map((item) => (
             <a key={item.label} href={item.href} className={item.active ? "is-active" : undefined} aria-current={item.active ? "page" : undefined}>

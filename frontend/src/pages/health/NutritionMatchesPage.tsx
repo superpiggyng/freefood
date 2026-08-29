@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../lib/authContext';
 import { useListings } from '../../lib/listingStore';
 import { loadPreferences, suggestListings, type DailyNutritionTargets } from '../../lib/foodPreferences';
+import { homePathForUser } from '../../lib/homePath';
 import { money } from '../../lib/sponsorship';
 import type { Listing } from '../../types';
 
@@ -47,7 +48,7 @@ export default function NutritionMatchesPage() {
   return (
     <main className="match-page">
       <header className="health-header">
-        <Link className="logo" to="/"><img src="/savr-icon.png" alt=""/><span>SAVR</span></Link>
+        <Link className="logo" to={homePathForUser(user)}><img src="/savr-icon.png" alt=""/><span>SAVR</span></Link>
         <nav><Link to="/preferences">Edit</Link><Link to="/requests">My requests</Link></nav>
       </header>
 
