@@ -1,4 +1,4 @@
-import { ArrowRight, Building2, HandHeart, Leaf, Store } from "lucide-react";
+import { ArrowRight, Building2, ClipboardCheck, Cloud, HandHeart, Leaf, ShoppingBasket, Store } from "lucide-react";
 import ListingCard, { type FoodListing } from "../../components/ListingCard";
 import SponsorMarquee from "../../components/SponsorMarquee";
 
@@ -23,10 +23,16 @@ const defaultImpact: ImpactStats = {
 };
 
 const impactCards = [
-  { key: "peopleHelped", icon: HandHeart, label: "people helped this week" },
-  { key: "businesses", icon: Store, label: "local businesses listing" },
-  { key: "foodRescued", icon: Leaf, label: "food rescued this week" },
-  { key: "co2Avoided", icon: Building2, label: "CO₂ avoided this week" },
+  { key: "peopleHelped", icon: HandHeart, label: "people helped this week", href: "/about" },
+  { key: "businesses", icon: Store, label: "local businesses listing", href: "/marketplace" },
+  { key: "foodRescued", icon: Leaf, label: "food rescued this week", href: "/marketplace" },
+  { key: "co2Avoided", icon: Cloud, label: "CO₂ avoided this week", href: "/sponsors" },
+] as const;
+
+const journeySteps = [
+  { number: "1", icon: ClipboardCheck, title: "Tell us what you need", copy: "Share your household needs, dietary preferences and how far you can travel.", href: "/register" },
+  { number: "2", icon: ShoppingBasket, title: "Find local food", copy: "Browse fresh surplus from trusted businesses in your community, priced from free.", href: "/marketplace" },
+  { number: "3", icon: Building2, title: "Request and collect", copy: "Requests are matched fairly by need. Collect at your confirmed pickup time.", href: "/requests" },
 ] as const;
 
 export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }: LandingPageProps) {
@@ -59,16 +65,38 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
 
       <SponsorMarquee label="Sponsored by" />
 
-      <section className="section page-shell" aria-labelledby="impact-title">
-        <h2 className="sr-only" id="impact-title">Community impact</h2>
-        <div className="impact-cards">
-          {impactCards.map(({ key, icon: Icon, label }) => (
-            <article className="impact-card" key={key}>
-              <span aria-hidden="true"><Icon size={18} /></span>
-              <strong>{stats[key]}</strong>
-              <small>{label}</small>
-            </article>
-          ))}
+      <section className="impact-journey" aria-labelledby="impact-story-title">
+        <div className="page-shell impact-journey__inner">
+          <div className="impact-journey__top">
+            <p className="impact-journey__note">Good food shouldn’t go to waste.</p>
+            <div className="impact-journey__metrics" aria-label="Community impact">
+              {impactCards.map(({ key, icon: Icon, label, href }) => (
+                <a className={`impact-journey__metric impact-journey__metric--${key}`} href={href} key={key}>
+                  <Icon aria-hidden="true" />
+                  <strong>{stats[key]}</strong>
+                  <span>{label}</span>
+                </a>
+              ))}
+            </div>
+            <p className="impact-journey__note impact-journey__note--right">Real people. Real food. A kinder future.</p>
+          </div>
+          <header className="impact-journey__heading">
+            <p className="eyebrow">Simple and fair</p>
+            <h2 id="impact-story-title">How SAVR works</h2>
+            <p>Less waste. More good.</p>
+          </header>
+          <div className="impact-journey__steps">
+            {journeySteps.map(({ number, icon: Icon, title, copy, href }) => (
+              <a className="impact-journey__step" href={href} key={number}>
+                <span className="impact-journey__number">{number}</span>
+                <Icon aria-hidden="true" />
+                <h3>{title}</h3>
+                <p>{copy}</p>
+                <span className="impact-journey__link">Get started <ArrowRight size={15} /></span>
+              </a>
+            ))}
+          </div>
+          <p className="impact-journey__footer">same food <span>×</span> less waste <span>×</span> stronger communities</p>
         </div>
       </section>
 
@@ -81,17 +109,6 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
           <div className="listing-grid">{featuredListings.map((listing) => <ListingCard key={listing.id} listing={listing} />)}</div>
         </section>
       )}
-
-      <section className="section section--tint" aria-labelledby="how-title">
-        <div className="page-shell">
-          <div className="section-heading section-heading--center"><div><p className="eyebrow">Simple and fair</p><h2 id="how-title">How SAVR works</h2></div></div>
-          <ol className="steps">
-            <li><span>1</span><h3>Tell us what you need</h3><p>Share your household needs, dietary preferences and how far you can travel.</p></li>
-            <li><span>2</span><h3>Find local food</h3><p>Browse fresh surplus from trusted businesses in your community, priced from free.</p></li>
-            <li><span>3</span><h3>Request and collect</h3><p>Requests are matched fairly by need. Collect at your confirmed pickup time.</p></li>
-          </ol>
-        </div>
-      </section>
 
       <section className="section page-shell" aria-labelledby="signup-path-title">
         <div className="section-heading section-heading--center"><div><p className="eyebrow">Choose your path</p><h2 id="signup-path-title">Create the right SAVR account</h2></div></div>
@@ -110,7 +127,6 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
           </article>
         </div>
       </section>
-
       <section className="section page-shell" aria-labelledby="funding-title">
         <div className="section-heading section-heading--center"><div><p className="eyebrow">How it is paid for</p><h2 id="funding-title">Corporate impact budgets become guaranteed demand</h2></div></div>
         <div className="funding-split">

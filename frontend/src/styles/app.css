@@ -360,6 +360,31 @@ body,.site-header,.eligibility-page,.dashboard-main,.health-page,.match-page{bac
 
 /* Funder strip: duplicated track for a seamless loop, edge fade, pause on hover */
 .sponsor-strip{border-block:1px solid #dfd7c5;background:var(--cream);padding-block:46px}
+.header-search input,.search-field input{background:transparent}
+
+.impact-journey{background:var(--cream);border-block:1px solid #dfd7c5;padding:58px 0 64px}
+.impact-journey__inner{display:grid;gap:44px}
+.impact-journey__top{display:grid;grid-template-columns:160px minmax(0,1fr) 160px;gap:28px;align-items:center}
+.impact-journey__note{font:600 23px/1.15 'DM Serif Display',serif;color:var(--dark);transform:rotate(-3deg);margin:0}
+.impact-journey__note--right{text-align:right;transform:rotate(3deg)}
+.impact-journey__metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.impact-journey__metric{min-height:180px;border:1px solid #20301f14;border-radius:22px;padding:22px 18px;display:grid;place-items:center;text-align:center;align-content:center;gap:8px;transition:transform .18s,box-shadow .18s}
+.impact-journey__metric:hover,.impact-journey__metric:focus-visible{transform:translateY(-4px) rotate(-1deg);box-shadow:0 12px 24px #20301f18;outline:2px solid var(--green);outline-offset:3px}
+.impact-journey__metric svg{width:31px;height:31px;color:var(--dark)}
+.impact-journey__metric strong{font:600 34px/1 'DM Serif Display',serif;color:var(--dark)}
+.impact-journey__metric span{max-width:130px;color:#4f5c52;font-size:13px}
+.impact-journey__metric--peopleHelped{background:#e8eedb}.impact-journey__metric--businesses{background:#f6dfd2}.impact-journey__metric--foodRescued{background:#f8dfa8}.impact-journey__metric--co2Avoided{background:#dce9ec}
+.impact-journey__heading{text-align:center}.impact-journey__heading h2{font:46px/1 'DM Serif Display',serif;margin:8px 0}.impact-journey__heading>p:last-child{color:#4f5c52;font:600 18px 'DM Serif Display',serif;margin:0}
+.impact-journey__steps{display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+.impact-journey__step{position:relative;min-height:300px;padding:30px 28px 26px;border:1px solid #dfd7c5;border-radius:22px;background:#fffaf0;display:grid;justify-items:center;text-align:center;align-content:start;gap:12px;transition:transform .18s,border-color .18s}
+.impact-journey__step:hover,.impact-journey__step:focus-visible{transform:translateY(-4px);border-color:var(--green);outline:0}
+.impact-journey__step>svg{width:76px;height:76px;stroke-width:1.35;color:var(--dark);margin-top:4px}
+.impact-journey__number{position:absolute;top:20px;left:20px;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#e5a32b;color:#fff;font:700 18px 'DM Serif Display',serif}
+.impact-journey__step:nth-child(2) .impact-journey__number{background:#879c68}.impact-journey__step:nth-child(3) .impact-journey__number{background:#d97941}
+.impact-journey__step h3{font:26px 'DM Serif Display',serif;margin:0}.impact-journey__step p{max-width:380px;color:#4f5c52;margin:0}.impact-journey__link{display:inline-flex;align-items:center;gap:5px;color:var(--green);font-weight:700;margin-top:auto}
+.impact-journey__footer{justify-self:center;background:#dfe6cf;border-radius:50%;padding:10px 32px;margin:0;color:#41503f;font-weight:600}.impact-journey__footer span{margin:0 12px}
+@media(max-width:1000px){.impact-journey__top{grid-template-columns:1fr}.impact-journey__note{display:none}.impact-journey__metrics{grid-template-columns:repeat(2,1fr)}.impact-journey__steps{grid-template-columns:1fr}}
+@media(max-width:600px){.impact-journey{padding-block:38px}.impact-journey__metrics{grid-template-columns:1fr 1fr;gap:9px}.impact-journey__metric{min-height:145px;padding:16px 10px}.impact-journey__metric strong{font-size:27px}.impact-journey__heading h2{font-size:38px}.impact-journey__footer{font-size:12px;padding:9px 16px}.impact-journey__footer span{margin:0 5px}}
 .sponsor-strip__head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:26px}
 .sponsor-strip__head h2{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);font-weight:700;margin:0}
 .sponsor-strip__head p{margin:0;font-size:12px;color:var(--muted)}
