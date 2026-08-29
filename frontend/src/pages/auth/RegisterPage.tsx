@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../lib/authContext';
 
 const incomeLevels = [
@@ -56,7 +56,7 @@ const initialForm = {
 
 type RegisterForm = typeof initialForm;
 
-export default function RegisterPage() {
+function RecipientRegister({ redirectTo }: { redirectTo: string }) {
   const { register } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
@@ -93,7 +93,7 @@ export default function RegisterPage() {
     setSubmitting(true);
     try {
       await register(form);
-      navigate('/preferences');
+      navigate(redirectTo);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed.');
     } finally {
@@ -135,6 +135,7 @@ export default function RegisterPage() {
             <form className="eligibility-form" onSubmit={step < steps.length - 1 ? goNext : submit}>
               {step === 0 && (
                 <div className="form-grid form-grid--two-columns">
+                  <p className="account-switch form-field--wide">Signing up a cafe, restaurant or grocer? <Link to="/vendors/signup">Create a business account</Link></p>
                   <label className="form-field">Username<input required autoFocus value={form.username} onChange={(event) => update('username', event.target.value)} /></label>
                   <label className="form-field">Email<input type="email" required value={form.email} onChange={(event) => update('email', event.target.value)} /></label>
                   <label className="form-field">Password<input type="password" required minLength={12} value={form.password1} onChange={(event) => update('password1', event.target.value)} /></label>
@@ -206,4 +207,66 @@ export default function RegisterPage() {
       </div>
     </main>
   );
+}
+
+const businessTypes = ['Cafe', 'Restaurant', 'Bakery', 'Grocer', 'Supermarket', 'Caterer'];
+
+function BusinessRegister() {
+  const { registerBusiness } = useAuth();
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ username: '', email: '', password1: '', password2: '', vendorName: '', businessType: 'Cafe', businessAddress: '' });
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const update = (key: keyof typeof form, value: string) => setForm((current) => ({ ...current, [key]: value }));
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    if (form.password1 !== form.password2) { setError('Both passwords must match.'); return; }
+    setSubmitting(true);
+    try {
+      await registerBusiness(form);
+      navigate('/vendor');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Registration failed.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <main className="eligibility-page">
+      <div className="eligibility-page__layout eligibility-page__layout--single">
+        <section className="eligibility-form-panel" aria-labelledby="business-title">
+          <header className="page-heading">
+            <h1 id="business-title">List surplus food</h1>
+            <p>Create a business account. You are paid in full for every serve — recipients pay a capped contribution and a corporate sponsor covers the rest.</p>
+          </header>
+          <form className="eligibility-form" onSubmit={submit}>
+            <div className="form-grid form-grid--two-columns">
+              <label className="form-field">Business name<input required autoFocus value={form.vendorName} onChange={(event) => update('vendorName', event.target.value)} /></label>
+              <label className="form-field">Business type<select value={form.businessType} onChange={(event) => update('businessType', event.target.value)}>{businessTypes.map((item) => <option key={item}>{item}</option>)}</select></label>
+              <label className="form-field form-field--wide">Business address<input required value={form.businessAddress} onChange={(event) => update('businessAddress', event.target.value)} placeholder="Street, suburb, postcode" /></label>
+              <label className="form-field">Username<input required value={form.username} onChange={(event) => update('username', event.target.value)} /></label>
+              <label className="form-field">Email<input type="email" required value={form.email} onChange={(event) => update('email', event.target.value)} /></label>
+              <label className="form-field">Password<input type="password" required minLength={12} value={form.password1} onChange={(event) => update('password1', event.target.value)} /></label>
+              <label className="form-field">Confirm password<input type="password" required minLength={12} value={form.password2} onChange={(event) => update('password2', event.target.value)} /></label>
+            </div>
+            <aside className="need-score-help"><strong>What you get</strong><p>Community partner status and badge, featured placement in your suburb, and sponsor-funded demand for food you would otherwise throw away.</p></aside>
+            {error && <p className="form-error" role="alert">{error}</p>}
+            <div className="form-actions"><button className="button button--primary" type="submit" disabled={submitting}>{submitting ? 'Creating account…' : 'Create business account'}</button></div>
+          </form>
+          <p className="auth-switch">Looking for food instead? <Link to="/register">Create a personal account</Link>. Already registered? <Link to="/login">Log in</Link>.</p>
+        </section>
+      </div>
+    </main>
+  );
+}
+
+export default function RegisterPage() {
+  const location = useLocation();
+  const state = location.state as { from?: string } | null;
+  const isBusiness = location.pathname.startsWith('/vendors') || new URLSearchParams(location.search).get('type') === 'vendor';
+  if (isBusiness) return <BusinessRegister />;
+  return <RecipientRegister redirectTo={state?.from && state.from !== '/register' ? state.from : '/preferences'} />;
 }

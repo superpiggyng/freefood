@@ -42,7 +42,7 @@ export default function RequestsPage() {
         <RequestSection title="Pending / In review" requests={currentPending} />
         <section className="requests-section"><h2>Allocated</h2><div className="allocated-request"><div className="requests-list">{allocatedRequests.map((request) => <RequestCard request={request} key={request.id} />)}</div><aside className="pickup-code" aria-label="Pickup code"><div className="pickup-code__qr" aria-hidden="true" /><p>Show this QR code at pickup</p><strong>SAVR-1264</strong><button className="button button--secondary" type="button">Add to wallet</button></aside></div></section>
         <RequestSection title="Other requests" requests={otherRequests} />
-        <p className="requests-tip"><strong>Tip:</strong> Update your preferences to get better matches. <a href="/recipient/profile">Update now</a></p>
+        <p className="requests-tip"><strong>Tip:</strong> Update your preferences to get better matches. <a href="/preferences">Update now</a></p>
       </section>
     </main>
   );

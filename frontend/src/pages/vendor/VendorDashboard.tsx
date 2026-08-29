@@ -8,7 +8,7 @@ const listings: Listing[] = [
   { id: 3, title: "Muffin Box", emoji: "🧁", pickupWindow: "Tomorrow, 5:30-6:30 PM", remaining: 6, total: 8 },
 ];
 const nav: DashboardNavItem[] = [
-  { label: "Dashboard", icon: "▦", href: "/vendor", active: true }, { label: "My listings", icon: "▣", href: "/vendor/listings" },
+  { label: "Dashboard", icon: "▦", href: "/vendor", active: true }, { label: "Upload stock", icon: "⇪", href: "/vendor/upload" }, { label: "Partner status", icon: "★", href: "/vendor/partner" },
   { label: "Requests", icon: "♡", href: "/vendor/allocations" }, { label: "Pickups", icon: "⌖", href: "/vendor/pickups" },
   { label: "Impact", icon: "♧", href: "/vendor/impact" }, { label: "Payouts", icon: "$", href: "/vendor/payouts" },
   { label: "Profile", icon: "♙", href: "/vendor/profile" }, { label: "Settings", icon: "⚙", href: "/vendor/settings" },
@@ -18,9 +18,9 @@ export default function VendorDashboard() {
   const [published, setPublished] = useState(false);
   const publishListing = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); setPublished(true); };
   return <DashboardShell productLabel="for Business" navItems={nav} userName="Bakers Lane" userRole="View profile">
-    <header className="dashboard-heading"><div><h1>Overview <small>(Today)</small></h1><p>Welcome back. Here is how your food rescue is going.</p></div><a className="button button--primary" href="#create-listing">Create listing</a></header>
+    <header className="dashboard-heading"><div><h1>Overview <small>(Today)</small></h1><p>Welcome back. Here is how your food rescue is going.</p></div><div className="button-row"><a className="button button--secondary" href="/vendor/partner">Partner status</a><a className="button button--primary" href="/vendor/upload">Upload stock</a></div></header>
     <section className="metric-grid" aria-label="Today's performance">
-      <MetricCard label="Active listings" value="8" detail="Available now"/><MetricCard label="Requests received" value="42" detail="Today"/><MetricCard label="Allocated pickups" value="27" detail="Ready to collect"/><MetricCard label="Food rescued" value="86 kg" detail="+12% this week"/><MetricCard label="Earnings recovered" value="$412" detail="Estimated value"/>
+      <MetricCard label="Active listings" value="8" detail="Available now"/><MetricCard label="Requests received" value="42" detail="Today"/><MetricCard label="Allocated pickups" value="27" detail="Ready to collect"/><MetricCard label="Food rescued" value="86 kg" detail="+12% this week"/><MetricCard label="Earnings recovered" value="$412" detail="Estimated value"/><MetricCard label="Sponsor funded" value="82%" detail="Of listings this month"/>
     </section>
     <div className="dashboard-columns">
       <section className="dashboard-panel"><div className="panel-heading"><h2>Active listings</h2><a href="/vendor/listings">View all</a></div>

@@ -1,11 +1,12 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { SavrUser } from './api';
-import { fetchSession, loginUser, logoutUser, registerUser, type RegisterPayload } from './api';
+import { fetchSession, loginUser, logoutUser, registerUser, registerVendor, type RegisterPayload, type RegisterVendorPayload } from './api';
 
 interface AuthContextValue {
   user: SavrUser | null;
   loading: boolean;
   register: (payload: RegisterPayload) => Promise<SavrUser>;
+  registerBusiness: (payload: RegisterVendorPayload) => Promise<SavrUser>;
   login: (username: string, password: string) => Promise<SavrUser>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -23,7 +24,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    refresh().finally(() => setLoading(false));
+    let active = true;
+    (async () => {
+      try {
+        const { user: current } = await fetchSession();
+        if (active) setUser(current);
+      } catch {
+        if (active) setUser(null);
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => { active = false; };
   }, []);
 
   const value: AuthContextValue = {
@@ -31,6 +43,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     register: async (payload) => {
       const created = await registerUser(payload);
+      setUser(created);
+      return created;
+    },
+    registerBusiness: async (payload) => {
+      const created = await registerVendor(payload);
       setUser(created);
       return created;
     },

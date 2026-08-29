@@ -94,6 +94,32 @@ export function registerUser(payload: RegisterPayload): Promise<SavrUser> {
   });
 }
 
+export interface RegisterVendorPayload {
+  username: string;
+  email: string;
+  password1: string;
+  password2: string;
+  vendorName: string;
+  businessType: string;
+  businessAddress: string;
+}
+
+export function registerVendor(payload: RegisterVendorPayload): Promise<SavrUser> {
+  return apiFetch('/api/accounts/register/vendor/', {
+    method: 'POST',
+    body: JSON.stringify({
+      username: payload.username,
+      email: payload.email,
+      password1: payload.password1,
+      password2: payload.password2,
+      vendor_name: payload.vendorName,
+      business_type: payload.businessType,
+      business_address: payload.businessAddress,
+      address: payload.businessAddress,
+    }),
+  });
+}
+
 export function loginUser(username: string, password: string): Promise<SavrUser> {
   return apiFetch('/api/accounts/login/', { method: 'POST', body: JSON.stringify({ username, password }) });
 }

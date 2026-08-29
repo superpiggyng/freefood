@@ -11,6 +11,9 @@ export interface FoodListing {
   pickupWindow: string;
   distance?: string;
   tags?: string[];
+  vendorPrice?: number;
+  sponsored?: boolean;
+  partnerTier?: string;
 }
 
 interface ListingCardProps {
@@ -21,6 +24,9 @@ interface ListingCardProps {
 
 const formatPrice = (price: number) =>
   price === 0 ? "Free" : new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(price);
+
+const sponsorShare = (listing: FoodListing) =>
+  listing.sponsored && listing.vendorPrice != null ? Math.max(0, listing.vendorPrice - listing.price) : 0;
 
 export function ListingCard({ listing, href = `/marketplace/${listing.id}`, className = "" }: ListingCardProps) {
   return (
@@ -38,7 +44,10 @@ export function ListingCard({ listing, href = `/marketplace/${listing.id}`, clas
       </a>
       <div className="listing-card__body">
         <h3><a href={href}>{listing.title}</a></h3>
-        <p className="listing-card__vendor">{listing.vendorName}</p>
+        <p className="listing-card__vendor">{listing.vendorName}{listing.partnerTier && <span className="partner-chip" title={`SAVR ${listing.partnerTier}`}>★ {listing.partnerTier.replace(" Partner", "")} partner</span>}</p>
+        {sponsorShare(listing) > 0 && (
+          <p className="listing-card__sponsor">Sponsor covers ${sponsorShare(listing).toFixed(2)} · {listing.vendorName} is paid ${listing.vendorPrice?.toFixed(2)}</p>
+        )}
         {(listing.category || listing.tags?.length) && (
           <ul className="tag-list" aria-label="Listing categories">
             {listing.category && <li>{listing.category}</li>}

@@ -72,6 +72,29 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
           </ol>
         </div>
       </section>
+
+      <section className="section page-shell" aria-labelledby="funding-title">
+        <div className="section-heading section-heading--center"><div><p className="eyebrow">How it is paid for</p><h2 id="funding-title">Corporate impact budgets become guaranteed demand</h2></div></div>
+        <div className="funding-split">
+          <div className="funding-flow">
+            <div className="funding-flow__row"><span>Restaurant lists a surplus meal</span><strong>$6.00</strong></div>
+            <div className="funding-flow__pair"><div><small>You pay</small><strong>$1.00</strong></div><div><small>Sponsor covers</small><strong>$5.00</strong></div></div>
+            <div className="funding-flow__row funding-flow__row--result"><span>Restaurant is paid in full</span><strong>$6.00</strong></div>
+          </div>
+          <ul className="funding-points">
+            <li><strong>Restaurants earn</strong> on food that would have been binned, cut disposal costs, and get community partner status and featured placement.</li>
+            <li><strong>Enterprises fund</strong> something countable — 1,000 meals in Western Sydney — and get a live dashboard of meals, suburbs, partners and dollars delivered.</li>
+            <li><strong>People pay</strong> a capped $1 to $2 for real food from normal shops, with allergen and dietary filtering built in.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section className="sponsor-band" aria-labelledby="sponsor-band-title">
+        <div className="page-shell sponsor-band__inner">
+          <div><p className="eyebrow">For enterprises</p><h2 id="sponsor-band-title">Fund 1,000 meals in your community</h2><p>Turn your CSR budget into meals people actually collect, reported suburb by suburb.</p></div>
+          <div className="button-row"><a className="button button--primary" href="/sponsors">Become a sponsor <span aria-hidden="true">→</span></a><a className="button button--secondary" href="/vendor/partner">Partner with us <span aria-hidden="true">↗</span></a></div>
+        </div>
+      </section>
     </main>
   );
 }

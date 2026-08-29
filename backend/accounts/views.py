@@ -43,6 +43,7 @@ def _user_json(user):
         "maxDistanceKm": user.max_distance_km,
         "postcode": user.zip_code,
         "ruralArea": user.rural_area,
+        "needyMetric": user.needy_metric,
         "needScore": user.calculate_need_score(),
     }
 
@@ -105,21 +106,6 @@ def session(request):
 @login_required_json
 @require_http_methods(["GET", "PATCH"])
 def profile(request):
-<<<<<<< Updated upstream
-    user = request.user
-    return JsonResponse({
-        "id": user.id,
-        "username": user.username,
-        "email": user.email,
-        "firstName": user.first_name,
-        "lastName": user.last_name,
-        "role": user.role,
-        "needyMetric": user.needy_metric,
-        "vendorName": user.vendor_name,
-        "isStaff": user.is_staff,
-        "isSuperuser": user.is_superuser,
-    })
-=======
     if request.method == "PATCH":
         data = _payload(request)
         if data is None:
@@ -151,4 +137,3 @@ def profile(request):
             user.rural_area = bool(data["ruralArea"])
         user.save()
     return JsonResponse(_user_json(request.user))
->>>>>>> Stashed changes
