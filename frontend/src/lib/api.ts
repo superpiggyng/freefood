@@ -29,18 +29,6 @@ export interface SavrUser {
   needyMetric: number;
 }
 
-function readCookie(name: string): string | null {
-  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : null;
-}
-
-async function ensureCsrfToken(): Promise<string> {
-  const existing = readCookie('csrftoken');
-  if (existing) return existing;
-  await fetch('/api/accounts/csrf/', { credentials: 'include' });
-  return readCookie('csrftoken') ?? '';
-}
-
 export interface FieldError {
   message: string;
   code: string;
@@ -59,6 +47,53 @@ export class ApiError extends Error {
   }
 }
 
+function readCookie(name: string): string | null {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function friendlyHttpMessage(response: Response, bodyText?: string) {
+  if (response.status === 403) {
+    return 'Your secure login token expired or was not set. Refresh the page and try again.';
+  }
+  if (response.status >= 500) {
+    return 'The backend server returned an error. Make sure Django is running on port 8000.';
+  }
+  if (bodyText && !bodyText.trim().startsWith('<')) {
+    return bodyText.trim().slice(0, 180);
+  }
+  return `Request failed with status ${response.status}.`;
+}
+
+async function readResponseBody(response: Response) {
+  const contentType = response.headers.get('content-type') ?? '';
+  if (contentType.includes('application/json')) {
+    return { data: await response.json().catch(() => null), text: '' };
+  }
+  const text = await response.text().catch(() => '');
+  return { data: null, text };
+}
+
+async function ensureCsrfToken(): Promise<string> {
+  const existing = readCookie('csrftoken');
+  if (existing) return existing;
+  let response: Response;
+  try {
+    response = await fetch('/api/accounts/csrf/', { credentials: 'include' });
+  } catch {
+    throw new ApiError('Cannot reach the backend server. Start Django on port 8000 and try again.', 0);
+  }
+  const { data, text } = await readResponseBody(response);
+  if (!response.ok) {
+    throw new ApiError(data?.detail || friendlyHttpMessage(response, text), response.status, data?.errors);
+  }
+  const token = readCookie('csrftoken') ?? data?.csrfToken ?? '';
+  if (!token) {
+    throw new ApiError('Could not create a secure login session. Refresh the page and try again.', 0);
+  }
+  return token;
+}
+
 async function apiFetch(path: string, options: RequestInit = {}) {
   const method = (options.method ?? 'GET').toUpperCase();
   const headers = new Headers(options.headers);
@@ -68,10 +103,15 @@ async function apiFetch(path: string, options: RequestInit = {}) {
       headers.set('Content-Type', 'application/json');
     }
   }
-  const response = await fetch(path, { ...options, headers, credentials: 'include' });
-  const data = await response.json().catch(() => null);
+  let response: Response;
+  try {
+    response = await fetch(path, { ...options, headers, credentials: 'include' });
+  } catch {
+    throw new ApiError('Cannot reach the backend server. Start Django on port 8000 and try again.', 0);
+  }
+  const { data, text } = await readResponseBody(response);
   if (!response.ok) {
-    const message = data?.detail || (data?.errors ? 'Please fix the highlighted fields below.' : 'Something went wrong.');
+    const message = data?.detail || (data?.errors ? 'Please fix the highlighted fields below.' : friendlyHttpMessage(response, text));
     throw new ApiError(message, response.status, data?.errors);
   }
   return data;
