@@ -10,6 +10,9 @@ from .models import Interest, Item, MarketplaceListing
 
 class MarketplaceApiTests(TestCase):
     def setUp(self):
+        # The seed data migration populates the marketplace; these tests own their fixtures.
+        MarketplaceListing.objects.all().delete()
+        Item.objects.all().delete()
         self.vendor = get_user_model().objects.create_user(
             username="vendor",
             email="vendor@example.com",
