@@ -367,19 +367,23 @@ body,.site-header,.eligibility-page,.dashboard-main,.health-page,.match-page{bac
 .hero__background{position:absolute;inset:0;z-index:-3}
 .hero__background,.hero__background img{width:100%;height:100%}
 .hero__background img{object-fit:cover;object-position:center;transform:scale(1.015)}
-.hero__wash{position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,#f4eddbf7 0%,#f4eddbe8 35%,#f4eddb8f 58%,#14291b26 78%,#14291b0f 100%)}
+.hero__wash{position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,#10281eee 0%,#163326d6 34%,#1735278a 55%,#14291b24 78%,#14291b0a 100%)}
 .hero--cinematic:after{content:'';position:absolute;inset:auto 0 0;height:150px;z-index:-1;background:linear-gradient(transparent,var(--cream))}
 .hero--cinematic .hero__content{display:flex;align-items:center;min-height:inherit;padding-block:80px 120px}
-.hero__copy{width:min(680px,58vw);padding:38px;border:1px solid #fff8e75c;border-radius:28px;background:#f4eddbb8;backdrop-filter:blur(9px);box-shadow:0 24px 60px #14291b1f}
-.hero--cinematic h1{font-size:clamp(46px,5.1vw,76px);max-width:650px;text-wrap:balance}
-.hero--cinematic .hero__lead{max-width:600px;color:#33453a}
-.hero--cinematic .hero__proof{border-top-color:#68756842}
-.hero__scroll{position:absolute;left:50%;bottom:25px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;color:var(--dark);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.hero__copy{width:min(660px,54vw);padding:0;text-shadow:0 2px 18px #08170f45}
+.hero--cinematic h1{font-size:clamp(46px,4.6vw,68px);max-width:640px;color:#fffaf0;text-wrap:balance;margin-bottom:22px}
+.hero--cinematic .eyebrow{color:#f0ad55}
+.hero--cinematic .hero__lead{max-width:590px;color:#eef1e8;font-size:18px}
+.hero--cinematic .hero__proof{border-top-color:#ffffff38;color:#fff}
+.hero--cinematic .hero__proof dt{color:#d5ded3}.hero--cinematic .hero__proof dd{color:#fffaf0}
+.hero--cinematic .button--primary{background:#f4eddb;color:var(--dark);border-color:#f4eddb;text-shadow:none}.hero--cinematic .button--primary:hover{background:#fff;border-color:#fff}
+.hero--cinematic .button--secondary{background:#10281e4d;color:#fff;border-color:#ffffffa6;text-shadow:none;backdrop-filter:blur(6px)}.hero--cinematic .button--secondary:hover{background:#ffffff1f;border-color:#fff}
+.hero__scroll{position:absolute;left:50%;bottom:25px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;color:#fffaf0;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;text-shadow:0 1px 8px #0008}
 .hero__scroll span{display:grid;place-items:center;width:30px;height:30px;border:1px solid #35563d66;border-radius:50%;animation:scroll-cue 1.8s ease-in-out infinite}
 @keyframes scroll-cue{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
 @media(prefers-reduced-motion:reduce){.hero__background img{transform:none}.hero__scroll span{animation:none}}
-@media(max-width:900px){.hero--cinematic{min-height:720px}.hero__wash{background:linear-gradient(180deg,#f4eddbed 0%,#f4eddbcf 62%,#f4eddb73 100%)}.hero--cinematic .hero__content{align-items:flex-end}.hero__copy{width:100%;padding:28px}.hero--cinematic h1{font-size:clamp(40px,8vw,60px)}}
-@media(max-width:600px){.hero--cinematic{min-height:760px}.hero--cinematic .hero__content{padding-block:50px 110px}.hero__copy{padding:22px;border-radius:20px}.hero--cinematic h1{font-size:39px}.hero--cinematic .hero__proof{gap:18px}.hero__scroll{bottom:18px}}
+@media(max-width:900px){.hero--cinematic{min-height:720px}.hero__wash{background:linear-gradient(180deg,#10281edb 0%,#163326c7 62%,#14291b8f 100%)}.hero--cinematic .hero__content{align-items:flex-end}.hero__copy{width:100%}.hero--cinematic h1{font-size:clamp(40px,8vw,60px)}}
+@media(max-width:600px){.hero--cinematic{min-height:760px}.hero--cinematic .hero__content{padding-block:50px 110px}.hero--cinematic h1{font-size:39px}.hero--cinematic .hero__proof{gap:18px}.hero__scroll{bottom:18px}}
 
 /* Motion system shared by the public experience. */
 html{scroll-behavior:smooth}
