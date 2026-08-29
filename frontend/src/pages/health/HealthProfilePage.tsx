@@ -1,32 +1,31 @@
 import { Sparkles } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
-const allergens = ['Peanut', 'Tree nuts', 'Milk', 'Egg', 'Wheat', 'Soy', 'Sesame', 'Fish', 'Shellfish'];
-const styles = ['Vegetarian', 'Vegan', 'Halal', 'Gluten-free', 'Dairy-free'];
+const avoidOptions = ['Peanut', 'Tree nuts', 'Milk', 'Egg', 'Wheat', 'Soy', 'Sesame', 'Fish', 'Shellfish'];
+const preferenceOptions = ['Vegetarian', 'Vegan', 'Halal', 'Gluten-free', 'Dairy-free'];
 
 export default function HealthProfilePage() {
-  const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
-  const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
-  const [goal, setGoal] = useState('balanced');
-  const [saved, setSaved] = useState(false);
-  const toggle = (value: string, values: string[], setter: (items: string[]) => void) => setter(values.includes(value) ? values.filter((item) => item !== value) : [...values, value]);
+  const navigate = useNavigate();
+  const [avoid, setAvoid] = useState<string[]>([]);
+  const [preferences, setPreferences] = useState<string[]>([]);
+  const [priority, setPriority] = useState('balanced');
+  const toggle = (value: string, values: string[], update: (items: string[]) => void) => update(values.includes(value) ? values.filter((item) => item !== value) : [...values, value]);
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    localStorage.setItem('savr.foodPreferences', JSON.stringify({ allergens: selectedAllergens, styles: selectedStyles, goal }));
-    setSaved(true);
+    localStorage.setItem('savr.foodPreferences', JSON.stringify({ avoid, preferences, priority }));
+    navigate('/suggested');
   };
 
   return <main className="health-page">
-    <header className="health-header"><Link className="logo" to="/"><img src="/savr-icon.png" alt=""/><span>SAVR</span></Link><span><Sparkles size={16}/> Meal preferences</span></header>
-    <div className="health-shell compact-profile">
-      <div className="health-intro"><p className="eyebrow">Optional meal assistant</p><h1>What sounds good to you?</h1><p>Answer a few simple questions and we’ll highlight suitable meals. Skip anything you don’t want to share.</p></div>
-      <form className="health-form" onSubmit={submit}>
-        <section className="health-card"><div className="health-card__heading"><span>1</span><div><h2>Anything we should avoid?</h2><p>Optional. We’ll hide meals with these declared allergens.</p></div></div><div className="choice-grid">{allergens.map((item) => <label className="check-card" key={item}><input type="checkbox" checked={selectedAllergens.includes(item)} onChange={() => toggle(item, selectedAllergens, setSelectedAllergens)}/><span>{item}</span></label>)}</div></section>
-        <section className="health-card"><div className="health-card__heading"><span>2</span><div><h2>How do you like to eat?</h2><p>Choose as many as you like - or none.</p></div></div><div className="choice-grid">{styles.map((item) => <label className="check-card" key={item}><input type="checkbox" checked={selectedStyles.includes(item)} onChange={() => toggle(item, selectedStyles, setSelectedStyles)}/><span>{item}</span></label>)}</div></section>
-        <section className="health-card"><div className="health-card__heading"><span>3</span><div><h2>What matters today?</h2><p>This simply changes how we order suggestions.</p></div></div><div className="form-grid form-grid--two-columns"><label className="form-field">Meal preference<select value={goal} onChange={(event) => setGoal(event.target.value)}><option value="balanced">A balanced option</option><option value="protein">Something filling</option><option value="lighter">Something lighter</option><option value="vegetables">More vegetables</option><option value="value">Best value nearby</option></select></label><label className="form-field">Maximum travel distance<select><option>2 km</option><option>5 km</option><option>10 km</option><option>Any distance</option></select></label></div></section>
-        <aside className="suggestion-note"><Sparkles/><p><strong>Simple, private suggestions</strong>Your answers stay in this browser for the MVP. Restaurants only see the request - not your preference profile.</p></aside>
-        <div className="health-actions">{saved && <p role="status">Preferences saved.</p>}<button className="button">Save preferences</button>{saved && <Link className="button button--secondary" to="/nutrition-matches">See suggestions</Link>}</div>
+    <header className="health-header"><Link className="logo" to="/"><img src="/savr-icon.png" alt=""/><span>SAVR</span></Link><Link to="/marketplace">Skip</Link></header>
+    <div className="health-shell preference-shell">
+      <div className="health-intro"><p className="eyebrow">Optional</p><h1>Make food easier to find</h1><p>Tell us what to avoid and what you like. You can skip this or change it anytime.</p></div>
+      <form className="preference-card" onSubmit={submit}>
+        <fieldset><legend>Avoid</legend><p>We will hide meals that declare these ingredients.</p><div className="choice-grid">{avoidOptions.map((item) => <label className="check-card" key={item}><input type="checkbox" checked={avoid.includes(item)} onChange={() => toggle(item, avoid, setAvoid)}/><span>{item}</span></label>)}</div></fieldset>
+        <fieldset><legend>Prefer</legend><p>Choose any that apply.</p><div className="choice-grid">{preferenceOptions.map((item) => <label className="check-card" key={item}><input type="checkbox" checked={preferences.includes(item)} onChange={() => toggle(item, preferences, setPreferences)}/><span>{item}</span></label>)}</div></fieldset>
+        <label className="form-field">Show me<select value={priority} onChange={(event) => setPriority(event.target.value)}><option value="balanced">Balanced options</option><option value="filling">Filling options</option><option value="lighter">Lighter options</option><option value="value">Best value nearby</option></select></label>
+        <div className="preference-footer"><span><Sparkles size={16}/>Stored only in this browser for now</span><button className="button">Show suggestions</button></div>
       </form>
     </div>
   </main>;

@@ -9,6 +9,8 @@ __pycache__/
 venv/
 env/
 backend/.venv/
+.*-venv/
+scrape-output/
 
 # Django/local database
 db.sqlite3
