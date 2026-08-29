@@ -1,6 +1,9 @@
 import json
 
+from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
+from django.middleware.csrf import get_token
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 
 from freefood.auth import login_required_json
@@ -17,6 +20,33 @@ def _payload(request):
     return request.POST
 
 
+def _user_json(user):
+    return {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "firstName": user.first_name,
+        "lastName": user.last_name,
+        "role": user.role,
+        "vendorName": user.vendor_name,
+        "isStaff": user.is_staff,
+        "isSuperuser": user.is_superuser,
+        "householdSize": user.household_size,
+        "incomeLevel": user.income_level,
+        "dependents": user.dependents,
+        "employmentStatus": user.employment_status,
+        "previousAllocationsCount": user.previous_allocations_count,
+        "currentFoodAccess": user.current_food_access,
+        "housingCost": str(user.housing_cost) if user.housing_cost is not None else None,
+        "debt": str(user.debt) if user.debt is not None else None,
+        "preferredCategory": user.preferred_category,
+        "maxDistanceKm": user.max_distance_km,
+        "postcode": user.zip_code,
+        "ruralArea": user.rural_area,
+        "needScore": user.calculate_need_score(),
+    }
+
+
 def _register(request, form_class):
     data = _payload(request)
     if data is None:
@@ -25,7 +55,14 @@ def _register(request, form_class):
     if not form.is_valid():
         return JsonResponse({"errors": form.errors.get_json_data()}, status=422)
     user = form.save()
-    return JsonResponse({"id": user.id, "username": user.username, "email": user.email, "role": user.role}, status=201)
+    login(request, user)
+    return JsonResponse(_user_json(user), status=201)
+
+
+@ensure_csrf_cookie
+@require_http_methods(["GET"])
+def csrf(request):
+    return JsonResponse({"csrfToken": get_token(request)})
 
 
 @require_http_methods(["POST"])
@@ -38,8 +75,37 @@ def vendor_signup(request):
     return _register(request, VendorSignupForm)
 
 
+@require_http_methods(["POST"])
+def login_view(request):
+    data = _payload(request)
+    if data is None:
+        return JsonResponse({"detail": "Invalid JSON."}, status=400)
+    username = data.get("username", "")
+    password = data.get("password", "")
+    user = authenticate(request, username=username, password=password)
+    if user is None:
+        return JsonResponse({"detail": "Invalid username or password."}, status=401)
+    login(request, user)
+    return JsonResponse(_user_json(user))
+
+
+@require_http_methods(["POST"])
+def logout_view(request):
+    logout(request)
+    return JsonResponse({}, status=204)
+
+
+@ensure_csrf_cookie
+def session(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"user": None})
+    return JsonResponse({"user": _user_json(request.user)})
+
+
 @login_required_json
+@require_http_methods(["GET", "PATCH"])
 def profile(request):
+<<<<<<< Updated upstream
     user = request.user
     return JsonResponse({
         "id": user.id,
@@ -53,3 +119,36 @@ def profile(request):
         "isStaff": user.is_staff,
         "isSuperuser": user.is_superuser,
     })
+=======
+    if request.method == "PATCH":
+        data = _payload(request)
+        if data is None:
+            return JsonResponse({"detail": "Invalid JSON."}, status=400)
+        user = request.user
+        if "householdSize" in data:
+            user.household_size = data["householdSize"]
+        if "incomeLevel" in data:
+            user.income_level = data["incomeLevel"]
+        if "dependents" in data:
+            user.dependents = data["dependents"]
+        if "employmentStatus" in data:
+            user.employment_status = data["employmentStatus"]
+        if "previousAllocationsCount" in data:
+            user.previous_allocations_count = data["previousAllocationsCount"]
+        if "currentFoodAccess" in data:
+            user.current_food_access = data["currentFoodAccess"]
+        if "housingCost" in data:
+            user.housing_cost = data["housingCost"]
+        if "debt" in data:
+            user.debt = data["debt"]
+        if "preferredCategory" in data:
+            user.preferred_category = data["preferredCategory"]
+        if "maxDistanceKm" in data:
+            user.max_distance_km = data["maxDistanceKm"]
+        if "postcode" in data:
+            user.zip_code = data["postcode"]
+        if "ruralArea" in data:
+            user.rural_area = bool(data["ruralArea"])
+        user.save()
+    return JsonResponse(_user_json(request.user))
+>>>>>>> Stashed changes

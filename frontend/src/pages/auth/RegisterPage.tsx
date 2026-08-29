@@ -1,0 +1,209 @@
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../lib/authContext';
+
+const incomeLevels = [
+  { value: 'under-25000', label: 'Under $25,000 per year' },
+  { value: '25000-49999', label: '$25,000-$49,999' },
+  { value: '50000-74999', label: '$50,000-$74,999' },
+  { value: '75000-plus', label: '$75,000 or more' },
+];
+
+const categories = [
+  { value: 'bakery', label: 'Bakery' },
+  { value: 'groceries', label: 'Groceries' },
+  { value: 'meals', label: 'Meals' },
+  { value: 'snacks', label: 'Snacks' },
+];
+
+const employmentStatuses = [
+  { value: 'employed-full-time', label: 'Employed full-time' },
+  { value: 'employed-part-time', label: 'Employed part-time' },
+  { value: 'unemployed', label: 'Unemployed' },
+  { value: 'student', label: 'Student' },
+  { value: 'retired', label: 'Retired' },
+  { value: 'unable-to-work', label: 'Unable to work' },
+];
+
+const foodAccessLevels = [
+  { value: 'reliable', label: 'Reliable access' },
+  { value: 'sometimes-limited', label: 'Sometimes limited' },
+  { value: 'often-limited', label: 'Often limited' },
+  { value: 'very-limited', label: 'Very limited' },
+];
+
+const steps = ['Account', 'Preferences', 'Household', 'Financial situation', 'Review & submit'];
+
+const initialForm = {
+  username: '',
+  email: '',
+  password1: '',
+  password2: '',
+  preferredCategory: 'groceries',
+  maxDistanceKm: 5,
+  householdSize: 1,
+  dependents: 0,
+  incomeLevel: 'under-25000',
+  postcode: '',
+  ruralArea: false,
+  employmentStatus: 'employed-full-time',
+  currentFoodAccess: 'reliable',
+  previousAllocationsCount: 0,
+  housingCost: '',
+  debt: '',
+};
+
+type RegisterForm = typeof initialForm;
+
+export default function RegisterPage() {
+  const { register } = useAuth();
+  const navigate = useNavigate();
+  const [step, setStep] = useState(0);
+  const [form, setForm] = useState<RegisterForm>(initialForm);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const update = <K extends keyof RegisterForm>(key: K, value: RegisterForm[K]) => setForm((current) => ({ ...current, [key]: value }));
+
+  const isStepValid = () => {
+    if (step === 0) return form.username.trim().length > 0 && form.email.trim().length > 0 && form.password1.length >= 12 && form.password1 === form.password2;
+    if (step === 2) return form.postcode.trim().length > 0;
+    return true;
+  };
+
+  const goNext = (event: FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    if (!isStepValid()) {
+      setError(step === 0 ? 'Enter a username, email and matching passwords (12+ characters).' : 'Enter your postcode.');
+      return;
+    }
+    setStep((current) => Math.min(current + 1, steps.length - 1));
+  };
+
+  const goBack = () => {
+    setError(null);
+    setStep((current) => Math.max(current - 1, 0));
+  };
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      await register(form);
+      navigate('/preferences');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Registration failed.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <main className="eligibility-page">
+      <div className="eligibility-page__layout">
+        <aside className="eligibility-progress" aria-label="Registration progress">
+          <ol className="eligibility-progress__steps">
+            {steps.map((label, index) => (
+              <li
+                className={`eligibility-progress__step${index === step ? ' eligibility-progress__step--active' : ''}${index < step ? ' eligibility-progress__step--complete' : ''}`}
+                aria-current={index === step ? 'step' : undefined}
+                key={label}
+              >
+                <span className="eligibility-progress__number" aria-hidden="true">{index < step ? '✓' : index + 1}</span>
+                {label}
+              </li>
+            ))}
+          </ol>
+          <p className="eligibility-progress__privacy"><strong>Your information is private and secure.</strong> We only use it to match food fairly by need.</p>
+        </aside>
+
+        <section className="eligibility-form-panel" aria-labelledby="register-title">
+          <header className="page-heading">
+            <h1 id="register-title">Create your account</h1>
+            <p>
+              {step === 0 && 'Choose a username and password to get started.'}
+              {step === 1 && 'Tell us what food you look for and how far you can travel.'}
+              {step === 2 && 'A few household questions so we can fairly match food by need.'}
+              {step === 3 && 'A little about your financial situation — this stays private and secure.'}
+              {step === 4 && 'Check your details before creating your account.'}
+            </p>
+          </header>
+          <div className="eligibility-form-panel__content">
+            <form className="eligibility-form" onSubmit={step < steps.length - 1 ? goNext : submit}>
+              {step === 0 && (
+                <div className="form-grid form-grid--two-columns">
+                  <label className="form-field">Username<input required autoFocus value={form.username} onChange={(event) => update('username', event.target.value)} /></label>
+                  <label className="form-field">Email<input type="email" required value={form.email} onChange={(event) => update('email', event.target.value)} /></label>
+                  <label className="form-field">Password<input type="password" required minLength={12} value={form.password1} onChange={(event) => update('password1', event.target.value)} /></label>
+                  <label className="form-field">Confirm password<input type="password" required minLength={12} value={form.password2} onChange={(event) => update('password2', event.target.value)} /></label>
+                </div>
+              )}
+
+              {step === 1 && (
+                <div className="form-grid form-grid--two-columns">
+                  <label className="form-field">Item category you look for most<select value={form.preferredCategory} onChange={(event) => update('preferredCategory', event.target.value)}>{categories.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
+                  <label className="form-field">Maximum travel distance<span className="range-field"><span>1 km</span><input type="range" min={1} max={20} value={form.maxDistanceKm} onChange={(event) => update('maxDistanceKm', Number(event.target.value))} /><output>{form.maxDistanceKm} km</output></span></label>
+                </div>
+              )}
+
+              {step === 2 && (
+                <div className="form-grid form-grid--two-columns">
+                  <label className="form-field">Household size<input type="number" min={1} required value={form.householdSize} onChange={(event) => update('householdSize', Number(event.target.value))} /></label>
+                  <label className="form-field">Number of dependents<input type="number" min={0} value={form.dependents} onChange={(event) => update('dependents', Number(event.target.value))} /></label>
+                  <label className="form-field">Household income (before tax)<select value={form.incomeLevel} onChange={(event) => update('incomeLevel', event.target.value)}>{incomeLevels.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
+                  <label className="form-field">Employment status<select value={form.employmentStatus} onChange={(event) => update('employmentStatus', event.target.value)}>{employmentStatuses.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
+                  <label className="form-field">Postcode<input required value={form.postcode} onChange={(event) => update('postcode', event.target.value)} /></label>
+                  <label className="toggle-field"><input type="checkbox" checked={form.ruralArea} onChange={(event) => update('ruralArea', event.target.checked)} /><span>I live in a rural area</span></label>
+                </div>
+              )}
+
+              {step === 3 && (
+                <div className="form-grid form-grid--two-columns">
+                  <label className="form-field">Current food access<select value={form.currentFoodAccess} onChange={(event) => update('currentFoodAccess', event.target.value)}>{foodAccessLevels.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
+                  <label className="form-field">Previous food allocations received<input type="number" min={0} value={form.previousAllocationsCount} onChange={(event) => update('previousAllocationsCount', Number(event.target.value))} /></label>
+                  <label className="form-field">Monthly housing cost ($, optional)<input type="number" min={0} placeholder="e.g. 1800" value={form.housingCost} onChange={(event) => update('housingCost', event.target.value)} /></label>
+                  <label className="form-field">Outstanding debt ($, optional)<input type="number" min={0} placeholder="e.g. 5000" value={form.debt} onChange={(event) => update('debt', event.target.value)} /></label>
+                </div>
+              )}
+
+              {step === 4 && (
+                <aside className="need-score-help review-summary">
+                  <strong>Review your details</strong>
+                  <ul>
+                    <li><span>Username</span><strong>{form.username}</strong></li>
+                    <li><span>Email</span><strong>{form.email}</strong></li>
+                    <li><span>Item category</span><strong>{categories.find((item) => item.value === form.preferredCategory)?.label}</strong></li>
+                    <li><span>Maximum travel distance</span><strong>{form.maxDistanceKm} km</strong></li>
+                    <li><span>Household size</span><strong>{form.householdSize}</strong></li>
+                    <li><span>Dependents</span><strong>{form.dependents}</strong></li>
+                    <li><span>Household income</span><strong>{incomeLevels.find((item) => item.value === form.incomeLevel)?.label}</strong></li>
+                    <li><span>Employment status</span><strong>{employmentStatuses.find((item) => item.value === form.employmentStatus)?.label}</strong></li>
+                    <li><span>Postcode</span><strong>{form.postcode}</strong></li>
+                    <li><span>Rural area</span><strong>{form.ruralArea ? 'Yes' : 'No'}</strong></li>
+                    <li><span>Current food access</span><strong>{foodAccessLevels.find((item) => item.value === form.currentFoodAccess)?.label}</strong></li>
+                    <li><span>Previous allocations</span><strong>{form.previousAllocationsCount}</strong></li>
+                    <li><span>Monthly housing cost</span><strong>{form.housingCost ? `$${form.housingCost}` : 'Not provided'}</strong></li>
+                    <li><span>Outstanding debt</span><strong>{form.debt ? `$${form.debt}` : 'Not provided'}</strong></li>
+                  </ul>
+                </aside>
+              )}
+
+              {error && <p className="form-error" role="alert">{error}</p>}
+
+              <div className="form-actions">
+                {step > 0 && <button className="button button--secondary" type="button" onClick={goBack}>Back</button>}
+                {step < steps.length - 1
+                  ? <button className="button button--primary" type="submit">Continue</button>
+                  : <button className="button button--primary" type="submit" disabled={submitting}>{submitting ? 'Creating account…' : 'Create account'}</button>}
+              </div>
+            </form>
+            <p className="auth-switch">Already have an account? <Link to="/login">Log in</Link></p>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}

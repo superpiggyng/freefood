@@ -1,5 +1,10 @@
+<<<<<<< Updated upstream
 import { useEffect, useState, type ReactNode } from 'react';
 import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+=======
+import type { ReactNode } from 'react';
+import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
+>>>>>>> Stashed changes
 import { Header } from './components/Header';
 import type { FoodListing } from './components/ListingCard';
 import { listings as sourceListings } from './data/listings';
@@ -15,20 +20,10 @@ import VendorDashboard from './pages/vendor/VendorDashboard';
 import { saveRequest } from './lib/mvpStore';
 import HealthProfilePage from './pages/health/HealthProfilePage';
 import NutritionMatchesPage from './pages/health/NutritionMatchesPage';
-
-interface AuthUser {
-  id: number;
-  username: string;
-  email: string;
-  role: 'user' | 'vendor';
-  isStaff?: boolean;
-  isSuperuser?: boolean;
-}
-
-interface AuthState {
-  user: AuthUser | null;
-  loading: boolean;
-}
+import RegisterPage from './pages/auth/RegisterPage';
+import LoginPage from './pages/auth/LoginPage';
+import { useAuth } from './lib/authContext';
+import type { SavrUser } from './lib/api';
 
 const listings: FoodListing[] = sourceListings.map((item) => ({
   id: item.slug, title: item.name, vendorName: item.vendor, category: item.category,
@@ -42,6 +37,7 @@ function PublicLayout({ children, marketplace = false }: { children: ReactNode; 
   return <><Header marketplace={marketplace}/>{children}</>;
 }
 
+<<<<<<< Updated upstream
 function ProtectedRoute({ auth, children, allowedRoles, staffOnly = false }: { auth: AuthState; children: ReactNode; allowedRoles?: AuthUser['role'][]; staffOnly?: boolean }) {
   if (auth.loading) {
     return <PublicLayout><AccessDeniedPage reason="loading" /></PublicLayout>;
@@ -57,19 +53,48 @@ function ProtectedRoute({ auth, children, allowedRoles, staffOnly = false }: { a
 
   if (allowedRoles && !allowedRoles.includes(auth.user.role)) {
     return <PublicLayout><AccessDeniedPage reason="role" /></PublicLayout>;
+=======
+function AuthMessage({ title, body }: { title: string; body: string }) {
+  return <PublicLayout><main className="page-shell"><header className="page-heading"><h1>{title}</h1><p>{body}</p></header><a className="button button--primary" href="/register">Get started</a></main></PublicLayout>;
+}
+
+function ProtectedRoute({ children, allowedRoles, staffOnly = false }: { children: ReactNode; allowedRoles?: string[]; staffOnly?: boolean }) {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return <AuthMessage title="Checking access" body="Please wait while we confirm your sign-in status." />;
+  }
+
+  if (!user) {
+    return <Navigate to="/register" replace state={{ from: location.pathname, authRequired: true }} />;
+  }
+
+  if (staffOnly && !user.isStaff && !user.isSuperuser) {
+    return <AuthMessage title="Access restricted" body="This area is only available to staff accounts." />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <AuthMessage title="Access restricted" body="Your account type does not have access to this area." />;
+>>>>>>> Stashed changes
   }
 
   return children;
 }
 
-function DetailRoute({ auth }: { auth: AuthState }) {
+function DetailRoute({ user }: { user: SavrUser | null }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const base = listings.find((item) => String(item.id) === id) ?? listings[0];
   const detail: ListingDetail = { ...base, description: 'A surprise box of delicious baked goods that couldn’t be sold today. Typically includes a mix of bread, rolls, pastries and muffins.', dietaryTags: ['Vegetarian', 'Nut-free'], allergenInformation: 'May contain gluten', servings: '4-6 servings', weight: '1.8 kg', co2Avoided: '3.2 kg', vendorVerified: true, isAvailable: true };
   return <PublicLayout><ListingDetailPage listing={detail} onRequest={(item) => {
+<<<<<<< Updated upstream
     if (!auth.user) {
       navigate('/access-denied');
+=======
+    if (!user) {
+      window.location.assign('/register');
+>>>>>>> Stashed changes
       return;
     }
     saveRequest({ id: String(item.id), title: item.title, vendor: item.vendorName, pickupWindow: item.pickupWindow });
@@ -78,28 +103,12 @@ function DetailRoute({ auth }: { auth: AuthState }) {
 }
 
 export default function App() {
-  const [auth, setAuth] = useState<AuthState>({ user: null, loading: true });
-
-  useEffect(() => {
-    let active = true;
-
-    fetch('/api/accounts/profile/', { credentials: 'include' })
-      .then((response) => response.ok ? response.json() : null)
-      .then((user) => {
-        if (active) setAuth({ user, loading: false });
-      })
-      .catch(() => {
-        if (active) setAuth({ user: null, loading: false });
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
+  const { user } = useAuth();
 
   return <Routes>
     <Route path="/" element={<PublicLayout><LandingPage heroImageUrl="/savr-icon.png"/></PublicLayout>}/>
     <Route path="/marketplace" element={<PublicLayout marketplace><MarketplacePage listings={listings} categories={[{slug:'bakery',name:'Bakery'},{slug:'groceries',name:'Groceries'},{slug:'meals',name:'Meals'},{slug:'snacks',name:'Snacks'}]} initialLocation="Marrickville, NSW"/></PublicLayout>}/>
+<<<<<<< Updated upstream
     <Route path="/marketplace/:id" element={<DetailRoute auth={auth}/>}/>
     <Route path="/access-denied" element={<PublicLayout><AccessDeniedPage reason="login" /></PublicLayout>}/>
     <Route path="/eligibility" element={<EligibilityPage/>}/>
@@ -109,6 +118,20 @@ export default function App() {
     <Route path="/vendor" element={<ProtectedRoute auth={auth} allowedRoles={['vendor']}><VendorDashboard/></ProtectedRoute>}/>
     <Route path="/vendor/allocations" element={<ProtectedRoute auth={auth} allowedRoles={['vendor']}><VendorAllocations/></ProtectedRoute>}/>
     <Route path="/platform" element={<ProtectedRoute auth={auth} staffOnly><AdminDashboard/></ProtectedRoute>}/>
+=======
+    <Route path="/marketplace/:id" element={<DetailRoute user={user}/>}/>
+    <Route path="/register" element={<RegisterPage/>}/>
+    <Route path="/login" element={<LoginPage/>}/>
+    <Route path="/eligibility" element={<ProtectedRoute allowedRoles={['user']}><EligibilityPage/></ProtectedRoute>}/>
+    <Route path="/requests" element={<ProtectedRoute allowedRoles={['user']}><RequestsPage/></ProtectedRoute>}/>
+    <Route path="/health-profile" element={<ProtectedRoute allowedRoles={['user']}><HealthProfilePage/></ProtectedRoute>}/>
+    <Route path="/preferences" element={<ProtectedRoute allowedRoles={['user']}><HealthProfilePage/></ProtectedRoute>}/>
+    <Route path="/nutrition-matches" element={<ProtectedRoute allowedRoles={['user']}><NutritionMatchesPage/></ProtectedRoute>}/>
+    <Route path="/suggested" element={<ProtectedRoute allowedRoles={['user']}><NutritionMatchesPage/></ProtectedRoute>}/>
+    <Route path="/vendor" element={<ProtectedRoute allowedRoles={['vendor']}><VendorDashboard/></ProtectedRoute>}/>
+    <Route path="/vendor/allocations" element={<ProtectedRoute allowedRoles={['vendor']}><VendorAllocations/></ProtectedRoute>}/>
+    <Route path="/platform" element={<ProtectedRoute staffOnly><AdminDashboard/></ProtectedRoute>}/>
+>>>>>>> Stashed changes
     <Route path="*" element={<Navigate to="/" replace/>}/>
   </Routes>;
 }

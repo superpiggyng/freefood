@@ -1,6 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { saveEligibility } from "../../lib/mvpStore";
+import { updateProfile } from "../../lib/api";
+import { useAuth } from "../../lib/authContext";
 
 interface EligibilityFormState {
   householdIncome: string;
@@ -31,12 +33,24 @@ const initialForm: EligibilityFormState = {
 };
 
 export default function EligibilityPage() {
+  const { user, refresh } = useAuth();
   const [form, setForm] = useState<EligibilityFormState>(initialForm);
   const [submitted, setSubmitted] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const score = useMemo(
     () => Math.min(98, 48 + form.dependants * 7 + (form.foodNeed === "often-run-out" ? 24 : 12)),
     [form.dependants, form.foodNeed],
   );
+
+  useEffect(() => {
+    if (!user) return;
+    setForm((current) => ({
+      ...current,
+      householdIncome: user.incomeLevel || current.householdIncome,
+      householdSize: user.householdSize || current.householdSize,
+      travelDistance: user.maxDistanceKm || current.travelDistance,
+    }));
+  }, [user]);
 
   const toggleListValue = (field: "preferences" | "pickupDays", value: string) => {
     setForm((current) => ({
@@ -47,10 +61,21 @@ export default function EligibilityPage() {
     }));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    saveEligibility();
-    setSubmitted(true);
+    setSaveError(null);
+    try {
+      await updateProfile({
+        incomeLevel: form.householdIncome,
+        householdSize: form.householdSize,
+        maxDistanceKm: form.travelDistance,
+      });
+      await refresh();
+      saveEligibility();
+      setSubmitted(true);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Could not save your profile.");
+    }
   };
 
   return (
@@ -89,6 +114,7 @@ export default function EligibilityPage() {
               <div className="form-grid form-grid--two-columns"><fieldset className="choice-field"><legend>Preferred pickup days</legend><div className="choice-pills choice-pills--compact">{pickupDays.map((day) => <label className="choice-pill" key={day}><input type="checkbox" checked={form.pickupDays.includes(day)} onChange={() => toggleListValue("pickupDays", day)} /><span>{day}</span></label>)}</div></fieldset><label className="form-field">Preferred pickup time<select value={form.pickupTime} onChange={(event) => setForm({ ...form, pickupTime: event.target.value })}><option value="morning">Morning (8am-12pm)</option><option value="afternoon">Afternoon (12pm-6pm)</option><option value="evening">Evening (6pm-9pm)</option></select></label></div>
               <aside className="need-score-help"><strong>About your Need Score</strong><p>We use your information to calculate a Need Score, which helps prioritise requests when demand is higher than supply.</p></aside>
               {submitted && <p className="form-success" role="status">Profile saved. You can now request available food.</p>}
+              {saveError && <p className="form-error" role="alert">{saveError}</p>}
               <div className="form-actions">{submitted ? <a className="button button--primary" href="/marketplace">Browse food</a> : <button className="button button--primary" type="submit">Save and continue</button>}</div>
             </form>
 
