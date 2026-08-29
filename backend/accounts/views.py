@@ -48,6 +48,7 @@ def profile(request):
         "firstName": user.first_name,
         "lastName": user.last_name,
         "role": user.role,
+        "needyMetric": user.needy_metric,
         "vendorName": user.vendor_name,
         "isStaff": user.is_staff,
         "isSuperuser": user.is_superuser,

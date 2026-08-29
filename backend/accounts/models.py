@@ -4,6 +4,7 @@ import hashlib
 from cryptography.fernet import Fernet
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
@@ -55,6 +56,10 @@ class User(AbstractUser):
     rural_area = models.BooleanField(default=False)
     bank_slip = models.FileField(upload_to="bank_slips/", blank=True, null=True)
     is_income_verified = models.BooleanField(default=False)
+    needy_metric = models.PositiveSmallIntegerField(
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+    )
 
     vendor_name = models.CharField(max_length=150, blank=True)
     business_type = models.CharField(max_length=80, blank=True)

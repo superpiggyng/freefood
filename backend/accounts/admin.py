@@ -10,6 +10,7 @@ class CustomUserAdmin(UserAdmin):
         "username",
         "email",
         "role",
+        "needy_metric",
         "is_income_verified",
         "is_staff",
     )
@@ -24,6 +25,7 @@ class CustomUserAdmin(UserAdmin):
                     "zip_code",
                     "rural_area",
                     "bank_slip",
+                    "needy_metric",
                     "vendor_name",
                     "business_type",
                     "business_address",
@@ -43,6 +45,7 @@ class CustomUserAdmin(UserAdmin):
                     "zip_code",
                     "rural_area",
                     "bank_slip",
+                    "needy_metric",
                     "vendor_name",
                     "business_type",
                     "business_address",
