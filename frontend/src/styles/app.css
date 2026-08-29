@@ -380,7 +380,7 @@ body,.site-header,.eligibility-page,.dashboard-main,.health-page,.match-page{bac
 .hero__scroll{position:absolute;left:50%;bottom:25px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;color:#fffaf0;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;text-shadow:0 1px 8px #0008}
 .hero__scroll span{display:grid;place-items:center;width:30px;height:30px;border:1px solid #35563d66;border-radius:50%;animation:scroll-cue 1.8s ease-in-out infinite}
 @keyframes scroll-cue{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
-@media(prefers-reduced-motion:reduce){.hero--cinematic{background:url('/savr-hero-background-poster.png') center/cover no-repeat}.hero__background{display:none}.hero__scroll span{animation:none}}
+@media(prefers-reduced-motion:reduce){.hero--cinematic{background:url('/savr-food-table-poster.png') center/cover no-repeat}.hero__background{display:none}.hero__scroll span{animation:none}}
 @media(max-width:900px){.hero--cinematic{min-height:720px}.hero__wash{background:linear-gradient(180deg,#10281edb 0%,#163326c7 62%,#14291b8f 100%)}.hero--cinematic .hero__content{align-items:flex-end}.hero__copy{width:100%}.hero--cinematic h1{font-size:clamp(40px,8vw,60px)}}
 @media(max-width:600px){.hero--cinematic{min-height:760px}.hero--cinematic .hero__content{padding-block:50px 110px}.hero--cinematic h1{font-size:39px}.hero--cinematic .hero__proof{gap:18px}.hero__scroll{bottom:18px}}
 
