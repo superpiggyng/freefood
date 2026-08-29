@@ -1,79 +1,31 @@
-import ListingCard, { type FoodListing } from "../../components/ListingCard";
+import ListingCard, { type FoodListing } from '../../components/ListingCard';
 
-export interface ImpactStats {
-  peopleHelped: string;
-  businesses: string;
-  foodRescued: string;
-  co2Avoided: string;
+interface LandingPageProps { featuredListings?: FoodListing[]; heroImageUrl?: string }
+
+const foodCircles = [
+  { icon: '🥬', label: 'Fresh produce', tone: 'leaf' },
+  { icon: '🥖', label: 'Bakery', tone: 'butter' },
+  { icon: '🍲', label: 'Ready meals', tone: 'tomato' },
+  { icon: '🥫', label: 'Pantry', tone: 'blue' },
+];
+
+export default function LandingPage({ featuredListings = [], heroImageUrl = '/savr-vegetable-hero.png' }: LandingPageProps) {
+  return <main className="indie-home" id="main-content">
+    <div className="rescue-ticker" aria-label="SAVR values"><div><span>GOOD FOOD</span><b>✿</b><span>LOCAL PEOPLE</span><b>✦</b><span>LESS WASTE</span><b>✿</b><span>FAIR SHARING</span><b>✦</b><span>GOOD FOOD</span></div></div>
+
+    <section className="indie-hero page-shell">
+      <div className="indie-hero__copy"><p className="scribble-label">Food belongs on plates</p><h1>Good food,<br/><em>shared nearby.</em></h1><p>Find surplus groceries and meals from local businesses. Request what helps, then collect it close to home.</p><div className="button-row"><a className="doodle-button doodle-button--tomato" href="/marketplace">Find food <span>→</span></a><a className="doodle-button" href="/vendor">Share surplus</a></div><div className="hero-proof"><span>12,540 people helped</span><span>25,860 kg rescued</span></div></div>
+      <div className="indie-hero__art"><img src={heroImageUrl} alt="Hand-drawn basket filled with vegetables and bread"/><span className="art-sticker art-sticker--top">Fresh today</span><span className="art-sticker art-sticker--bottom">Pick up nearby</span></div>
+    </section>
+
+    <section className="food-orbit page-shell" aria-labelledby="browse-kind"><header><p className="scribble-label">Browse by what you need</p><h2 id="browse-kind">A little bit of everything</h2></header><div className="food-orbit__grid">{foodCircles.map((item) => <a className={`food-circle food-circle--${item.tone}`} href={`/marketplace?category=${item.label}`} key={item.label}><span>{item.icon}</span><strong>{item.label}</strong><small>See what is nearby</small></a>)}</div></section>
+
+    {featuredListings.length > 0 && <section className="indie-collection"><div className="page-shell"><div className="indie-heading"><div><p className="scribble-label">Available today</p><h2>Rescue something good</h2></div><a href="/marketplace">See everything →</a></div><div className="listing-grid indie-listing-grid">{featuredListings.slice(0, 3).map((listing) => <ListingCard key={listing.id} listing={listing}/>)}</div></div></section>}
+
+    <section className="indie-steps page-shell"><div className="tomato-doodle" aria-hidden="true">🍅</div><div className="indie-heading"><div><p className="scribble-label">No complicated bits</p><h2>Three small steps</h2></div></div><ol><li><span>01</span><div><h3>Look around</h3><p>See food available from trusted businesses near you.</p></div></li><li><span>02</span><div><h3>Make a request</h3><p>Tell us what would help. Matching stays fair when demand is high.</p></div></li><li><span>03</span><div><h3>Pick it up</h3><p>Get a collection time and bring your pickup code.</p></div></li></ol></section>
+
+    <section className="vendor-poster"><div className="page-shell"><div><p className="scribble-label">For local businesses</p><h2>Today’s extras can be someone’s dinner.</h2><p>List surplus in a minute, reduce waste and support your neighbourhood.</p><a className="doodle-button doodle-button--cream" href="/vendor">Start sharing food →</a></div><div className="poster-art" aria-hidden="true"><span>🥕</span><span>🍅</span><span>🥦</span><span>🥖</span></div></div></section>
+
+    <footer className="indie-footer"><div className="page-shell"><div><img src="/savr-icon.png" alt=""/><h2>Stay in the loop</h2><p>New food, useful updates and local impact.</p></div><form onSubmit={(event) => event.preventDefault()}><label className="sr-only" htmlFor="community-email">Email address</label><input id="community-email" type="email" placeholder="your@email.com"/><button>Join →</button></form><nav><a href="/marketplace">Find food</a><a href="/vendor">For businesses</a><a href="/requests">My requests</a><a href="/preferences">Preferences</a></nav></div></footer>
+  </main>;
 }
-
-interface LandingPageProps {
-  featuredListings?: FoodListing[];
-  heroImageUrl?: string;
-  impact?: Partial<ImpactStats>;
-}
-
-const defaultImpact: ImpactStats = {
-  peopleHelped: "12,540",
-  businesses: "1,285",
-  foodRescued: "25,860 kg",
-  co2Avoided: "62,340 kg",
-};
-
-export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }: LandingPageProps) {
-  const stats = { ...defaultImpact, ...impact };
-
-  return (
-    <main className="page-home" id="main-content">
-      <section className="hero page-shell" aria-labelledby="hero-title">
-        <div className="hero__content">
-          <p className="eyebrow">Local food. Local impact.</p>
-          <h1 id="hero-title">Good food shouldn’t go to waste when someone nearby needs it.</h1>
-          <p className="hero__lead">SAVR connects surplus food from local businesses with people who need it most. Fairly matched by need, not first come first served.</p>
-          <div className="button-row">
-            <a className="button button--primary" href="/marketplace">Find food <span aria-hidden="true">→</span></a>
-            <a className="button button--secondary" href="/vendors/signup">List surplus food <span aria-hidden="true">↗</span></a>
-          </div>
-          <p className="trust-note"><span aria-hidden="true">✓</span> Fairly matched by household need</p>
-        </div>
-        <div className="hero__visual" aria-hidden="true">
-          {heroImageUrl ? <img src={heroImageUrl} alt="" /> : (
-            <><div className="hero__produce">🥬 🥕 🥖 🍅</div><div className="hero__bag"><span>♥</span></div></>
-          )}
-        </div>
-      </section>
-
-      <section className="impact-strip" aria-label="Community impact">
-        <div className="page-shell impact-strip__grid">
-          <div><span aria-hidden="true">♧</span><strong>{stats.peopleHelped}</strong><small>people helped this week</small></div>
-          <div><span aria-hidden="true">▦</span><strong>{stats.businesses}</strong><small>local businesses</small></div>
-          <div><span aria-hidden="true">☁</span><strong>{stats.foodRescued}</strong><small>food rescued this week</small></div>
-          <div><span aria-hidden="true">♧</span><strong>{stats.co2Avoided}</strong><small>CO₂ avoided this week</small></div>
-        </div>
-      </section>
-
-      {featuredListings.length > 0 && (
-        <section className="section page-shell" aria-labelledby="nearby-title">
-          <div className="section-heading">
-            <div><p className="eyebrow">Available today</p><h2 id="nearby-title">Good food near you</h2></div>
-            <a href="/marketplace">Browse all <span aria-hidden="true">→</span></a>
-          </div>
-          <div className="listing-grid">{featuredListings.map((listing) => <ListingCard key={listing.id} listing={listing} />)}</div>
-        </section>
-      )}
-
-      <section className="section section--tint" aria-labelledby="how-title">
-        <div className="page-shell">
-          <div className="section-heading section-heading--center"><div><p className="eyebrow">Simple and fair</p><h2 id="how-title">How SAVR works</h2></div></div>
-          <ol className="steps">
-            <li><span>1</span><h3>Tell us what you need</h3><p>Share your household needs, dietary preferences and travel distance.</p></li>
-            <li><span>2</span><h3>Find local food</h3><p>Explore fresh surplus from trusted businesses in your community.</p></li>
-            <li><span>3</span><h3>Request and collect</h3><p>We match requests fairly. Collect at your confirmed pickup time.</p></li>
-          </ol>
-        </div>
-      </section>
-    </main>
-  );
-}
-
-export default LandingPage;
