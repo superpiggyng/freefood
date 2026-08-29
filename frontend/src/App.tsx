@@ -44,7 +44,9 @@ export default function App() {
     <Route path="/eligibility" element={<EligibilityPage/>}/>
     <Route path="/requests" element={<RequestsPage/>}/>
     <Route path="/health-profile" element={<HealthProfilePage/>}/>
+    <Route path="/preferences" element={<HealthProfilePage/>}/>
     <Route path="/nutrition-matches" element={<NutritionMatchesPage/>}/>
+    <Route path="/suggested" element={<NutritionMatchesPage/>}/>
     <Route path="/vendor" element={<VendorDashboard/>}/>
     <Route path="/vendor/allocations" element={<VendorAllocations/>}/>
     <Route path="/platform" element={<AdminDashboard/>}/>
