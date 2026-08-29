@@ -1,4 +1,6 @@
+import { ArrowRight, Building2, HandHeart, Leaf, Store } from "lucide-react";
 import ListingCard, { type FoodListing } from "../../components/ListingCard";
+import SponsorMarquee from "../../components/SponsorMarquee";
 
 export interface ImpactStats {
   peopleHelped: string;
@@ -20,6 +22,13 @@ const defaultImpact: ImpactStats = {
   co2Avoided: "62,340 kg",
 };
 
+const impactCards = [
+  { key: "peopleHelped", icon: HandHeart, label: "people helped this week" },
+  { key: "businesses", icon: Store, label: "local businesses listing" },
+  { key: "foodRescued", icon: Leaf, label: "food rescued this week" },
+  { key: "co2Avoided", icon: Building2, label: "CO₂ avoided this week" },
+] as const;
+
 export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }: LandingPageProps) {
   const stats = { ...defaultImpact, ...impact };
 
@@ -29,34 +38,50 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
         <div className="hero__content">
           <p className="eyebrow">Local food. Local impact.</p>
           <h1 id="hero-title">Good food shouldn’t go to waste when someone nearby needs it.</h1>
-          <p className="hero__lead">SAVR connects surplus food from local businesses with people who need it most. Fairly matched by need, not first come first served.</p>
+          <p className="hero__lead">SAVR connects surplus food from local businesses with the people who need it most, matched fairly by household need rather than first come, first served.</p>
           <div className="button-row">
-            <a className="button button--primary" href="/marketplace">Find food <span aria-hidden="true">→</span></a>
-            <a className="button button--secondary" href="/vendors/signup">List surplus food <span aria-hidden="true">↗</span></a>
+            <a className="button button--primary" href="/marketplace">Find food near you <ArrowRight size={17} /></a>
+            <a className="button button--secondary" href="/vendors/signup">List surplus food</a>
           </div>
-          <p className="trust-note"><span aria-hidden="true">✓</span> Fairly matched by household need</p>
+          <dl className="hero__proof">
+            <div><dt>People helped</dt><dd>{stats.peopleHelped}</dd></div>
+            <div><dt>Businesses</dt><dd>{stats.businesses}</dd></div>
+            <div><dt>Food rescued</dt><dd>{stats.foodRescued}</dd></div>
+          </dl>
         </div>
-        <div className="hero__visual" aria-hidden="true">
-          {heroImageUrl ? <img src={heroImageUrl} alt="" /> : (
-            <><div className="hero__produce">🥬 🥕 🥖 🍅</div><div className="hero__bag"><span>♥</span></div></>
-          )}
+        <div className="hero__visual">
+          <div className="hero__frame">
+            {heroImageUrl && <img src={heroImageUrl} alt="" />}
+          </div>
+          <figure className="hero__price-card" aria-label="How a six dollar meal is paid for">
+            <figcaption>A $6.00 surplus meal</figcaption>
+            <div><span>You pay</span><strong>$1.00</strong></div>
+            <div><span>Sponsor covers</span><strong>$5.00</strong></div>
+            <div className="hero__price-card__total"><span>Business is paid</span><strong>$6.00</strong></div>
+          </figure>
         </div>
       </section>
 
-      <section className="impact-strip" aria-label="Community impact">
-        <div className="page-shell impact-strip__grid">
-          <div><span aria-hidden="true">♧</span><strong>{stats.peopleHelped}</strong><small>people helped this week</small></div>
-          <div><span aria-hidden="true">▦</span><strong>{stats.businesses}</strong><small>local businesses</small></div>
-          <div><span aria-hidden="true">☁</span><strong>{stats.foodRescued}</strong><small>food rescued this week</small></div>
-          <div><span aria-hidden="true">♧</span><strong>{stats.co2Avoided}</strong><small>CO₂ avoided this week</small></div>
+      <SponsorMarquee label="Sponsored by" />
+
+      <section className="section page-shell" aria-labelledby="impact-title">
+        <h2 className="sr-only" id="impact-title">Community impact</h2>
+        <div className="impact-cards">
+          {impactCards.map(({ key, icon: Icon, label }) => (
+            <article className="impact-card" key={key}>
+              <span aria-hidden="true"><Icon size={18} /></span>
+              <strong>{stats[key]}</strong>
+              <small>{label}</small>
+            </article>
+          ))}
         </div>
       </section>
 
       {featuredListings.length > 0 && (
-        <section className="section page-shell" aria-labelledby="nearby-title">
+        <section className="section section--flush page-shell" aria-labelledby="nearby-title">
           <div className="section-heading">
             <div><p className="eyebrow">Available today</p><h2 id="nearby-title">Good food near you</h2></div>
-            <a href="/marketplace">Browse all <span aria-hidden="true">→</span></a>
+            <a href="/marketplace">Browse all <ArrowRight size={15} /></a>
           </div>
           <div className="listing-grid">{featuredListings.map((listing) => <ListingCard key={listing.id} listing={listing} />)}</div>
         </section>
@@ -66,9 +91,9 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
         <div className="page-shell">
           <div className="section-heading section-heading--center"><div><p className="eyebrow">Simple and fair</p><h2 id="how-title">How SAVR works</h2></div></div>
           <ol className="steps">
-            <li><span>1</span><h3>Tell us what you need</h3><p>Share your household needs, dietary preferences and travel distance.</p></li>
-            <li><span>2</span><h3>Find local food</h3><p>Explore fresh surplus from trusted businesses in your community.</p></li>
-            <li><span>3</span><h3>Request and collect</h3><p>We match requests fairly. Collect at your confirmed pickup time.</p></li>
+            <li><span>1</span><h3>Tell us what you need</h3><p>Share your household needs, dietary preferences and how far you can travel.</p></li>
+            <li><span>2</span><h3>Find local food</h3><p>Browse fresh surplus from trusted businesses in your community, priced from free.</p></li>
+            <li><span>3</span><h3>Request and collect</h3><p>Requests are matched fairly by need. Collect at your confirmed pickup time.</p></li>
           </ol>
         </div>
       </section>
@@ -92,7 +117,7 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
       <section className="sponsor-band" aria-labelledby="sponsor-band-title">
         <div className="page-shell sponsor-band__inner">
           <div><p className="eyebrow">For enterprises</p><h2 id="sponsor-band-title">Fund 1,000 meals in your community</h2><p>Turn your CSR budget into meals people actually collect, reported suburb by suburb.</p></div>
-          <div className="button-row"><a className="button button--primary" href="/sponsors">Become a sponsor <span aria-hidden="true">→</span></a><a className="button button--secondary" href="/vendor/partner">Partner with us <span aria-hidden="true">↗</span></a></div>
+          <div className="button-row"><a className="button button--primary" href="/sponsors">Become a sponsor <ArrowRight size={17} /></a><a className="button button--secondary" href="/vendor/partner">Partner with us</a></div>
         </div>
       </section>
     </main>

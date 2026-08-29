@@ -33,5 +33,13 @@ export const partnerVendors: PartnerVendor[] = [
   { name: 'Green Bites Cafe', suburb: 'Blacktown', mealsRescued: 121, earnings: 726, sponsoredShare: 64, joined: 'Jun 2026' },
 ];
 
+export interface SponsorLogo { name: string; logo: string }
+export const sponsorLogos: SponsorLogo[] = [
+  { name: 'Flow Traders', logo: '/sponsors/flow-traders.png' },
+  { name: 'Jane Street', logo: '/sponsors/jane-street.png' },
+  { name: 'Apple', logo: '/sponsors/apple.png' },
+  { name: 'NSW Government', logo: '/sponsors/nsw-government.png' },
+];
+
 /* The signed-in business for the demo. */
 export const currentVendor = partnerVendors[0];
