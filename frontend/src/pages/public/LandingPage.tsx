@@ -42,10 +42,9 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
     <main className="page-home" id="main-content">
       <section className="hero hero--cinematic" aria-labelledby="hero-title">
         {heroImageUrl && (
-          <picture className="hero__background" aria-hidden="true">
-            <source media="(prefers-reduced-motion: reduce)" srcSet="/savr-grocery-motion-poster.png" />
-            <img src={heroImageUrl} alt="" width={540} height={304} />
-          </picture>
+          <video className="hero__background" autoPlay loop muted playsInline preload="metadata" poster="/savr-hero-background-poster.png" aria-hidden="true">
+            <source src={heroImageUrl} type="video/mp4" />
+          </video>
         )}
         <div className="hero__wash" aria-hidden="true" />
         <div className="hero__content page-shell">

@@ -365,10 +365,9 @@ body,.site-header,.eligibility-page,.dashboard-main,.health-page,.match-page{bac
 /* Cinematic home hero: motion is environmental, while content stays stable. */
 .hero--cinematic{position:relative;width:100%;min-height:clamp(620px,78vh,820px);display:grid;grid-template-columns:1fr;padding:0;overflow:hidden;isolation:isolate;background:#14291b}
 .hero__background{position:absolute;inset:0;z-index:-3}
-.hero__background,.hero__background img{width:100%;height:100%}
-.hero__background img{object-fit:cover;object-position:center;transform:scale(1.015)}
+.hero__background{width:100%;height:100%;object-fit:cover;object-position:center}
 .hero__wash{position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,#10281eee 0%,#163326d6 34%,#1735278a 55%,#14291b24 78%,#14291b0a 100%)}
-.hero--cinematic:after{content:'';position:absolute;inset:auto 0 0;height:150px;z-index:-1;background:linear-gradient(transparent,var(--cream))}
+.hero--cinematic:after{content:'';position:absolute;inset:auto 0 0;height:280px;z-index:-1;background:linear-gradient(to bottom,transparent 0%,#f4eddb24 32%,#f4eddb8c 68%,var(--cream) 100%)}
 .hero--cinematic .hero__content{display:flex;align-items:center;min-height:inherit;padding-block:80px 120px}
 .hero__copy{width:min(660px,54vw);padding:0;text-shadow:0 2px 18px #08170f45}
 .hero--cinematic h1{font-size:clamp(46px,4.6vw,68px);max-width:640px;color:#fffaf0;text-wrap:balance;margin-bottom:22px}
@@ -381,7 +380,7 @@ body,.site-header,.eligibility-page,.dashboard-main,.health-page,.match-page{bac
 .hero__scroll{position:absolute;left:50%;bottom:25px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;color:#fffaf0;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;text-shadow:0 1px 8px #0008}
 .hero__scroll span{display:grid;place-items:center;width:30px;height:30px;border:1px solid #35563d66;border-radius:50%;animation:scroll-cue 1.8s ease-in-out infinite}
 @keyframes scroll-cue{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
-@media(prefers-reduced-motion:reduce){.hero__background img{transform:none}.hero__scroll span{animation:none}}
+@media(prefers-reduced-motion:reduce){.hero--cinematic{background:url('/savr-hero-background-poster.png') center/cover no-repeat}.hero__background{display:none}.hero__scroll span{animation:none}}
 @media(max-width:900px){.hero--cinematic{min-height:720px}.hero__wash{background:linear-gradient(180deg,#10281edb 0%,#163326c7 62%,#14291b8f 100%)}.hero--cinematic .hero__content{align-items:flex-end}.hero__copy{width:100%}.hero--cinematic h1{font-size:clamp(40px,8vw,60px)}}
 @media(max-width:600px){.hero--cinematic{min-height:760px}.hero--cinematic .hero__content{padding-block:50px 110px}.hero--cinematic h1{font-size:39px}.hero--cinematic .hero__proof{gap:18px}.hero__scroll{bottom:18px}}
 
@@ -398,8 +397,16 @@ html{scroll-behavior:smooth}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.page-home>section{animation:none!important}.main-nav a,.header-actions a{transition:none}}
 
+/* Home navigation floats over the video; surfaces appear only on interaction. */
+body:has(.page-home) .site-header{position:absolute;inset:0 0 auto;background:transparent;border:0;box-shadow:none;backdrop-filter:none;color:#fffaf0}
+body:has(.page-home) .site-header .logo,body:has(.page-home) .site-header .logo span{color:#fffaf0}
+body:has(.page-home) .site-header a,body:has(.page-home) .site-header button{border-radius:10px;padding:9px 12px;text-shadow:0 1px 10px #0008}
+body:has(.page-home) .site-header .button{background:transparent;border-color:#ffffff7a}
+body:has(.page-home) .site-header a:hover,body:has(.page-home) .site-header a:focus-visible,body:has(.page-home) .site-header button:hover,body:has(.page-home) .site-header button:focus-visible{background:#10281e66;color:#fff;backdrop-filter:blur(8px)}
+body:has(.page-home) .main-nav a:after{display:none}
+
 /* Funder strip: duplicated track for a seamless loop, edge fade, pause on hover */
-.sponsor-strip{border-block:1px solid #dfd7c5;background:var(--cream);padding-block:46px}
+.sponsor-strip{border:0;background:var(--cream);padding-block:46px}
 .header-search input,.search-field input{background:transparent}
 
 .impact-journey{background:var(--cream);border-block:1px solid #dfd7c5;padding:58px 0 64px}
