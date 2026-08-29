@@ -381,6 +381,19 @@ body,.site-header,.eligibility-page,.dashboard-main,.health-page,.match-page{bac
 @media(max-width:900px){.hero--cinematic{min-height:720px}.hero__wash{background:linear-gradient(180deg,#f4eddbed 0%,#f4eddbcf 62%,#f4eddb73 100%)}.hero--cinematic .hero__content{align-items:flex-end}.hero__copy{width:100%;padding:28px}.hero--cinematic h1{font-size:clamp(40px,8vw,60px)}}
 @media(max-width:600px){.hero--cinematic{min-height:760px}.hero--cinematic .hero__content{padding-block:50px 110px}.hero__copy{padding:22px;border-radius:20px}.hero--cinematic h1{font-size:39px}.hero--cinematic .hero__proof{gap:18px}.hero__scroll{bottom:18px}}
 
+/* Motion system shared by the public experience. */
+html{scroll-behavior:smooth}
+.site-header{position:sticky;top:0;z-index:50;background:#f4eddbdb;backdrop-filter:blur(14px);box-shadow:0 1px 0 #20301f12}
+.main-nav a,.header-actions a{position:relative;transition:color .18s,transform .18s}
+.main-nav a:hover,.main-nav a:focus-visible,.header-actions a:not(.button):hover,.header-actions a:not(.button):focus-visible{color:var(--green);transform:translateY(-1px)}
+.main-nav a:after{content:'';position:absolute;left:0;right:0;bottom:-8px;height:2px;border-radius:2px;background:var(--green);transform:scaleX(0);transform-origin:center;transition:transform .18s}
+.main-nav a:hover:after,.main-nav a:focus-visible:after{transform:scaleX(1)}
+@supports(animation-timeline:view()){
+  .page-home>section:not(.hero){animation:section-reveal linear both;animation-timeline:view();animation-range:entry 0% entry 24%}
+  @keyframes section-reveal{from{opacity:.35;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.page-home>section{animation:none!important}.main-nav a,.header-actions a{transition:none}}
+
 /* Funder strip: duplicated track for a seamless loop, edge fade, pause on hover */
 .sponsor-strip{border-block:1px solid #dfd7c5;background:var(--cream);padding-block:46px}
 .header-search input,.search-field input{background:transparent}
