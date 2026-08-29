@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Header } from './components/Header';
 import type { FoodListing } from './components/ListingCard';
 import { findListing, useListings } from './lib/listingStore';
@@ -40,13 +40,14 @@ function PublicLayout({ children, marketplace = false }: { children: ReactNode; 
 
 function ProtectedRoute({ children, allowedRoles, staffOnly = false }: { children: ReactNode; allowedRoles?: string[]; staffOnly?: boolean }) {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return <PublicLayout><AccessDeniedPage reason="loading" /></PublicLayout>;
   }
 
   if (!user) {
-    return <PublicLayout><AccessDeniedPage reason="login" /></PublicLayout>;
+    return <PublicLayout><AccessDeniedPage reason="login" from={location.pathname} /></PublicLayout>;
   }
 
   if (staffOnly && !user.isStaff && !user.isSuperuser) {
@@ -82,7 +83,7 @@ function DetailRoute({ user }: { user: SavrUser | null }) {
   };
   return <PublicLayout><ListingDetailPage listing={detail} onRequest={async (item) => {
     if (!user) {
-      navigate('/access-denied');
+      navigate('/register', { state: { from: `/marketplace/${id}` } });
       return;
     }
     try {

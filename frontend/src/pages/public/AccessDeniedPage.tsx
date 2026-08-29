@@ -5,6 +5,8 @@ interface AccessDeniedPageProps {
   title?: string;
   message?: string;
   reason?: 'login' | 'role' | 'staff' | 'loading';
+  /* Where the visitor was trying to go, so signing in returns them to it. */
+  from?: string;
 }
 
 const defaults = {
@@ -26,8 +28,9 @@ const defaults = {
   },
 };
 
-export default function AccessDeniedPage({ title, message, reason = 'role' }: AccessDeniedPageProps) {
+export default function AccessDeniedPage({ title, message, reason = 'role', from }: AccessDeniedPageProps) {
   const content = defaults[reason];
+  const returnTo = from ? { from } : undefined;
 
   return (
     <main className="access-page" id="main-content">
@@ -39,13 +42,22 @@ export default function AccessDeniedPage({ title, message, reason = 'role' }: Ac
         <h1 id="access-title">{title ?? content.title}</h1>
         <p>{message ?? content.message}</p>
         <div className="access-actions">
-          <Link className="button button--primary" to="/">
-            <ArrowLeft size={17} />
-            Home
-          </Link>
-          <Link className="button button--secondary" to="/marketplace">
-            Browse food
-          </Link>
+          {reason === 'login' ? (
+            <>
+              <Link className="button button--primary" to="/register" state={returnTo}>Create an account</Link>
+              <Link className="button button--secondary" to="/login" state={returnTo}>Log in</Link>
+            </>
+          ) : (
+            <>
+              <Link className="button button--primary" to="/">
+                <ArrowLeft size={17} />
+                Home
+              </Link>
+              <Link className="button button--secondary" to="/marketplace">
+                Browse food
+              </Link>
+            </>
+          )}
         </div>
       </section>
 

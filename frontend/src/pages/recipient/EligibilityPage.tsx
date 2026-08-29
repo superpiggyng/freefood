@@ -146,7 +146,7 @@ export default function EligibilityPage() {
         <section className="eligibility-form-panel" aria-labelledby="eligibility-title">
           <header className="page-heading">
             <h1 id="eligibility-title">Your household profile</h1>
-            <p>Prefilled from your registration. Update it any time — your Need Score changes with it.</p>
+            <p>Prefilled from your registration. Update it any time, and your Need Score changes with it.</p>
           </header>
           <div className="eligibility-form-panel__content">
             <form className="eligibility-form" onSubmit={handleSubmit}>

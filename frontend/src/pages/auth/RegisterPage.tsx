@@ -180,7 +180,7 @@ function RecipientRegister({ redirectTo }: { redirectTo: string }) {
               {step === 0 && 'Choose a username and password to get started.'}
               {step === 1 && 'Tell us what food you look for and how far you can travel.'}
               {step === 2 && 'A few household questions so we can fairly match food by need.'}
-              {step === 3 && 'A little about your financial situation — this stays private and secure.'}
+              {step === 3 && 'A little about your financial situation. This stays private and secure.'}
               {step === 4 && 'Check your details before creating your account.'}
             </p>
           </header>
@@ -299,7 +299,7 @@ function BusinessRegister() {
         <section className="eligibility-form-panel" aria-labelledby="business-title">
           <header className="page-heading">
             <h1 id="business-title">List surplus food</h1>
-            <p>Create a business account. You are paid in full for every serve — recipients pay a capped contribution and a corporate sponsor covers the rest.</p>
+            <p>Create a business account. You are paid in full for every serve. Recipients pay a capped contribution and a corporate sponsor covers the rest.</p>
           </header>
           <form className="eligibility-form" onSubmit={submit}>
             <div className="form-grid form-grid--two-columns">

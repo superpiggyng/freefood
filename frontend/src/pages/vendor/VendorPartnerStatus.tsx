@@ -20,7 +20,7 @@ export default function VendorPartnerStatus() {
   const copyBadge = () => { navigator.clipboard?.writeText(badgeSnippet); setCopied(true); };
 
   return <DashboardShell productLabel="for Business" navItems={nav} userName={currentVendor.name} userRole={current?.tier ?? 'View profile'}>
-    <header className="dashboard-heading"><div><h1>Community partner status</h1><p>Listing surplus food earns status, placement and marketing — on top of what the sponsor fund pays you.</p></div><a className="button button--primary" href="/vendor/upload">Upload today’s stock</a></header>
+    <header className="dashboard-heading"><div><h1>Community partner status</h1><p>Listing surplus food earns status, placement and marketing, on top of what the sponsor fund pays you.</p></div><a className="button button--primary" href="/vendor/upload">Upload today’s stock</a></header>
 
     <section className="partner-banner">
       <div className="partner-badge"><Award size={30}/><strong>{current?.tier ?? 'Not yet ranked'}</strong><small>{currentVendor.suburb} · since {currentVendor.joined}</small></div>
