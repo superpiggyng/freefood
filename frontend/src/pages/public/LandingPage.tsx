@@ -51,7 +51,10 @@ export function LandingPage({ featuredListings = [], impact = {} }: LandingPageP
           </dl>
         </div>
         <div className="hero__visual">
-          <img className="hero__mascot" src="/carrot-hero.png" alt="A carrot character holding a coin" width={401} height={798} />
+          <picture>
+            <source srcSet="/carrot.webp" type="image/webp" />
+            <img className="hero__mascot" src="/carrot-poster.png" alt="A carrot character waving and holding a coin" width={300} height={412} />
+          </picture>
         </div>
         </div>
       </section>
