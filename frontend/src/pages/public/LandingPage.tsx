@@ -40,8 +40,16 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
 
   return (
     <main className="page-home" id="main-content">
-      <section className="hero page-shell" aria-labelledby="hero-title">
-        <div className="hero__content">
+      <section className="hero hero--cinematic" aria-labelledby="hero-title">
+        {heroImageUrl && (
+          <picture className="hero__background" aria-hidden="true">
+            <source media="(prefers-reduced-motion: reduce)" srcSet="/savr-grocery-motion-poster.png" />
+            <img src={heroImageUrl} alt="" width={540} height={304} />
+          </picture>
+        )}
+        <div className="hero__wash" aria-hidden="true" />
+        <div className="hero__content page-shell">
+          <div className="hero__copy">
           <p className="eyebrow">Local food. Local impact.</p>
           <h1 id="hero-title">Good food shouldn’t go to waste when someone nearby needs it.</h1>
           <p className="hero__lead">SAVR connects surplus food from local businesses with the people who need it most, matched fairly by household need rather than first come, first served.</p>
@@ -55,17 +63,9 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
             <div><dt>Businesses</dt><dd>{stats.businesses}</dd></div>
             <div><dt>Food rescued</dt><dd>{stats.foodRescued}</dd></div>
           </dl>
-        </div>
-        <div className="hero__visual">
-          <div className="hero__frame hero__frame--motion">
-            {heroImageUrl && (
-              <picture>
-                <source media="(prefers-reduced-motion: reduce)" srcSet="/savr-grocery-motion-poster.png" />
-                <img src={heroImageUrl} alt="A grocery basket being filled with rescued food" width={540} height={304} />
-              </picture>
-            )}
           </div>
         </div>
+        <a className="hero__scroll" href="#impact-story-title">See how it works <span aria-hidden="true">↓</span></a>
       </section>
 
       <SponsorMarquee label="Sponsored by" />
