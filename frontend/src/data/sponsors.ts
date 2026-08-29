@@ -35,8 +35,6 @@ export const partnerVendors: PartnerVendor[] = [
 
 export interface SponsorLogo { name: string; logo: string }
 export const sponsorLogos: SponsorLogo[] = [
-  { name: 'Flow Traders', logo: '/sponsors/flow-traders.png' },
-  { name: 'Jane Street', logo: '/sponsors/jane-street.png' },
   { name: 'Apple', logo: '/sponsors/apple.png' },
   { name: 'Google', logo: '/sponsors/google.svg' },
   { name: 'Microsoft', logo: '/sponsors/microsoft.svg' },

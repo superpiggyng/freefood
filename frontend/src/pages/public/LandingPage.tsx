@@ -1,4 +1,4 @@
-import { ArrowRight, Building2, Cloud, HandHeart, Leaf, Store } from "lucide-react";
+import { ArrowRight, Cloud, HandHeart, Leaf, Store } from "lucide-react";
 import ListingCard, { type FoodListing } from "../../components/ListingCard";
 import SponsorMarquee from "../../components/SponsorMarquee";
 
@@ -31,28 +31,36 @@ const impactCards = [
 
 const journeySteps = [
   { number: "1", image: "/step-pencil.png", imageAlt: "Illustrated pencil", title: "Tell us what you need", copy: "Share your household needs, dietary preferences and how far you can travel.", href: "/register" },
-  { number: "2", image: "/step-grocery-basket.png", imageAlt: "Hand-drawn grocery basket", title: "Find local food", copy: "Browse fresh surplus from trusted businesses in your community, priced from free.", href: "/marketplace" },
-  { number: "3", image: "/step-storefront.png", imageAlt: "Hand-drawn local storefront", title: "Request and collect", copy: "Requests are matched fairly by need. Collect at your confirmed pickup time.", href: "/requests" },
+  { number: "2", image: "/step-grocery-basket.png?v=transparent-2", imageAlt: "Hand-drawn grocery basket", title: "Find local food", copy: "Browse fresh surplus from trusted businesses in your community, priced from free.", href: "/marketplace" },
+  { number: "3", image: "/step-storefront.png?v=transparent-2", imageAlt: "Hand-drawn local storefront", title: "Request and collect", copy: "Requests are matched fairly by need. Collect at your confirmed pickup time.", href: "/requests" },
 ] as const;
 
 export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }: LandingPageProps) {
   const stats = { ...defaultImpact, ...impact };
+  const showHeroStickers = import.meta.env.VITE_SHOW_HERO_STICKERS === "true";
 
   return (
     <main className="page-home" id="main-content">
       <section className="hero hero--cinematic" aria-labelledby="hero-title">
         {heroImageUrl && <img className="hero__background" src={heroImageUrl} alt="" aria-hidden="true" />}
         <div className="hero__wash" aria-hidden="true" />
+        {showHeroStickers && (
+          <div className="hero-collage" aria-hidden="true">
+            <img className="hero-sticker hero-sticker--croissant" src="/hero-sticker-croissant.png?v=2" alt="" />
+            <img className="hero-sticker hero-sticker--tomatoes" src="/hero-sticker-tomatoes.png?v=2" alt="" />
+            <img className="hero-sticker hero-sticker--olives" src="/hero-sticker-olives.png?v=2" alt="" />
+          </div>
+        )}
         <div className="hero__content page-shell">
           <div className="hero__copy">
-          <p className="eyebrow">Local food. Local impact.</p>
-          <h1 id="hero-title">Good food shouldn’t go to waste when someone nearby needs it.</h1>
-          <p className="hero__lead">SAVR connects surplus food from local businesses with the people who need it most, matched fairly by household need rather than first come, first served.</p>
+          <p className="eyebrow">Share The Joy.</p>
+          <h1 id="hero-title">Extra food should be shared, not wasted.</h1>
+          <p className="hero__lead">SAVR connects surplus food from local businesses with nearby people who need it.</p>
           <div className="button-row">
             <a className="button button--primary" href="/register">Get food support <ArrowRight size={17} /></a>
             <a className="button button--secondary" href="/vendors/signup">Business signup</a>
           </div>
-          <p className="hero__choice-note">Recipients create a personal account. Businesses create a vendor account. Everyone logs in from the same portal.</p>
+          <p className="hero__choice-note">Sign up as a recipient or business.</p>
           <dl className="hero__proof">
             <div><dt>People helped</dt><dd>{stats.peopleHelped}</dd></div>
             <div><dt>Businesses</dt><dd>{stats.businesses}</dd></div>

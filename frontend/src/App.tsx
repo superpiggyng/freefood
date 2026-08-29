@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Header } from './components/Header';
 import type { FoodListing } from './components/ListingCard';
@@ -17,6 +17,7 @@ import { saveRequest } from './lib/mvpStore';
 import HealthProfilePage from './pages/health/HealthProfilePage';
 import NutritionMatchesPage from './pages/health/NutritionMatchesPage';
 import SponsorsPage from './pages/public/SponsorsPage';
+import SponsorMapPage from './pages/public/SponsorMapPage';
 import SponsorDashboard from './pages/sponsor/SponsorDashboard';
 import VendorPartnerStatus from './pages/vendor/VendorPartnerStatus';
 import VendorStockUpload from './pages/vendor/VendorStockUpload';
@@ -40,6 +41,15 @@ const toCard = (item: Listing): FoodListing => ({
 
 const marketplaceCategories = [{slug:'bakery',name:'Bakery'},{slug:'groceries',name:'Groceries'},{slug:'meals',name:'Meals'},{slug:'snacks',name:'Snacks'}];
 
+function ScrollToRouteTop() {
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    if (hash) requestAnimationFrame(() => document.querySelector(hash)?.scrollIntoView());
+    else window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [pathname, hash]);
+  return null;
+}
+
 function PublicLayout({ children, marketplace = false, authOnly = false }: { children: ReactNode; marketplace?: boolean; authOnly?: boolean }) {
   return <><Header marketplace={marketplace} authOnly={authOnly}/>{children}</>;
 }
@@ -49,11 +59,11 @@ function ProtectedRoute({ children, allowedRoles, staffOnly = false }: { childre
   const location = useLocation();
 
   if (loading) {
-    return <PublicLayout authOnly><AccessDeniedPage reason="loading" /></PublicLayout>;
+    return <PublicLayout><AccessDeniedPage reason="loading" /></PublicLayout>;
   }
 
   if (!user) {
-    return <PublicLayout authOnly><AccessDeniedPage reason="login" from={location.pathname} /></PublicLayout>;
+    return <PublicLayout><AccessDeniedPage reason="login" from={location.pathname} /></PublicLayout>;
   }
 
   if (staffOnly && !user.isStaff && !user.isSuperuser) {
@@ -73,7 +83,7 @@ function DetailRoute({ user, loading }: { user: SavrUser | null; loading: boolea
   const isVendor = user?.role === 'vendor';
   const all = useListings(isVendor ? 'vendor' : 'public', !loading);
   if (loading) {
-    return <PublicLayout authOnly><AccessDeniedPage reason="loading" /></PublicLayout>;
+    return <PublicLayout><AccessDeniedPage reason="loading" /></PublicLayout>;
   }
   const source = findListing(all, id);
   if (!source) {
@@ -113,14 +123,14 @@ function MarketplaceRoute() {
   const isVendor = user?.role === 'vendor';
   const listings = useListings(isVendor ? 'vendor' : 'public', !loading).map(toCard);
   if (loading) {
-    return <PublicLayout authOnly><AccessDeniedPage reason="loading" /></PublicLayout>;
+    return <PublicLayout><AccessDeniedPage reason="loading" /></PublicLayout>;
   }
   return (
     <PublicLayout marketplace={!isVendor}>
       <MarketplacePage
         listings={listings}
         categories={marketplaceCategories}
-        initialLocation={isVendor ? "" : "Marrickville, NSW"}
+        initialLocation=""
         eyebrow={isVendor ? "Business marketplace view" : undefined}
         title={isVendor ? "My listings" : undefined}
         description={isVendor ? "Surplus food listings published by your business." : undefined}
@@ -146,15 +156,16 @@ function HomeRoute() {
 export default function App() {
   const { user, loading } = useAuth();
 
-  return <Routes>
+  return <><ScrollToRouteTop/><Routes>
     <Route path="/" element={<HomeRoute/>}/>
     <Route path="/marketplace" element={<MarketplaceRoute/>}/>
     <Route path="/marketplace/:id" element={<DetailRoute user={user} loading={loading}/>}/>
-    <Route path="/access-denied" element={<PublicLayout authOnly><AccessDeniedPage reason="login" /></PublicLayout>}/>
+    <Route path="/access-denied" element={<PublicLayout><AccessDeniedPage reason="login" /></PublicLayout>}/>
     <Route path="/register" element={<RegisterPage/>}/>
     <Route path="/login" element={<LoginPage/>}/>
     <Route path="/vendors/signup" element={<RegisterPage/>}/>
     <Route path="/sponsors" element={<PublicLayout><SponsorsPage/></PublicLayout>}/>
+    <Route path="/sponsor-map" element={<PublicLayout><SponsorMapPage/></PublicLayout>}/>
     <Route path="/sponsor" element={<SponsorDashboard/>}/>
     <Route path="/eligibility" element={<ProtectedRoute allowedRoles={['user']}><EligibilityPage/></ProtectedRoute>}/>
     <Route path="/profile" element={<ProtectedRoute allowedRoles={['user']}><ProfileDashboardPage/></ProtectedRoute>}/>
@@ -169,5 +180,5 @@ export default function App() {
     <Route path="/vendor/allocations" element={<ProtectedRoute allowedRoles={['vendor']}><VendorAllocations/></ProtectedRoute>}/>
     <Route path="/platform" element={<ProtectedRoute staffOnly><AdminDashboard/></ProtectedRoute>}/>
     <Route path="*" element={<Navigate to="/" replace/>}/>
-  </Routes>;
+  </Routes></>;
 }

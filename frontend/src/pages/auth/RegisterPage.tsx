@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Building2, HandHeart } from 'lucide-react';
 import { useAuth } from '../../lib/authContext';
 import { ApiError } from '../../lib/api';
+import { Header } from '../../components/Header';
 
 const incomeLevels = [
   { value: 'under-25000', label: 'Under $25,000 per year' },
@@ -188,6 +189,7 @@ function RecipientRegister({ redirectTo }: { redirectTo: string }) {
 
   return (
     <main className="eligibility-page">
+      <Header />
       <div className="eligibility-page__layout">
         <aside className="eligibility-progress" aria-label="Registration progress">
           <ol className="eligibility-progress__steps">
@@ -375,6 +377,7 @@ function BusinessRegister() {
 
   return (
     <main className="eligibility-page">
+      <Header />
       <div className="eligibility-page__layout eligibility-page__layout--single">
         <section className="eligibility-form-panel" aria-labelledby="business-title">
           <header className="page-heading">

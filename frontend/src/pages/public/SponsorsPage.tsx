@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { ArrowRight, BadgeCheck, Building2, HandCoins, Store, Users } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { savePledge } from '../../lib/sponsorship';
 import { suburbImpact } from '../../data/sponsors';
 
@@ -8,9 +8,10 @@ const SUBSIDY_PER_MEAL = 5;
 
 export default function SponsorsPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [sponsor, setSponsor] = useState('');
   const [meals, setMeals] = useState(1000);
-  const [suburb, setSuburb] = useState('Western Sydney');
+  const [suburb, setSuburb] = useState(searchParams.get('suburb') ?? 'Western Sydney');
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -70,7 +71,7 @@ export default function SponsorsPage() {
         <form className="fund-card" onSubmit={submit}>
           <label className="form-field">Organisation<input value={sponsor} onChange={(event) => setSponsor(event.target.value)} placeholder="Atlas Bank"/></label>
           <label className="form-field">Meals to fund<input type="number" min={100} step={50} value={meals} onChange={(event) => setMeals(Number(event.target.value))}/></label>
-          <label className="form-field">Where<select value={suburb} onChange={(event) => setSuburb(event.target.value)}>{['Western Sydney', ...suburbImpact.map((row) => row.suburb)].map((item) => <option key={item}>{item}</option>)}</select></label>
+          <label className="form-field">Where<select value={suburb} onChange={(event) => setSuburb(event.target.value)}>{Array.from(new Set(['Western Sydney', suburb, ...suburbImpact.map((row) => row.suburb)])).map((item) => <option key={item}>{item}</option>)}</select></label>
           <div className="fund-total"><HandCoins size={18}/><span><small>Your commitment</small><strong>${(meals * SUBSIDY_PER_MEAL).toLocaleString()}</strong></span><small>${SUBSIDY_PER_MEAL.toFixed(2)} subsidy per meal</small></div>
           <button className="button button--primary button--wide" type="submit">Create campaign</button>
           <p className="fine-print">Demo commitment. Nothing is charged.</p>

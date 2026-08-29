@@ -1,16 +1,14 @@
 import { Sparkles } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../lib/authContext';
+import { useNavigate } from 'react-router-dom';
 import { clearPreferences, loadPreferences, savePreferences } from '../../lib/foodPreferences';
-import { homePathForUser } from '../../lib/homePath';
+import { Header } from '../../components/Header';
 
 const avoidOptions = ['Peanut', 'Tree nuts', 'Milk', 'Egg', 'Wheat', 'Soy', 'Sesame', 'Fish', 'Shellfish'];
 const preferenceOptions = ['Vegetarian', 'Vegan', 'Halal', 'Gluten-free', 'Dairy-free'];
 
 export default function HealthProfilePage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [saved] = useState(loadPreferences);
   const [avoid, setAvoid] = useState<string[]>(saved.avoid);
   const [preferences, setPreferences] = useState<string[]>(saved.preferences);
@@ -29,7 +27,7 @@ export default function HealthProfilePage() {
   };
 
   return <main className="health-page">
-    <header className="health-header"><Link className="logo" to={homePathForUser(user)}><img src="/savr-icon.png" alt=""/><span>SAVR</span></Link><Link to="/eligibility">Skip</Link></header>
+    <Header />
     <div className="health-shell preference-shell">
       <div className="health-intro"><p className="eyebrow">Optional</p><h1>Make food easier to find</h1><p>Tell us what to avoid and what you like. You can skip this or change it anytime.</p></div>
       <form className="preference-card" onSubmit={submit}>

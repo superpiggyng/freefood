@@ -3,9 +3,10 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Building2, HandHeart } from 'lucide-react';
 import { useAuth } from '../../lib/authContext';
 import { homePathForUser } from '../../lib/homePath';
+import { Header } from '../../components/Header';
 
 export default function LoginPage() {
-  const { login, user } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from;
@@ -31,7 +32,7 @@ export default function LoginPage() {
 
   return (
     <main className="health-page">
-      <header className="health-header"><Link className="logo" to={homePathForUser(user)}><img src="/savr-icon.png" alt="" /><span>SAVR</span></Link><nav aria-label="Account options"><Link to="/register">Recipient signup</Link><Link to="/vendors/signup">Business signup</Link></nav></header>
+      <Header />
       <div className="health-shell preference-shell">
         <div className="health-intro"><p className="eyebrow">Shared login</p><h1>Log in to SAVR</h1><p>Recipients and businesses use the same login portal. We will send you to the right dashboard after login.</p></div>
         <form className="preference-card" onSubmit={submit}>

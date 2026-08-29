@@ -1,4 +1,5 @@
 import { useMemo, useState, type FormEvent } from "react";
+import { LocateFixed } from "lucide-react";
 import ListingCard, { type FoodListing } from "../../components/ListingCard";
 
 export interface MarketplaceCategory { slug: string; name: string }
@@ -36,6 +37,8 @@ export function MarketplacePage({
 }: MarketplacePageProps) {
   const [query, setQuery] = useState("");
   const [location, setLocation] = useState(initialLocation);
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState("");
   const [category, setCategory] = useState("all");
   const [sort, setSort] = useState("nearest");
 
@@ -45,17 +48,38 @@ export function MarketplacePage({
   }), [category, listings, query]);
 
   const submitSearch = (event: FormEvent<HTMLFormElement>) => event.preventDefault();
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError("Location services are not supported by this browser.");
+      return;
+    }
+    setLocating(true);
+    setLocationError("");
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        setLocation("your location");
+        setSort("nearest");
+        setLocating(false);
+      },
+      () => {
+        setLocationError("Allow location access to sort food by distance.");
+        setLocating(false);
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
+    );
+  };
 
   return (
     <main className="page-shell marketplace" id="main-content">
       <header className="marketplace__header">
         <div><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p>{description}</p></div>
         {showLocationSearch && (
-          <form className="location-picker" onSubmit={submitSearch} role="search">
-            <label htmlFor="location">Your location</label>
-            <input id="location" value={location} onChange={(event) => setLocation(event.target.value)} placeholder="Suburb or postcode" />
-            <button className="button button--secondary" type="submit">Update</button>
-          </form>
+          <div className="location-services">
+            <button className="button button--secondary" type="button" onClick={useCurrentLocation} disabled={locating}>
+              <LocateFixed size={17}/>{locating ? "Finding your location…" : location === "your location" ? "Location enabled" : "Use my location"}
+            </button>
+            {locationError && <small role="alert">{locationError}</small>}
+          </div>
         )}
       </header>
 

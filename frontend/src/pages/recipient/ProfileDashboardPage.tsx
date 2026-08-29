@@ -187,29 +187,30 @@ export default function ProfileDashboardPage() {
       <section className="recipient-dashboard__content recipient-dashboard__content--wide" aria-labelledby="profile-title">
         <header className="requests-header profile-dashboard__header">
           <div>
+            <span className="profile-dashboard__eyebrow">Profile &amp; insights</span>
             <h1 id="profile-title">My profile</h1>
-            <p>Your household details, matching score and weekly nutrition estimate.</p>
+            <p>Manage the details that shape your food matches.</p>
           </div>
           <a className="button button--secondary" href="/suggested">View suggested food</a>
         </header>
 
         <section className="profile-stat-grid" aria-label="Profile statistics">
-          <article className="metric-card"><span>Need score</span><strong>{user.needScore}</strong><small>Used when demand exceeds supply</small></article>
-          <article className="metric-card"><span>This week</span><strong>{summary?.impact.servings ?? 0}</strong><small>Allocated servings counted as eaten</small></article>
-          <article className="metric-card"><span>Estimated savings</span><strong>{money(summary?.impact.savedAmount ?? 0)}</strong><small>Compared with original listing value</small></article>
-          <article className="metric-card"><span>Food rescued</span><strong>{summary?.impact.foodRescuedKg ?? 0} kg</strong><small>Estimated impact this week</small></article>
+          <article className="metric-card"><span>Need score</span><strong>{user.needScore}</strong><small>Matching priority</small></article>
+          <article className="metric-card"><span>Servings</span><strong>{summary?.impact.servings ?? 0}</strong><small>This week</small></article>
+          <article className="metric-card"><span>Savings</span><strong>{money(summary?.impact.savedAmount ?? 0)}</strong><small>This week</small></article>
+          <article className="metric-card"><span>Food rescued</span><strong>{summary?.impact.foodRescuedKg ?? 0} kg</strong><small>This week</small></article>
         </section>
 
         <div className="profile-dashboard__grid">
           <form className="dashboard-panel profile-form" onSubmit={submit}>
-            <div className="panel-heading"><h2><UserRound size={15}/> Account and profile</h2><span>{user.username}</span></div>
+            <div className="panel-heading profile-form__heading"><div><h2><UserRound size={16}/> Personal details</h2><p>Keep this information current for more relevant matches.</p></div><span>{user.username}</span></div>
             <div className="profile-readonly">
               <span><small>Email</small><strong>{user.email || "Not provided"}</strong></span>
               <span><small>Account type</small><strong>{user.role === "user" ? "Recipient" : user.role}</strong></span>
             </div>
 
             <fieldset>
-              <legend>Household need</legend>
+              <legend>Household</legend>
               <div className="form-grid form-grid--two-columns">
                 <label className="form-field">Income level<select value={form.incomeLevel} onChange={(event) => update("incomeLevel", event.target.value)}>{incomeOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
                 <label className="form-field">Employment status<select value={form.employmentStatus} onChange={(event) => update("employmentStatus", event.target.value)}>{employmentOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
@@ -222,7 +223,7 @@ export default function ProfileDashboardPage() {
             </fieldset>
 
             <fieldset>
-              <legend>Nutrition inputs</legend>
+              <legend>Health basics <span>Optional</span></legend>
               <div className="form-grid form-grid--two-columns">
                 <label className="form-field">Age<input type="number" min="0" max="120" value={form.age} onChange={(event) => update("age", event.target.value)} /></label>
                 <label className="form-field">Height cm<input type="number" min="30" max="260" value={form.heightCm} onChange={(event) => update("heightCm", event.target.value)} /></label>
@@ -231,7 +232,7 @@ export default function ProfileDashboardPage() {
             </fieldset>
 
             <fieldset>
-              <legend>Food access settings</legend>
+              <legend>Location &amp; preferences</legend>
               <div className="form-grid form-grid--two-columns">
                 <label className="form-field">Preferred category<select value={form.preferredCategory} onChange={(event) => update("preferredCategory", event.target.value)}>{categoryOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
                 <label className="form-field">Maximum distance<input type="number" min="1" max="50" value={form.maxDistanceKm} onChange={(event) => update("maxDistanceKm", event.target.value)} /></label>
