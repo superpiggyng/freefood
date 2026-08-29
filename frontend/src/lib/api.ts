@@ -21,6 +21,7 @@ export interface SavrUser {
   postcode: string;
   ruralArea: boolean;
   needScore: number;
+  needyMetric: number;
 }
 
 function readCookie(name: string): string | null {
@@ -35,6 +36,24 @@ async function ensureCsrfToken(): Promise<string> {
   return readCookie('csrftoken') ?? '';
 }
 
+export interface FieldError {
+  message: string;
+  code: string;
+}
+
+export type FieldErrors = Record<string, FieldError[]>;
+
+export class ApiError extends Error {
+  status: number;
+  errors?: FieldErrors;
+
+  constructor(message: string, status: number, errors?: FieldErrors) {
+    super(message);
+    this.status = status;
+    this.errors = errors;
+  }
+}
+
 async function apiFetch(path: string, options: RequestInit = {}) {
   const method = (options.method ?? 'GET').toUpperCase();
   const headers = new Headers(options.headers);
@@ -45,8 +64,8 @@ async function apiFetch(path: string, options: RequestInit = {}) {
   const response = await fetch(path, { ...options, headers, credentials: 'include' });
   const data = await response.json().catch(() => null);
   if (!response.ok) {
-    const message = data?.detail || (data?.errors ? 'Please check the form for errors.' : 'Something went wrong.');
-    throw Object.assign(new Error(message), { status: response.status, errors: data?.errors });
+    const message = data?.detail || (data?.errors ? 'Please fix the highlighted fields below.' : 'Something went wrong.');
+    throw new ApiError(message, response.status, data?.errors);
   }
   return data;
 }

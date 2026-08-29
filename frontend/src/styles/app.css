@@ -77,6 +77,18 @@ body{background:#fbfaf3}.site-header{background:#fffdf8}.hero{position:relative}
   border-color: #b9c7ba;
 }
 
+.form-field--invalid input,
+.form-field--invalid select {
+  border-color: #c0392b;
+  background: #fdf3f2;
+}
+
+.field-error {
+  font-size: 12px;
+  font-weight: 600;
+  color: #c0392b;
+}
+
 .form-grid--two-columns {
   row-gap: 20px;
   column-gap: 20px;

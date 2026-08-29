@@ -1,5 +1,9 @@
 import type { ReactNode } from 'react';
+<<<<<<< Updated upstream
 import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
+=======
+import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+>>>>>>> Stashed changes
 import { Header } from './components/Header';
 import type { FoodListing } from './components/ListingCard';
 import { findListing, useListings } from './lib/listingStore';
@@ -37,6 +41,7 @@ function PublicLayout({ children, marketplace = false }: { children: ReactNode; 
   return <><Header marketplace={marketplace}/>{children}</>;
 }
 
+<<<<<<< Updated upstream
 function AuthMessage({ title, body }: { title: string; body: string }) {
   return <PublicLayout><main className="page-shell auth-message"><header className="page-heading"><h1>{title}</h1><p>{body}</p></header><a className="button button--primary" href="/register">Get started</a></main></PublicLayout>;
 }
@@ -49,6 +54,26 @@ function ProtectedRoute({ children, allowedRoles, staffOnly = false }: { childre
   if (!user) return <Navigate to="/register" replace state={{ from: location.pathname, authRequired: true }} />;
   if (staffOnly && !user.isStaff && !user.isSuperuser) return <AuthMessage title="Access restricted" body="This area is only available to staff accounts." />;
   if (allowedRoles && !allowedRoles.includes(user.role)) return <AuthMessage title="Access restricted" body="Your account type does not have access to this area." />;
+=======
+function ProtectedRoute({ children, allowedRoles, staffOnly = false }: { children: ReactNode; allowedRoles?: string[]; staffOnly?: boolean }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <PublicLayout><AccessDeniedPage reason="loading" /></PublicLayout>;
+  }
+
+  if (!user) {
+    return <Navigate to="/register" replace />;
+  }
+
+  if (staffOnly && !user.isStaff && !user.isSuperuser) {
+    return <PublicLayout><AccessDeniedPage reason="staff" /></PublicLayout>;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <PublicLayout><AccessDeniedPage reason="role" /></PublicLayout>;
+  }
+>>>>>>> Stashed changes
 
   return children;
 }
@@ -72,7 +97,11 @@ function DetailRoute({ user }: { user: SavrUser | null }) {
   };
   return <PublicLayout><ListingDetailPage listing={detail} onRequest={(item) => {
     if (!user) {
+<<<<<<< Updated upstream
       navigate('/register', { state: { from: `/marketplace/${id}`, authRequired: true } });
+=======
+      navigate('/register');
+>>>>>>> Stashed changes
       return;
     }
     saveRequest({ id: String(item.id), title: item.title, vendor: item.vendorName, pickupWindow: item.pickupWindow });

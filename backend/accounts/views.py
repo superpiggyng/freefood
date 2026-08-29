@@ -45,7 +45,14 @@ def _user_json(user):
         "ruralArea": user.rural_area,
         "needyMetric": user.needy_metric,
         "needScore": user.calculate_need_score(),
+        "needyMetric": user.needy_metric,
     }
+
+
+def _sync_needy_metric(user):
+    """Persist the computed need score so matching can order by it in the database."""
+    user.needy_metric = user.calculate_need_score()
+    user.save(update_fields=["needy_metric"])
 
 
 def _register(request, form_class):
@@ -56,6 +63,7 @@ def _register(request, form_class):
     if not form.is_valid():
         return JsonResponse({"errors": form.errors.get_json_data()}, status=422)
     user = form.save()
+    _sync_needy_metric(user)
     login(request, user)
     return JsonResponse(_user_json(user), status=201)
 
@@ -86,6 +94,7 @@ def login_view(request):
     user = authenticate(request, username=username, password=password)
     if user is None:
         return JsonResponse({"detail": "Invalid username or password."}, status=401)
+    _sync_needy_metric(user)
     login(request, user)
     return JsonResponse(_user_json(user))
 
@@ -136,4 +145,5 @@ def profile(request):
         if "ruralArea" in data:
             user.rural_area = bool(data["ruralArea"])
         user.save()
+        _sync_needy_metric(user)
     return JsonResponse(_user_json(request.user))

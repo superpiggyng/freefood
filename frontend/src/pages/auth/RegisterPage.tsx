@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../lib/authContext';
+import { ApiError } from '../../lib/api';
 
 const incomeLevels = [
   { value: 'under-25000', label: 'Under $25,000 per year' },
@@ -56,15 +57,48 @@ const initialForm = {
 
 type RegisterForm = typeof initialForm;
 
+<<<<<<< Updated upstream
 function RecipientRegister({ redirectTo }: { redirectTo: string }) {
+=======
+// Maps the backend form field name to the frontend form key and the wizard step it lives on.
+const fieldMap: Record<string, { key: keyof RegisterForm; step: number }> = {
+  username: { key: 'username', step: 0 },
+  email: { key: 'email', step: 0 },
+  password1: { key: 'password1', step: 0 },
+  password2: { key: 'password2', step: 0 },
+  preferred_category: { key: 'preferredCategory', step: 1 },
+  max_distance_km: { key: 'maxDistanceKm', step: 1 },
+  household_size: { key: 'householdSize', step: 2 },
+  dependents: { key: 'dependents', step: 2 },
+  income_level: { key: 'incomeLevel', step: 2 },
+  employment_status: { key: 'employmentStatus', step: 2 },
+  zip_code: { key: 'postcode', step: 2 },
+  rural_area: { key: 'ruralArea', step: 2 },
+  current_food_access: { key: 'currentFoodAccess', step: 3 },
+  previous_allocations_count: { key: 'previousAllocationsCount', step: 3 },
+  housing_cost: { key: 'housingCost', step: 3 },
+  debt: { key: 'debt', step: 3 },
+};
+
+export default function RegisterPage() {
+>>>>>>> Stashed changes
   const { register } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<RegisterForm>(initialForm);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof RegisterForm, string>>>({});
   const [submitting, setSubmitting] = useState(false);
 
-  const update = <K extends keyof RegisterForm>(key: K, value: RegisterForm[K]) => setForm((current) => ({ ...current, [key]: value }));
+  const update = <K extends keyof RegisterForm>(key: K, value: RegisterForm[K]) => {
+    setForm((current) => ({ ...current, [key]: value }));
+    setFieldErrors((current) => {
+      if (!(key in current)) return current;
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
+  };
 
   const isStepValid = () => {
     if (step === 0) return form.username.trim().length > 0 && form.email.trim().length > 0 && form.password1.length >= 12 && form.password1 === form.password2;
@@ -90,12 +124,29 @@ function RecipientRegister({ redirectTo }: { redirectTo: string }) {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
+    setFieldErrors({});
     setSubmitting(true);
     try {
       await register(form);
       navigate(redirectTo);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed.');
+      if (err instanceof ApiError && err.errors) {
+        const nextFieldErrors: Partial<Record<keyof RegisterForm, string>> = {};
+        let earliestStep = steps.length - 1;
+        for (const [backendField, messages] of Object.entries(err.errors)) {
+          const mapped = fieldMap[backendField];
+          const message = messages[0]?.message ?? 'This field is invalid.';
+          if (mapped) {
+            nextFieldErrors[mapped.key] = message;
+            earliestStep = Math.min(earliestStep, mapped.step);
+          }
+        }
+        setFieldErrors(nextFieldErrors);
+        setStep(earliestStep);
+        setError('Please fix the highlighted fields below.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Registration failed.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -135,38 +186,45 @@ function RecipientRegister({ redirectTo }: { redirectTo: string }) {
             <form className="eligibility-form" onSubmit={step < steps.length - 1 ? goNext : submit}>
               {step === 0 && (
                 <div className="form-grid form-grid--two-columns">
+<<<<<<< Updated upstream
                   <p className="account-switch form-field--wide">Signing up a cafe, restaurant or grocer? <Link to="/vendors/signup">Create a business account</Link></p>
                   <label className="form-field">Username<input required autoFocus value={form.username} onChange={(event) => update('username', event.target.value)} /></label>
                   <label className="form-field">Email<input type="email" required value={form.email} onChange={(event) => update('email', event.target.value)} /></label>
                   <label className="form-field">Password<input type="password" required minLength={12} value={form.password1} onChange={(event) => update('password1', event.target.value)} /></label>
                   <label className="form-field">Confirm password<input type="password" required minLength={12} value={form.password2} onChange={(event) => update('password2', event.target.value)} /></label>
+=======
+                  <label className={`form-field${fieldErrors.username ? ' form-field--invalid' : ''}`}>Username<input required autoFocus value={form.username} onChange={(event) => update('username', event.target.value)} />{fieldErrors.username && <small className="field-error">{fieldErrors.username}</small>}</label>
+                  <label className={`form-field${fieldErrors.email ? ' form-field--invalid' : ''}`}>Email<input type="email" required value={form.email} onChange={(event) => update('email', event.target.value)} />{fieldErrors.email && <small className="field-error">{fieldErrors.email}</small>}</label>
+                  <label className={`form-field${fieldErrors.password1 ? ' form-field--invalid' : ''}`}>Password<input type="password" required minLength={12} value={form.password1} onChange={(event) => update('password1', event.target.value)} />{fieldErrors.password1 && <small className="field-error">{fieldErrors.password1}</small>}</label>
+                  <label className={`form-field${fieldErrors.password2 ? ' form-field--invalid' : ''}`}>Confirm password<input type="password" required minLength={12} value={form.password2} onChange={(event) => update('password2', event.target.value)} />{fieldErrors.password2 && <small className="field-error">{fieldErrors.password2}</small>}</label>
+>>>>>>> Stashed changes
                 </div>
               )}
 
               {step === 1 && (
                 <div className="form-grid form-grid--two-columns">
-                  <label className="form-field">Item category you look for most<select value={form.preferredCategory} onChange={(event) => update('preferredCategory', event.target.value)}>{categories.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
-                  <label className="form-field">Maximum travel distance<span className="range-field"><span>1 km</span><input type="range" min={1} max={20} value={form.maxDistanceKm} onChange={(event) => update('maxDistanceKm', Number(event.target.value))} /><output>{form.maxDistanceKm} km</output></span></label>
+                  <label className={`form-field${fieldErrors.preferredCategory ? ' form-field--invalid' : ''}`}>Item category you look for most<select value={form.preferredCategory} onChange={(event) => update('preferredCategory', event.target.value)}>{categories.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select>{fieldErrors.preferredCategory && <small className="field-error">{fieldErrors.preferredCategory}</small>}</label>
+                  <label className={`form-field${fieldErrors.maxDistanceKm ? ' form-field--invalid' : ''}`}>Maximum travel distance<span className="range-field"><span>1 km</span><input type="range" min={1} max={20} value={form.maxDistanceKm} onChange={(event) => update('maxDistanceKm', Number(event.target.value))} /><output>{form.maxDistanceKm} km</output></span>{fieldErrors.maxDistanceKm && <small className="field-error">{fieldErrors.maxDistanceKm}</small>}</label>
                 </div>
               )}
 
               {step === 2 && (
                 <div className="form-grid form-grid--two-columns">
-                  <label className="form-field">Household size<input type="number" min={1} required value={form.householdSize} onChange={(event) => update('householdSize', Number(event.target.value))} /></label>
-                  <label className="form-field">Number of dependents<input type="number" min={0} value={form.dependents} onChange={(event) => update('dependents', Number(event.target.value))} /></label>
-                  <label className="form-field">Household income (before tax)<select value={form.incomeLevel} onChange={(event) => update('incomeLevel', event.target.value)}>{incomeLevels.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
-                  <label className="form-field">Employment status<select value={form.employmentStatus} onChange={(event) => update('employmentStatus', event.target.value)}>{employmentStatuses.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
-                  <label className="form-field">Postcode<input required value={form.postcode} onChange={(event) => update('postcode', event.target.value)} /></label>
+                  <label className={`form-field${fieldErrors.householdSize ? ' form-field--invalid' : ''}`}>Household size<input type="number" min={1} required value={form.householdSize} onChange={(event) => update('householdSize', Number(event.target.value))} />{fieldErrors.householdSize && <small className="field-error">{fieldErrors.householdSize}</small>}</label>
+                  <label className={`form-field${fieldErrors.dependents ? ' form-field--invalid' : ''}`}>Number of dependents<input type="number" min={0} value={form.dependents} onChange={(event) => update('dependents', Number(event.target.value))} />{fieldErrors.dependents && <small className="field-error">{fieldErrors.dependents}</small>}</label>
+                  <label className={`form-field${fieldErrors.incomeLevel ? ' form-field--invalid' : ''}`}>Household income (before tax)<select value={form.incomeLevel} onChange={(event) => update('incomeLevel', event.target.value)}>{incomeLevels.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select>{fieldErrors.incomeLevel && <small className="field-error">{fieldErrors.incomeLevel}</small>}</label>
+                  <label className={`form-field${fieldErrors.employmentStatus ? ' form-field--invalid' : ''}`}>Employment status<select value={form.employmentStatus} onChange={(event) => update('employmentStatus', event.target.value)}>{employmentStatuses.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select>{fieldErrors.employmentStatus && <small className="field-error">{fieldErrors.employmentStatus}</small>}</label>
+                  <label className={`form-field${fieldErrors.postcode ? ' form-field--invalid' : ''}`}>Postcode<input required value={form.postcode} onChange={(event) => update('postcode', event.target.value)} />{fieldErrors.postcode && <small className="field-error">{fieldErrors.postcode}</small>}</label>
                   <label className="toggle-field"><input type="checkbox" checked={form.ruralArea} onChange={(event) => update('ruralArea', event.target.checked)} /><span>I live in a rural area</span></label>
                 </div>
               )}
 
               {step === 3 && (
                 <div className="form-grid form-grid--two-columns">
-                  <label className="form-field">Current food access<select value={form.currentFoodAccess} onChange={(event) => update('currentFoodAccess', event.target.value)}>{foodAccessLevels.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
-                  <label className="form-field">Previous food allocations received<input type="number" min={0} value={form.previousAllocationsCount} onChange={(event) => update('previousAllocationsCount', Number(event.target.value))} /></label>
-                  <label className="form-field">Monthly housing cost ($, optional)<input type="number" min={0} placeholder="e.g. 1800" value={form.housingCost} onChange={(event) => update('housingCost', event.target.value)} /></label>
-                  <label className="form-field">Outstanding debt ($, optional)<input type="number" min={0} placeholder="e.g. 5000" value={form.debt} onChange={(event) => update('debt', event.target.value)} /></label>
+                  <label className={`form-field${fieldErrors.currentFoodAccess ? ' form-field--invalid' : ''}`}>Current food access<select value={form.currentFoodAccess} onChange={(event) => update('currentFoodAccess', event.target.value)}>{foodAccessLevels.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select>{fieldErrors.currentFoodAccess && <small className="field-error">{fieldErrors.currentFoodAccess}</small>}</label>
+                  <label className={`form-field${fieldErrors.previousAllocationsCount ? ' form-field--invalid' : ''}`}>Previous food allocations received<input type="number" min={0} value={form.previousAllocationsCount} onChange={(event) => update('previousAllocationsCount', Number(event.target.value))} />{fieldErrors.previousAllocationsCount && <small className="field-error">{fieldErrors.previousAllocationsCount}</small>}</label>
+                  <label className={`form-field${fieldErrors.housingCost ? ' form-field--invalid' : ''}`}>Monthly housing cost ($, optional)<input type="number" min={0} placeholder="e.g. 1800" value={form.housingCost} onChange={(event) => update('housingCost', event.target.value)} />{fieldErrors.housingCost && <small className="field-error">{fieldErrors.housingCost}</small>}</label>
+                  <label className={`form-field${fieldErrors.debt ? ' form-field--invalid' : ''}`}>Outstanding debt ($, optional)<input type="number" min={0} placeholder="e.g. 5000" value={form.debt} onChange={(event) => update('debt', event.target.value)} />{fieldErrors.debt && <small className="field-error">{fieldErrors.debt}</small>}</label>
                 </div>
               )}
 
