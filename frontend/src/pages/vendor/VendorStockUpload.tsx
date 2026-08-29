@@ -6,6 +6,7 @@ import { money } from '../../lib/sponsorship';
 import { publishListings } from '../../lib/listingStore';
 import type { Listing } from '../../types';
 import { currentVendor } from '../../data/sponsors';
+import { estimateNutritionFromImage } from '../../lib/api';
 
 const nav: DashboardNavItem[] = [
   { label: 'Dashboard', icon: '▦', href: '/vendor' }, { label: 'Upload stock', icon: '⇪', href: '/vendor/upload', active: true },
@@ -48,15 +49,40 @@ const toListing = (item: StockMatch, pickupWindow: string, index: number): Listi
 
 const fundedSuburbs = ['Marrickville', 'Blacktown', 'Parramatta', 'Auburn'];
 
+const compressImage = (file: File) => new Promise<File>((resolve) => {
+  const image = new Image();
+  const url = URL.createObjectURL(file);
+  image.onload = () => {
+    URL.revokeObjectURL(url);
+    const maxSide = 640;
+    const scale = Math.min(1, maxSide / Math.max(image.width, image.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(image.width * scale));
+    canvas.height = Math.max(1, Math.round(image.height * scale));
+    canvas.getContext('2d')?.drawImage(image, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob((blob) => {
+      resolve(blob ? new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }) : file);
+    }, 'image/jpeg', 0.68);
+  };
+  image.onerror = () => {
+    URL.revokeObjectURL(url);
+    resolve(file);
+  };
+  image.src = url;
+});
+
 export default function VendorStockUpload() {
   const [text, setText] = useState('');
   const [suburb, setSuburb] = useState('Marrickville');
   const [fileName, setFileName] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [pickupWindow, setPickupWindow] = useState('Today, 5:30 - 6:30 PM');
   const [results, setResults] = useState<StockMatch[] | null>(null);
   const [skipped, setSkipped] = useState<number[]>([]);
   const [published, setPublished] = useState(0);
   const [publishError, setPublishError] = useState<string | null>(null);
+  const [estimateError, setEstimateError] = useState<string | null>(null);
+  const [estimating, setEstimating] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const funded = fundedSuburbs.includes(suburb);
 
@@ -64,13 +90,60 @@ export default function VendorStockUpload() {
     const file = event.target.files?.[0];
     if (!file) return;
     setFileName(file.name);
+    setEstimateError(null);
+    if (file.type.startsWith('image/')) {
+      compressImage(file).then(setImageFile);
+      return;
+    }
+    setImageFile(null);
     file.text().then((contents) => setText(contents.trim()));
   };
 
-  const analyse = (event: FormEvent<HTMLFormElement>) => {
+  const analyse = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setPublished(0); setSkipped([]);
-    setResults(analyseStock(text.trim() || sampleStock, funded));
+    setPublished(0); setSkipped([]); setEstimateError(null);
+    const parsed = analyseStock(text.trim() || sampleStock, funded);
+    if (!imageFile) {
+      setResults(parsed);
+      return;
+    }
+    setEstimating(true);
+    try {
+      const estimate = await estimateNutritionFromImage(imageFile, parsed.map((item) => item.name));
+      if (estimate.source === 'fallback') {
+        setEstimateError(`${estimate.warning ?? 'Gemini did not return nutrition.'} Keeping local item-based nutrition estimates.`);
+      } else if (estimate.source === 'gemini_text' && estimate.warning) {
+        setEstimateError(estimate.warning);
+      }
+      setResults(parsed.map((item, index) => {
+        const aiItem = estimate.items[index];
+        if (!aiItem) return item;
+        const nutrition = aiItem.nutrition;
+        const source = estimate.source === 'gemini'
+          ? 'Gemini image nutrition estimate'
+          : estimate.source === 'gemini_text'
+            ? 'Gemini item-name nutrition estimate'
+            : 'MVP fallback nutrition estimate';
+        const model = estimate.model ? ` via ${estimate.model}` : '';
+        return {
+          ...item,
+          nutrition: {
+            calories: nutrition.calories ?? item.nutrition.calories,
+            proteinG: nutrition.proteinG ?? item.nutrition.proteinG,
+            carbsG: nutrition.carbsG ?? item.nutrition.carbsG,
+            fatG: nutrition.fatG ?? item.nutrition.fatG,
+            fiberG: nutrition.fiberG ?? item.nutrition.fiberG,
+            sodiumMg: nutrition.sodiumMg ?? item.nutrition.sodiumMg,
+          },
+          notes: [`${source}${model}: ${aiItem.confidence} confidence.`, ...item.notes],
+        };
+      }));
+    } catch (error) {
+      setEstimateError(error instanceof Error ? error.message : 'AI nutrition estimate failed. Using MVP fallback nutrition.');
+      setResults(parsed);
+    } finally {
+      setEstimating(false);
+    }
   };
 
   const included = (results ?? []).filter((item) => !skipped.includes(item.id));
@@ -95,17 +168,19 @@ export default function VendorStockUpload() {
       <section className="dashboard-panel stock-upload__input">
         <div className="panel-heading"><h2>1. What is left over?</h2><button className="button button--quiet button--small" type="button" onClick={() => setText(sampleStock)}>Use today’s POS export</button></div>
         <label className="upload-zone">
-          <CloudUpload size={22}/><strong>{fileName || 'Upload a stock list'}</strong><span>CSV or text export from your POS, or drop a photo of the sheet</span>
-          <input type="file" accept=".csv,.txt,text/plain" onChange={readFile}/>
+          <CloudUpload size={22}/><strong>{fileName || 'Upload stock list or food photo'}</strong><span>CSV/text for item names, image for AI nutrition estimate</span>
+          <input type="file" accept=".csv,.txt,text/plain,image/*" onChange={readFile}/>
         </label>
+        {imageFile && <p className="stock-item__note">Food photo attached. SAVR will estimate nutrition when you match stock.</p>}
         <label className="form-field stock-upload__textarea">One item per line
           <textarea rows={7} value={text} onChange={(event) => setText(event.target.value)} placeholder={sampleStock}/>
         </label>
         <div className="stock-upload__controls">
           <label className="form-field">Pickup window<input value={pickupWindow} onChange={(event) => setPickupWindow(event.target.value)}/></label>
           <label className="form-field">Pickup suburb<select value={suburb} onChange={(event) => setSuburb(event.target.value)}>{['Marrickville', 'Blacktown', 'Parramatta', 'Auburn', 'Newtown', 'Liverpool'].map((item) => <option key={item}>{item}</option>)}</select></label>
-          <button className="button button--primary" type="submit"><Sparkles size={16}/> Match stock</button>
+          <button className="button button--primary" type="submit" disabled={estimating}><Sparkles size={16}/> {estimating ? 'Estimating…' : 'Match stock'}</button>
         </div>
+        {estimateError && <p className="form-error" role="alert">{estimateError}</p>}
         <p className={funded ? 'fund-status fund-status--on' : 'fund-status'}>{funded ? <><Check size={14}/> Atlas Bank sponsor fund is active in {suburb}. Recipients pay a capped contribution and you are still paid in full.</> : <><AlertTriangle size={14}/> No sponsor fund in {suburb} yet. Listings will be priced as a straight discount.</>}</p>
       </section>
 
@@ -133,6 +208,7 @@ export default function VendorStockUpload() {
                   <span><small>Sponsor covers</small><strong>{money(item.split.sponsorCovers)}</strong></span>
                   <span className="price-split__total"><small>You receive</small><strong>{money(item.split.vendorReceives)}</strong></span>
                 </div>
+                <p className="stock-item__nutrition">{item.nutrition.calories} kcal · {Math.round(item.nutrition.proteinG)}g protein · {Math.round(item.nutrition.carbsG)}g carbs · {Math.round(item.nutrition.fiberG)}g fiber</p>
                 <p className="stock-item__demand"><Users size={14}/> <strong>{item.matches}</strong> nearby people can safely eat this · <strong>{item.greatFit}</strong> a great dietary fit</p>
                 {item.notes.map((note) => <p className="stock-item__note" key={note}>{note}</p>)}
                 <button className="button button--quiet button--small" type="button" onClick={() => toggle(item.id)}>{off ? 'Include' : 'Skip this item'}</button>

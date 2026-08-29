@@ -18,6 +18,7 @@ export default function NutritionMatchesPage() {
     const parts = [
       values.calories ? `${values.calories} kcal` : null,
       values.proteinG ? `${Math.round(values.proteinG)}g protein` : null,
+      values.carbsG ? `${Math.round(values.carbsG)}g carbs` : null,
       values.fiberG ? `${Math.round(values.fiberG)}g fiber` : null,
     ].filter(Boolean);
     return parts.length ? parts.join(' · ') : null;

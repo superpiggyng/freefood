@@ -64,7 +64,9 @@ async function apiFetch(path: string, options: RequestInit = {}) {
   const headers = new Headers(options.headers);
   if (method !== 'GET' && method !== 'HEAD') {
     headers.set('X-CSRFToken', await ensureCsrfToken());
-    if (!headers.has('Content-Type') && options.body) headers.set('Content-Type', 'application/json');
+    if (!headers.has('Content-Type') && options.body && !(options.body instanceof FormData)) {
+      headers.set('Content-Type', 'application/json');
+    }
   }
   const response = await fetch(path, { ...options, headers, credentials: 'include' });
   const data = await response.json().catch(() => null);
@@ -200,6 +202,19 @@ export function createMarketplaceListing(payload: CreateListingPayload): Promise
     method: 'POST',
     body: JSON.stringify(payload),
   });
+}
+
+export interface NutritionEstimateItem {
+  name: string;
+  nutrition: NonNullable<Listing['nutrition']>;
+  confidence: 'low' | 'medium' | 'high';
+}
+
+export function estimateNutritionFromImage(image: File, itemNames: string[]): Promise<{ items: NutritionEstimateItem[]; source?: 'gemini' | 'gemini_text' | 'fallback'; model?: string; warning?: string }> {
+  const body = new FormData();
+  body.append('image', image);
+  body.append('items', JSON.stringify(itemNames));
+  return apiFetch('/api/vendor/nutrition-estimate/', { method: 'POST', body });
 }
 
 export function submitListingInterest(slug: string, requestedQuantity = 1) {
