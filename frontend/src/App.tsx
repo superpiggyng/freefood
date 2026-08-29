@@ -38,7 +38,7 @@ function DetailRoute() {
 
 export default function App() {
   return <Routes>
-    <Route path="/" element={<PublicLayout><LandingPage heroImageUrl="/savr-icon.png"/></PublicLayout>}/>
+    <Route path="/" element={<PublicLayout><LandingPage featuredListings={listings} heroImageUrl="/savr-vegetable-hero.png"/></PublicLayout>}/>
     <Route path="/marketplace" element={<PublicLayout marketplace><MarketplacePage listings={listings} categories={[{slug:'bakery',name:'Bakery'},{slug:'groceries',name:'Groceries'},{slug:'meals',name:'Meals'},{slug:'snacks',name:'Snacks'}]} initialLocation="Marrickville, NSW"/></PublicLayout>}/>
     <Route path="/marketplace/:id" element={<DetailRoute/>}/>
     <Route path="/eligibility" element={<EligibilityPage/>}/>
