@@ -165,7 +165,6 @@ function RecipientRegister({ redirectTo }: { redirectTo: string }) {
     } catch (err) {
       if (err instanceof ApiError && err.errors) {
         const nextFieldErrors: Partial<Record<keyof RegisterForm, string>> = {};
-        const generalMessages: string[] = [];
         let earliestStep = steps.length - 1;
         for (const [backendField, messages] of Object.entries(err.errors)) {
           const mapped = fieldMap[backendField];
@@ -173,13 +172,11 @@ function RecipientRegister({ redirectTo }: { redirectTo: string }) {
           if (mapped) {
             nextFieldErrors[mapped.key] = message;
             earliestStep = Math.min(earliestStep, mapped.step);
-          } else {
-            generalMessages.push(message);
           }
         }
         setFieldErrors(nextFieldErrors);
-        if (Object.keys(nextFieldErrors).length > 0) setStep(earliestStep);
-        setError(generalMessages.length > 0 ? generalMessages.join(' ') : 'Please fix the highlighted fields below.');
+        setStep(earliestStep);
+        setError('Please fix the highlighted fields below.');
       } else {
         setError(err instanceof Error ? err.message : 'Registration failed.');
       }
@@ -222,7 +219,6 @@ function RecipientRegister({ redirectTo }: { redirectTo: string }) {
             <form className="eligibility-form" onSubmit={step < steps.length - 1 ? goNext : submit}>
               {step === 0 && (
                 <div className="form-grid form-grid--two-columns">
-                  <p className="account-switch form-field--wide">Signing up a cafe, restaurant or grocer? <Link to="/vendors/signup">Create a business account</Link></p>
                   <label className={`form-field${fieldErrors.username ? ' form-field--invalid' : ''}`}>Username<input required autoFocus value={form.username} onChange={(event) => update('username', event.target.value)} />{fieldErrors.username && <small className="field-error">{fieldErrors.username}</small>}</label>
                   <label className={`form-field${fieldErrors.email ? ' form-field--invalid' : ''}`}>Email<input type="email" required value={form.email} onChange={(event) => update('email', event.target.value)} />{fieldErrors.email && <small className="field-error">{fieldErrors.email}</small>}</label>
                   <label className={`form-field${fieldErrors.password1 ? ' form-field--invalid' : ''}`}>Password<input type="password" required minLength={12} value={form.password1} onChange={(event) => update('password1', event.target.value)} />{fieldErrors.password1 && <small className="field-error">{fieldErrors.password1}</small>}</label>
@@ -243,9 +239,6 @@ function RecipientRegister({ redirectTo }: { redirectTo: string }) {
                   <label className={`form-field${fieldErrors.dependents ? ' form-field--invalid' : ''}`}>Number of dependents<input type="number" min={0} value={form.dependents} onChange={(event) => update('dependents', Number(event.target.value))} />{fieldErrors.dependents && <small className="field-error">{fieldErrors.dependents}</small>}</label>
                   <label className={`form-field${fieldErrors.incomeLevel ? ' form-field--invalid' : ''}`}>Household income (before tax)<select value={form.incomeLevel} onChange={(event) => update('incomeLevel', event.target.value)}>{incomeLevels.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select>{fieldErrors.incomeLevel && <small className="field-error">{fieldErrors.incomeLevel}</small>}</label>
                   <label className={`form-field${fieldErrors.employmentStatus ? ' form-field--invalid' : ''}`}>Employment status<select value={form.employmentStatus} onChange={(event) => update('employmentStatus', event.target.value)}>{employmentStatuses.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select>{fieldErrors.employmentStatus && <small className="field-error">{fieldErrors.employmentStatus}</small>}</label>
-                  <label className={`form-field${fieldErrors.age ? ' form-field--invalid' : ''}`}>Age<input type="number" min={0} max={120} value={form.age} onChange={(event) => update('age', event.target.value)} />{fieldErrors.age && <small className="field-error">{fieldErrors.age}</small>}</label>
-                  <label className={`form-field${fieldErrors.heightCm ? ' form-field--invalid' : ''}`}>Height (cm)<input type="number" min={30} max={260} value={form.heightCm} onChange={(event) => update('heightCm', event.target.value)} />{fieldErrors.heightCm && <small className="field-error">{fieldErrors.heightCm}</small>}</label>
-                  <label className={`form-field${fieldErrors.weightKg ? ' form-field--invalid' : ''}`}>Weight (kg)<input type="number" min={0} max={500} step="0.1" value={form.weightKg} onChange={(event) => update('weightKg', event.target.value)} />{fieldErrors.weightKg && <small className="field-error">{fieldErrors.weightKg}</small>}</label>
                   <label className={`form-field${fieldErrors.postcode ? ' form-field--invalid' : ''}`}>Postcode<input required value={form.postcode} onChange={(event) => update('postcode', event.target.value)} />{fieldErrors.postcode && <small className="field-error">{fieldErrors.postcode}</small>}</label>
                   <label className="toggle-field"><input type="checkbox" checked={form.ruralArea} onChange={(event) => update('ruralArea', event.target.checked)} /><span>I live in a rural area</span></label>
                 </div>

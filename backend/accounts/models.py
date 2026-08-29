@@ -17,7 +17,7 @@ class SecureEncryptedTextField(models.TextField):
 
     def from_db_value(self, value, expression, connection):
         if value is None or value == "":
-            return None
+            return value
         return self._decrypt(value)
 
     def to_python(self, value):
