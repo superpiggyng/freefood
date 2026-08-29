@@ -29,7 +29,7 @@ export function Header({ marketplace = false, authOnly = false }: { marketplace?
       </> : user ? <>
         <Link to="/marketplace">Find food</Link><Link to="/suggested">Suggested</Link><Link to="/sponsor-map">Sponsor Map</Link><Link to="/requests">My requests</Link>
       </> : <>
-        <Link to="/marketplace">Find food</Link><Link to="/suggested">Suggested</Link><Link to="/sponsor-map">Sponsor Map</Link><Link to="/sponsors">For sponsors</Link>
+        <Link to="/sponsor-map">Sponsor Map</Link><Link to="/sponsors">For sponsors</Link>
       </>}
     </nav>
     <div className="header-actions">

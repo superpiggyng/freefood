@@ -130,7 +130,7 @@ function MarketplaceRoute() {
       <MarketplacePage
         listings={listings}
         categories={marketplaceCategories}
-        initialLocation=""
+        initialLocation={isVendor ? "" : "Marrickville, NSW"}
         eyebrow={isVendor ? "Business marketplace view" : undefined}
         title={isVendor ? "My listings" : undefined}
         description={isVendor ? "Surplus food listings published by your business." : undefined}
@@ -138,8 +138,8 @@ function MarketplaceRoute() {
         resultLabel={isVendor ? "listings from your business" : undefined}
         searchPlaceholder={isVendor ? "Search your listings…" : undefined}
         emptyTitle={isVendor ? "No listings yet" : undefined}
-        emptyMessage={isVendor ? "Upload today’s surplus stock to publish listings here." : undefined}
-        emptyActionLabel={isVendor ? "Upload stock" : undefined}
+        emptyMessage={isVendor ? "Create a listing from today’s surplus stock to publish it here." : undefined}
+        emptyActionLabel={isVendor ? "Create listing" : undefined}
         emptyActionHref={isVendor ? "/vendor/upload" : undefined}
       />
     </PublicLayout>

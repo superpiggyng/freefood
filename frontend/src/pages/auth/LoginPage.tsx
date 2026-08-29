@@ -32,7 +32,7 @@ export default function LoginPage() {
 
   return (
     <main className="health-page">
-      <Header />
+      <Header authOnly />
       <div className="health-shell preference-shell">
         <div className="health-intro"><p className="eyebrow">Shared login</p><h1>Log in to SAVR</h1><p>Recipients and businesses use the same login portal. We will send you to the right dashboard after login.</p></div>
         <form className="preference-card" onSubmit={submit}>
