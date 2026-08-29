@@ -6,52 +6,83 @@
 <div class="topbar">
     <div class="brand">
         <div class="brand-mark">F</div>
-        <span>FreeFood</span>
+        <span class="brand-name">SAVR</span>
     </div>
     <div class="nav">
         <a href="#">How it works</a>
-        <a href="#">Community</a>
-        <a href="#" class="secondary-btn">Login</a>
+        <a href="#">Find food</a>
+        <a href="#">Impact</a>
+        <a href="{% url 'vendor_signup' %}" class="secondary-btn">Vendor sign up</a>
     </div>
 </div>
 
 <section class="hero">
     <div>
-        <div class="badge">Fresh food, fair access</div>
-        <h1 class="title">Turning surplus food into someone’s next meal.</h1>
+        <div class="eyebrow">Fresh food, fair access</div>
+        <h1 class="title">Good food<br>shouldn’t go to waste<br>when someone nearby needs it.</h1>
         <p class="lead">
-            FreeFood connects low-income families with nearby grocers, bakeries, and restaurants that still have safe, unsold food at the end of the day.
+            We connect low-income households with nearby stores, bakeries, and restaurants that have safe surplus food at the end of the day.
+            Users reserve it for pickup, while vendors reduce waste and keep perfectly good food in circulation.
         </p>
+
         <div class="cta-row">
-            <a href="{% url 'user_signup' %}" class="primary-btn">Create user profile</a>
-            <a href="{% url 'vendor_signup' %}" class="secondary-btn">Register as vendor</a>
+            <a href="{% url 'user_signup' %}" class="primary-btn">Find food</a>
+            <a href="{% url 'vendor_signup' %}" class="secondary-btn">List surplus food</a>
         </div>
+
         <div class="stats">
-            <div class="stat"><strong>2x</strong> less food waste</div>
-            <div class="stat"><strong>24/7</strong> local listings</div>
-            <div class="stat"><strong>Fair</strong> priority matching</div>
+            <div class="stat"><strong>12,540</strong> meals shared</div>
+            <div class="stat"><strong>1,285</strong> households helped</div>
+            <div class="stat"><strong>86%</strong> priority match rate</div>
         </div>
     </div>
 
-    <div class="glass">
-        <div class="badge">Today’s availability</div>
-        <div class="card-grid">
-            <div class="mini-card">
-                <strong>Fresh produce</strong><br>
-                23 listings
+    <div class="visual-panel">
+        <div class="leaf"></div>
+        <div class="produce-bag">
+            <div class="produce-items">
+                <div class="produce-item"></div>
+                <div class="produce-item"></div>
+                <div class="produce-item"></div>
+                <div class="produce-item"></div>
+                <div class="produce-item"></div>
+                <div class="produce-item"></div>
             </div>
-            <div class="mini-card">
-                <strong>Bakeries</strong><br>
-                14 listings
+        </div>
+
+        <div class="mini-widget">
+            <div class="row"><span>Food rescued</span><span>Today</span></div>
+            <strong>32.4kg</strong>
+            <div class="row" style="margin-top: 8px; color: var(--green-700); font-weight:700;">
+                <span>Saved from waste</span>
+                <span>+18%</span>
             </div>
-            <div class="mini-card">
-                <strong>Meals</strong><br>
-                8 listings
-            </div>
-            <div class="mini-card">
-                <strong>Groceries</strong><br>
-                18 listings
-            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-shell">
+    <div class="badge">How it works</div>
+    <div class="section-grid">
+        <div class="feature-box">
+            <div class="icon">🏷️</div>
+            <strong>1. Register</strong>
+            <span>Create a user or vendor profile and verify eligibility in a few steps.</span>
+        </div>
+        <div class="feature-box">
+            <div class="icon">📍</div>
+            <strong>2. Discover</strong>
+            <span>Browse nearby listings and see fresh items available for pickup today.</span>
+        </div>
+        <div class="feature-box">
+            <div class="icon">🤝</div>
+            <strong>3. Match</strong>
+            <span>Need-based prioritization helps the most vulnerable households get access first.</span>
+        </div>
+        <div class="feature-box">
+            <div class="icon">✅</div>
+            <strong>4. Collect</strong>
+            <span>Reserve and pick up food quickly, safely, and with low friction.</span>
         </div>
     </div>
 </section>
