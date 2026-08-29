@@ -1,3 +1,5 @@
+import type { Listing } from '../types';
+
 export interface SavrUser {
   id: number;
   username: string;
@@ -153,4 +155,46 @@ export function fetchSession(): Promise<{ user: SavrUser | null }> {
 
 export function updateProfile(patch: Partial<Pick<SavrUser, 'householdSize' | 'incomeLevel' | 'dependents' | 'employmentStatus' | 'currentFoodAccess' | 'previousAllocationsCount' | 'housingCost' | 'debt' | 'preferredCategory' | 'maxDistanceKm' | 'postcode' | 'ruralArea'>>): Promise<SavrUser> {
   return apiFetch('/api/accounts/profile/', { method: 'PATCH', body: JSON.stringify(patch) });
+}
+
+export interface ListingCollection {
+  results: Listing[];
+  count: number;
+}
+
+export interface CreateListingPayload {
+  name: string;
+  category: string;
+  description?: string;
+  dietaryTags?: string[];
+  tags?: string[];
+  quantityAvailable: number;
+  price: number;
+  originalValue?: number | null;
+  pickupLocation?: string;
+  pickupStart?: string;
+  pickupEnd?: string;
+  interestDeadline?: string;
+}
+
+export function fetchListings(): Promise<ListingCollection> {
+  return apiFetch('/api/listings/');
+}
+
+export function fetchListing(slug: string): Promise<Listing> {
+  return apiFetch(`/api/listings/${slug}/`);
+}
+
+export function createMarketplaceListing(payload: CreateListingPayload): Promise<Listing> {
+  return apiFetch('/api/vendor/listings/', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function submitListingInterest(slug: string, requestedQuantity = 1) {
+  return apiFetch(`/api/listings/${slug}/interest/`, {
+    method: 'POST',
+    body: JSON.stringify({ requestedQuantity }),
+  });
 }

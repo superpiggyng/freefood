@@ -57,9 +57,6 @@ const initialForm = {
 
 type RegisterForm = typeof initialForm;
 
-<<<<<<< Updated upstream
-function RecipientRegister({ redirectTo }: { redirectTo: string }) {
-=======
 // Maps the backend form field name to the frontend form key and the wizard step it lives on.
 const fieldMap: Record<string, { key: keyof RegisterForm; step: number }> = {
   username: { key: 'username', step: 0 },
@@ -80,8 +77,7 @@ const fieldMap: Record<string, { key: keyof RegisterForm; step: number }> = {
   debt: { key: 'debt', step: 3 },
 };
 
-export default function RegisterPage() {
->>>>>>> Stashed changes
+function RecipientRegister({ redirectTo }: { redirectTo: string }) {
   const { register } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
@@ -186,18 +182,11 @@ export default function RegisterPage() {
             <form className="eligibility-form" onSubmit={step < steps.length - 1 ? goNext : submit}>
               {step === 0 && (
                 <div className="form-grid form-grid--two-columns">
-<<<<<<< Updated upstream
                   <p className="account-switch form-field--wide">Signing up a cafe, restaurant or grocer? <Link to="/vendors/signup">Create a business account</Link></p>
-                  <label className="form-field">Username<input required autoFocus value={form.username} onChange={(event) => update('username', event.target.value)} /></label>
-                  <label className="form-field">Email<input type="email" required value={form.email} onChange={(event) => update('email', event.target.value)} /></label>
-                  <label className="form-field">Password<input type="password" required minLength={12} value={form.password1} onChange={(event) => update('password1', event.target.value)} /></label>
-                  <label className="form-field">Confirm password<input type="password" required minLength={12} value={form.password2} onChange={(event) => update('password2', event.target.value)} /></label>
-=======
                   <label className={`form-field${fieldErrors.username ? ' form-field--invalid' : ''}`}>Username<input required autoFocus value={form.username} onChange={(event) => update('username', event.target.value)} />{fieldErrors.username && <small className="field-error">{fieldErrors.username}</small>}</label>
                   <label className={`form-field${fieldErrors.email ? ' form-field--invalid' : ''}`}>Email<input type="email" required value={form.email} onChange={(event) => update('email', event.target.value)} />{fieldErrors.email && <small className="field-error">{fieldErrors.email}</small>}</label>
                   <label className={`form-field${fieldErrors.password1 ? ' form-field--invalid' : ''}`}>Password<input type="password" required minLength={12} value={form.password1} onChange={(event) => update('password1', event.target.value)} />{fieldErrors.password1 && <small className="field-error">{fieldErrors.password1}</small>}</label>
                   <label className={`form-field${fieldErrors.password2 ? ' form-field--invalid' : ''}`}>Confirm password<input type="password" required minLength={12} value={form.password2} onChange={(event) => update('password2', event.target.value)} />{fieldErrors.password2 && <small className="field-error">{fieldErrors.password2}</small>}</label>
->>>>>>> Stashed changes
                 </div>
               )}
 

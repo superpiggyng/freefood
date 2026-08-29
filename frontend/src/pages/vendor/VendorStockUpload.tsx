@@ -55,6 +55,8 @@ export default function VendorStockUpload() {
   const [results, setResults] = useState<StockMatch[] | null>(null);
   const [skipped, setSkipped] = useState<number[]>([]);
   const [published, setPublished] = useState(0);
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const [publishing, setPublishing] = useState(false);
   const funded = fundedSuburbs.includes(suburb);
 
   const readFile = (event: ChangeEvent<HTMLInputElement>) => {
@@ -72,6 +74,18 @@ export default function VendorStockUpload() {
 
   const included = (results ?? []).filter((item) => !skipped.includes(item.id));
   const toggle = (id: number) => setSkipped((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  const publish = async () => {
+    setPublishError(null);
+    setPublishing(true);
+    try {
+      await publishListings(included.map((item, index) => toListing(item, pickupWindow, index)));
+      setPublished(included.length);
+    } catch (error) {
+      setPublishError(error instanceof Error ? error.message : 'Could not publish listings.');
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   return <DashboardShell productLabel="for Business" navItems={nav} userName="Bakers Lane" userRole="Silver Partner">
     <header className="dashboard-heading"><div><h1>Upload today’s surplus</h1><p>Paste or upload what is left over. SAVR prices it against the sponsor fund and matches it to nearby demand.</p></div><a className="button button--secondary" href="/vendor">Back to overview</a></header>
@@ -124,7 +138,8 @@ export default function VendorStockUpload() {
               </li>;
             })}
           </ul>
-          <button className="button button--primary button--wide" type="button" onClick={() => { publishListings(included.map((item, index) => toListing(item, pickupWindow, index))); setPublished(included.length); }} disabled={!included.length}>Publish {included.length} listing{included.length === 1 ? '' : 's'}</button>
+          <button className="button button--primary button--wide" type="button" onClick={publish} disabled={!included.length || publishing}>{publishing ? 'Publishing…' : `Publish ${included.length} listing${included.length === 1 ? '' : 's'}`}</button>
+          {publishError && <p className="form-error" role="alert">{publishError}</p>}
           {published > 0 && <p className="form-success" role="status"><Check size={14}/> {published} listing{published === 1 ? '' : 's'} published and live in the marketplace. Matched recipients in {suburb} are being notified now. <a href="/marketplace">View them</a></p>}
         </>}
       </section>

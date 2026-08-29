@@ -5,10 +5,11 @@ from django.core.validators import MinValueValidator
 
 class Item(models.Model):
     CATEGORY_CHOICES = (
-        ("meal", "Prepared meal"),
+        ("meals", "Meals"),
         ("groceries", "Groceries"),
         ("bakery", "Bakery"),
         ("produce", "Produce"),
+        ("snacks", "Snacks"),
         ("other", "Other"),
     )
 

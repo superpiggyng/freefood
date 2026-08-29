@@ -1,13 +1,10 @@
 import type { ReactNode } from 'react';
-<<<<<<< Updated upstream
-import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
-=======
 import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
->>>>>>> Stashed changes
 import { Header } from './components/Header';
 import type { FoodListing } from './components/ListingCard';
 import { findListing, useListings } from './lib/listingStore';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AccessDeniedPage from './pages/public/AccessDeniedPage';
 import LandingPage from './pages/public/LandingPage';
 import ListingDetailPage, { type ListingDetail } from './pages/public/ListingDetailPage';
 import MarketplacePage from './pages/public/MarketplacePage';
@@ -25,7 +22,7 @@ import VendorStockUpload from './pages/vendor/VendorStockUpload';
 import RegisterPage from './pages/auth/RegisterPage';
 import LoginPage from './pages/auth/LoginPage';
 import { useAuth } from './lib/authContext';
-import type { SavrUser } from './lib/api';
+import { submitListingInterest, type SavrUser } from './lib/api';
 import type { Listing } from './types';
 
 const toCard = (item: Listing): FoodListing => ({
@@ -41,20 +38,6 @@ function PublicLayout({ children, marketplace = false }: { children: ReactNode; 
   return <><Header marketplace={marketplace}/>{children}</>;
 }
 
-<<<<<<< Updated upstream
-function AuthMessage({ title, body }: { title: string; body: string }) {
-  return <PublicLayout><main className="page-shell auth-message"><header className="page-heading"><h1>{title}</h1><p>{body}</p></header><a className="button button--primary" href="/register">Get started</a></main></PublicLayout>;
-}
-
-function ProtectedRoute({ children, allowedRoles, staffOnly = false }: { children: ReactNode; allowedRoles?: string[]; staffOnly?: boolean }) {
-  const { user, loading } = useAuth();
-  const location = useLocation();
-
-  if (loading) return <AuthMessage title="Checking access" body="Please wait while we confirm your sign-in status." />;
-  if (!user) return <Navigate to="/register" replace state={{ from: location.pathname, authRequired: true }} />;
-  if (staffOnly && !user.isStaff && !user.isSuperuser) return <AuthMessage title="Access restricted" body="This area is only available to staff accounts." />;
-  if (allowedRoles && !allowedRoles.includes(user.role)) return <AuthMessage title="Access restricted" body="Your account type does not have access to this area." />;
-=======
 function ProtectedRoute({ children, allowedRoles, staffOnly = false }: { children: ReactNode; allowedRoles?: string[]; staffOnly?: boolean }) {
   const { user, loading } = useAuth();
 
@@ -63,7 +46,7 @@ function ProtectedRoute({ children, allowedRoles, staffOnly = false }: { childre
   }
 
   if (!user) {
-    return <Navigate to="/register" replace />;
+    return <PublicLayout><AccessDeniedPage reason="login" /></PublicLayout>;
   }
 
   if (staffOnly && !user.isStaff && !user.isSuperuser) {
@@ -73,7 +56,6 @@ function ProtectedRoute({ children, allowedRoles, staffOnly = false }: { childre
   if (allowedRoles && !allowedRoles.includes(user.role)) {
     return <PublicLayout><AccessDeniedPage reason="role" /></PublicLayout>;
   }
->>>>>>> Stashed changes
 
   return children;
 }
@@ -82,7 +64,10 @@ function DetailRoute({ user }: { user: SavrUser | null }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const all = useListings();
-  const source = findListing(all, id) ?? all[0];
+  const source = findListing(all, id);
+  if (!source) {
+    return <PublicLayout><main className="page-shell detail-page"><header className="page-heading"><h1>Listing not found</h1><p>This food listing is no longer available.</p></header><a className="button button--primary" href="/marketplace">Back to marketplace</a></main></PublicLayout>;
+  }
   const base = toCard(source);
   const allergens = source.allergens.length ? `Contains ${source.allergens.join(', ')}` : 'No major allergens declared';
   const crossContact = source.possibleCrossContact?.length ? ` · Possible cross-contact with ${source.possibleCrossContact.join(', ')}` : '';
@@ -95,13 +80,15 @@ function DetailRoute({ user }: { user: SavrUser | null }) {
     co2Avoided: `${(source.quantityLeft * 0.9).toFixed(1)} kg`,
     vendorVerified: true, isAvailable: source.quantityLeft > 0,
   };
-  return <PublicLayout><ListingDetailPage listing={detail} onRequest={(item) => {
+  return <PublicLayout><ListingDetailPage listing={detail} onRequest={async (item) => {
     if (!user) {
-<<<<<<< Updated upstream
-      navigate('/register', { state: { from: `/marketplace/${id}`, authRequired: true } });
-=======
-      navigate('/register');
->>>>>>> Stashed changes
+      navigate('/access-denied');
+      return;
+    }
+    try {
+      await submitListingInterest(String(item.id));
+    } catch {
+      navigate('/access-denied');
       return;
     }
     saveRequest({ id: String(item.id), title: item.title, vendor: item.vendorName, pickupWindow: item.pickupWindow });
@@ -117,6 +104,7 @@ export default function App() {
     <Route path="/" element={<PublicLayout><LandingPage heroImageUrl="/savr-icon.png"/></PublicLayout>}/>
     <Route path="/marketplace" element={<PublicLayout marketplace><MarketplacePage listings={listings} categories={[{slug:'bakery',name:'Bakery'},{slug:'groceries',name:'Groceries'},{slug:'meals',name:'Meals'},{slug:'snacks',name:'Snacks'}]} initialLocation="Marrickville, NSW"/></PublicLayout>}/>
     <Route path="/marketplace/:id" element={<DetailRoute user={user}/>}/>
+    <Route path="/access-denied" element={<PublicLayout><AccessDeniedPage reason="login" /></PublicLayout>}/>
     <Route path="/register" element={<RegisterPage/>}/>
     <Route path="/login" element={<LoginPage/>}/>
     <Route path="/vendors/signup" element={<RegisterPage/>}/>
