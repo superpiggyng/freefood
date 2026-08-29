@@ -38,6 +38,9 @@ export const sponsorLogos: SponsorLogo[] = [
   { name: 'Flow Traders', logo: '/sponsors/flow-traders.png' },
   { name: 'Jane Street', logo: '/sponsors/jane-street.png' },
   { name: 'Apple', logo: '/sponsors/apple.png' },
+  { name: 'Google', logo: '/sponsors/google.svg' },
+  { name: 'Microsoft', logo: '/sponsors/microsoft.svg' },
+  { name: 'Crown', logo: '/sponsors/crown.svg' },
   { name: 'NSW Government', logo: '/sponsors/nsw-government.png' },
 ];
 
