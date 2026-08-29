@@ -1,8 +1,9 @@
 import { RequestCard } from "./components/RequestCard";
 import type { FoodRequest } from "./components/RequestCard";
 import { RecipientSidebar } from "./components/RecipientSidebar";
-import { getSavedRequest, hasEligibility } from "../../lib/mvpStore";
+import { getSavedRequest } from "../../lib/mvpStore";
 import { useListings } from "../../lib/listingStore";
+import { useAuth } from "../../lib/authContext";
 import { money } from "../../lib/sponsorship";
 
 const pendingRequests: FoodRequest[] = [
@@ -35,6 +36,8 @@ function RequestSection({ title, requests }: RequestSectionProps) {
 export default function RequestsPage() {
   const listings = useListings();
   const savedRequest = getSavedRequest();
+  const { user } = useAuth();
+  const profileComplete = Boolean(user?.postcode);
 
   /* Show each request with what it costs the person and what the sponsor covers. */
   const withFunding = (request: FoodRequest): FoodRequest => {
@@ -60,7 +63,7 @@ export default function RequestsPage() {
       <RecipientSidebar activeItem="requests" />
       <section className="recipient-dashboard__content" aria-labelledby="requests-title">
         <header className="requests-header"><div><h1 id="requests-title">My requests</h1><p>Track requests and get ready for your pickups.</p></div><a className="button button--primary" href="/marketplace">Browse food</a></header>
-        {!hasEligibility() && <p className="requests-tip"><strong>Complete your profile</strong> so requests can be matched fairly. <a href="/eligibility">Start now</a></p>}
+        {!profileComplete && <p className="requests-tip"><strong>Complete your profile</strong> so requests can be matched fairly. <a href="/eligibility">Start now</a></p>}
         <RequestSection title="Pending / In review" requests={currentPending} />
         <section className="requests-section"><h2>Allocated</h2><div className="allocated-request"><div className="requests-list">{allocated.map((request) => <RequestCard request={request} key={request.id} />)}</div><aside className="pickup-code" aria-label="Pickup code"><div className="pickup-code__qr" aria-hidden="true" /><p>Show this QR code at pickup</p><strong>SAVR-1264</strong><button className="button button--secondary" type="button">Add to wallet</button></aside></div></section>
         <RequestSection title="Other requests" requests={others} />

@@ -102,17 +102,40 @@ function RecipientRegister({ redirectTo }: { redirectTo: string }) {
     });
   };
 
-  const isStepValid = () => {
-    if (step === 0) return form.username.trim().length > 0 && form.email.trim().length > 0 && form.password1.length >= 12 && form.password1 === form.password2;
-    if (step === 2) return form.postcode.trim().length > 0;
-    return true;
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const validateStep = (targetStep: number): Partial<Record<keyof RegisterForm, string>> => {
+    const errors: Partial<Record<keyof RegisterForm, string>> = {};
+    if (targetStep === 0) {
+      if (!form.username.trim()) errors.username = 'Username is required.';
+      if (!form.email.trim()) errors.email = 'Email is required.';
+      else if (!emailPattern.test(form.email.trim())) errors.email = 'Enter a valid email address.';
+      if (form.password1.length < 12) errors.password1 = 'Password must be at least 12 characters.';
+      if (form.password2 !== form.password1) errors.password2 = 'Passwords do not match.';
+    }
+    if (targetStep === 2) {
+      if (!Number.isFinite(form.householdSize) || form.householdSize < 1) errors.householdSize = 'Household size must be at least 1.';
+      if (!Number.isFinite(form.dependents) || form.dependents < 0) errors.dependents = 'Dependents cannot be negative.';
+      if (!form.postcode.trim()) errors.postcode = 'Postcode is required.';
+      if (form.age !== '' && (!Number.isFinite(Number(form.age)) || Number(form.age) < 0 || Number(form.age) > 120)) errors.age = 'Age must be between 0 and 120.';
+      if (form.heightCm !== '' && (!Number.isFinite(Number(form.heightCm)) || Number(form.heightCm) < 30 || Number(form.heightCm) > 260)) errors.heightCm = 'Height must be between 30 and 260 cm.';
+      if (form.weightKg !== '' && (!Number.isFinite(Number(form.weightKg)) || Number(form.weightKg) < 0 || Number(form.weightKg) > 500)) errors.weightKg = 'Weight must be between 0 and 500 kg.';
+    }
+    if (targetStep === 3) {
+      if (!Number.isFinite(form.previousAllocationsCount) || form.previousAllocationsCount < 0) errors.previousAllocationsCount = 'This cannot be negative.';
+      if (form.housingCost !== '' && (!Number.isFinite(Number(form.housingCost)) || Number(form.housingCost) < 0)) errors.housingCost = 'Enter a valid amount.';
+      if (form.debt !== '' && (!Number.isFinite(Number(form.debt)) || Number(form.debt) < 0)) errors.debt = 'Enter a valid amount.';
+    }
+    return errors;
   };
 
   const goNext = (event: FormEvent) => {
     event.preventDefault();
     setError(null);
-    if (!isStepValid()) {
-      setError(step === 0 ? 'Enter a username, email and matching passwords (12+ characters).' : 'Enter your postcode.');
+    const stepErrors = validateStep(step);
+    if (Object.keys(stepErrors).length > 0) {
+      setFieldErrors((current) => ({ ...current, ...stepErrors }));
+      setError('Please fix the highlighted fields below.');
       return;
     }
     setStep((current) => Math.min(current + 1, steps.length - 1));
@@ -127,6 +150,14 @@ function RecipientRegister({ redirectTo }: { redirectTo: string }) {
     event.preventDefault();
     setError(null);
     setFieldErrors({});
+    const allErrors = { ...validateStep(0), ...validateStep(2), ...validateStep(3) };
+    if (Object.keys(allErrors).length > 0) {
+      setFieldErrors(allErrors);
+      const stepsWithErrors = Object.keys(allErrors).map((key) => Object.values(fieldMap).find((entry) => entry.key === key)?.step ?? 0);
+      setStep(Math.min(...stepsWithErrors));
+      setError('Please fix the highlighted fields below.');
+      return;
+    }
     setSubmitting(true);
     try {
       await register(form);
@@ -134,6 +165,7 @@ function RecipientRegister({ redirectTo }: { redirectTo: string }) {
     } catch (err) {
       if (err instanceof ApiError && err.errors) {
         const nextFieldErrors: Partial<Record<keyof RegisterForm, string>> = {};
+        const generalMessages: string[] = [];
         let earliestStep = steps.length - 1;
         for (const [backendField, messages] of Object.entries(err.errors)) {
           const mapped = fieldMap[backendField];
@@ -141,11 +173,13 @@ function RecipientRegister({ redirectTo }: { redirectTo: string }) {
           if (mapped) {
             nextFieldErrors[mapped.key] = message;
             earliestStep = Math.min(earliestStep, mapped.step);
+          } else {
+            generalMessages.push(message);
           }
         }
         setFieldErrors(nextFieldErrors);
-        setStep(earliestStep);
-        setError('Please fix the highlighted fields below.');
+        if (Object.keys(nextFieldErrors).length > 0) setStep(earliestStep);
+        setError(generalMessages.length > 0 ? generalMessages.join(' ') : 'Please fix the highlighted fields below.');
       } else {
         setError(err instanceof Error ? err.message : 'Registration failed.');
       }
@@ -270,24 +304,75 @@ function RecipientRegister({ redirectTo }: { redirectTo: string }) {
 
 const businessTypes = ['Cafe', 'Restaurant', 'Bakery', 'Grocer', 'Supermarket', 'Caterer'];
 
+type BusinessForm = { username: string; email: string; password1: string; password2: string; vendorName: string; businessType: string; businessAddress: string };
+
+// Maps the backend form field name to the frontend business form key.
+const businessFieldMap: Record<string, keyof BusinessForm> = {
+  username: 'username',
+  email: 'email',
+  password1: 'password1',
+  password2: 'password2',
+  vendor_name: 'vendorName',
+  business_type: 'businessType',
+  business_address: 'businessAddress',
+  address: 'businessAddress',
+};
+
 function BusinessRegister() {
   const { registerBusiness } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username: '', email: '', password1: '', password2: '', vendorName: '', businessType: 'Cafe', businessAddress: '' });
+  const [form, setForm] = useState<BusinessForm>({ username: '', email: '', password1: '', password2: '', vendorName: '', businessType: 'Cafe', businessAddress: '' });
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof BusinessForm, string>>>({});
   const [submitting, setSubmitting] = useState(false);
-  const update = (key: keyof typeof form, value: string) => setForm((current) => ({ ...current, [key]: value }));
+  const update = (key: keyof BusinessForm, value: string) => {
+    setForm((current) => ({ ...current, [key]: value }));
+    setFieldErrors((current) => {
+      if (!(key in current)) return current;
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
+  };
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
-    if (form.password1 !== form.password2) { setError('Both passwords must match.'); return; }
+    setFieldErrors({});
+    const nextErrors: Partial<Record<keyof BusinessForm, string>> = {};
+    if (!form.vendorName.trim()) nextErrors.vendorName = 'Business name is required.';
+    if (!form.businessAddress.trim()) nextErrors.businessAddress = 'Business address is required.';
+    if (!form.username.trim()) nextErrors.username = 'Username is required.';
+    if (!form.email.trim()) nextErrors.email = 'Email is required.';
+    else if (!emailPattern.test(form.email.trim())) nextErrors.email = 'Enter a valid email address.';
+    if (form.password1.length < 12) nextErrors.password1 = 'Password must be at least 12 characters.';
+    if (form.password2 !== form.password1) nextErrors.password2 = 'Passwords do not match.';
+    if (Object.keys(nextErrors).length > 0) {
+      setFieldErrors(nextErrors);
+      setError('Please fix the highlighted fields below.');
+      return;
+    }
     setSubmitting(true);
     try {
       await registerBusiness(form);
       navigate('/vendor');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed.');
+      if (err instanceof ApiError && err.errors) {
+        const nextFieldErrors: Partial<Record<keyof BusinessForm, string>> = {};
+        const generalMessages: string[] = [];
+        for (const [backendField, messages] of Object.entries(err.errors)) {
+          const mapped = businessFieldMap[backendField];
+          const message = messages[0]?.message ?? 'This field is invalid.';
+          if (mapped) nextFieldErrors[mapped] = message;
+          else generalMessages.push(message);
+        }
+        setFieldErrors(nextFieldErrors);
+        setError(generalMessages.length > 0 ? generalMessages.join(' ') : 'Please fix the highlighted fields below.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Registration failed.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -303,13 +388,13 @@ function BusinessRegister() {
           </header>
           <form className="eligibility-form" onSubmit={submit}>
             <div className="form-grid form-grid--two-columns">
-              <label className="form-field">Business name<input required autoFocus value={form.vendorName} onChange={(event) => update('vendorName', event.target.value)} /></label>
+              <label className={`form-field${fieldErrors.vendorName ? ' form-field--invalid' : ''}`}>Business name<input required autoFocus value={form.vendorName} onChange={(event) => update('vendorName', event.target.value)} />{fieldErrors.vendorName && <small className="field-error">{fieldErrors.vendorName}</small>}</label>
               <label className="form-field">Business type<select value={form.businessType} onChange={(event) => update('businessType', event.target.value)}>{businessTypes.map((item) => <option key={item}>{item}</option>)}</select></label>
-              <label className="form-field form-field--wide">Business address<input required value={form.businessAddress} onChange={(event) => update('businessAddress', event.target.value)} placeholder="Street, suburb, postcode" /></label>
-              <label className="form-field">Username<input required value={form.username} onChange={(event) => update('username', event.target.value)} /></label>
-              <label className="form-field">Email<input type="email" required value={form.email} onChange={(event) => update('email', event.target.value)} /></label>
-              <label className="form-field">Password<input type="password" required minLength={12} value={form.password1} onChange={(event) => update('password1', event.target.value)} /></label>
-              <label className="form-field">Confirm password<input type="password" required minLength={12} value={form.password2} onChange={(event) => update('password2', event.target.value)} /></label>
+              <label className={`form-field form-field--wide${fieldErrors.businessAddress ? ' form-field--invalid' : ''}`}>Business address<input required value={form.businessAddress} onChange={(event) => update('businessAddress', event.target.value)} placeholder="Street, suburb, postcode" />{fieldErrors.businessAddress && <small className="field-error">{fieldErrors.businessAddress}</small>}</label>
+              <label className={`form-field${fieldErrors.username ? ' form-field--invalid' : ''}`}>Username<input required value={form.username} onChange={(event) => update('username', event.target.value)} />{fieldErrors.username && <small className="field-error">{fieldErrors.username}</small>}</label>
+              <label className={`form-field${fieldErrors.email ? ' form-field--invalid' : ''}`}>Email<input type="email" required value={form.email} onChange={(event) => update('email', event.target.value)} />{fieldErrors.email && <small className="field-error">{fieldErrors.email}</small>}</label>
+              <label className={`form-field${fieldErrors.password1 ? ' form-field--invalid' : ''}`}>Password<input type="password" required minLength={12} value={form.password1} onChange={(event) => update('password1', event.target.value)} />{fieldErrors.password1 && <small className="field-error">{fieldErrors.password1}</small>}</label>
+              <label className={`form-field${fieldErrors.password2 ? ' form-field--invalid' : ''}`}>Confirm password<input type="password" required minLength={12} value={form.password2} onChange={(event) => update('password2', event.target.value)} />{fieldErrors.password2 && <small className="field-error">{fieldErrors.password2}</small>}</label>
             </div>
             <aside className="need-score-help"><strong>What you get</strong><p>Community partner status and badge, featured placement in your suburb, and sponsor-funded demand for food you would otherwise throw away.</p></aside>
             {error && <p className="form-error" role="alert">{error}</p>}

@@ -21,9 +21,8 @@ interface EligibilityFormState {
 }
 
 /* Registration already captures the account and the need questions, so this page
-   is the editable version of that profile rather than a second set of the same
-   questions. Everything shown here is saved. */
-const journey = ["Account", "Household profile", "Food preferences", "Browse food"];
+   is a read-only summary of that profile with an edit mode, not a second
+   registration form. */
 const pickupDayOptions = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const categories = [
   { value: "bakery", label: "Bakery" }, { value: "groceries", label: "Groceries" },
@@ -40,6 +39,10 @@ const employmentOptions = [
   { value: "unemployed", label: "Unemployed" }, { value: "student", label: "Student" },
   { value: "retired", label: "Retired" }, { value: "unable-to-work", label: "Unable to work" },
 ];
+const incomeOptions = [
+  { value: "under-25000", label: "Under $25,000 per year" }, { value: "25000-49999", label: "$25,000-$49,999" },
+  { value: "50000-74999", label: "$50,000-$74,999" }, { value: "75000-plus", label: "$75,000 or more" },
+];
 const dietaryOptions = ["None", "Vegetarian", "Vegan", "Halal", "Gluten-free", "Dairy-free"];
 
 const PICKUP_KEY = "savr.pickupPreferences";
@@ -51,10 +54,15 @@ const initialForm: EligibilityFormState = {
   travelDistance: 5, postcode: "", pickupDays: ["Mon", "Wed", "Fri"], pickupTime: "afternoon",
 };
 
+const pickupTimeLabels: Record<string, string> = {
+  morning: "Morning (8am-12pm)", afternoon: "Afternoon (12pm-6pm)", evening: "Evening (6pm-9pm)",
+};
+
 export default function EligibilityPage() {
   const { user, refresh } = useAuth();
+  const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<EligibilityFormState>(initialForm);
-  const [submitted, setSubmitted] = useState(false);
+  const [savedMessage, setSavedMessage] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -62,7 +70,7 @@ export default function EligibilityPage() {
     () => Math.min(98, 40 + form.dependants * 6 + Math.max(0, form.householdSize - 1) * 4 + (form.foodAccess === "very-limited" ? 24 : form.foodAccess === "often-limited" ? 16 : form.foodAccess === "sometimes-limited" ? 8 : 0)),
     [form.dependants, form.foodAccess, form.householdSize],
   );
-  const score = submitted && user ? user.needScore : estimate;
+  const score = user?.needScore ?? estimate;
 
   /* Prefill from the account as soon as the session resolves, without an effect. */
   const [hydratedFor, setHydratedFor] = useState<number | null>(null);
@@ -116,7 +124,8 @@ export default function EligibilityPage() {
       localStorage.setItem(PICKUP_KEY, JSON.stringify({ pickupDays: form.pickupDays, pickupTime: form.pickupTime }));
       await refresh();
       saveEligibility();
-      setSubmitted(true);
+      setSavedMessage(true);
+      setEditing(false);
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : "Could not save your profile.");
     } finally {
@@ -124,34 +133,66 @@ export default function EligibilityPage() {
     }
   };
 
+  if (!user) return null;
+
+  if (!editing) {
+    return (
+      <main className="eligibility-page">
+        <div className="eligibility-page__layout eligibility-page__layout--single">
+          <section className="eligibility-form-panel" aria-labelledby="profile-title">
+            <header className="page-heading">
+              <h1 id="profile-title">Your profile</h1>
+              <p>Everything you shared when you signed up. Update it any time and your Need Score changes with it.</p>
+            </header>
+            <div className="eligibility-form-panel__content">
+              <aside className="need-score-help review-summary">
+                <strong>Household &amp; need details</strong>
+                <ul>
+                  <li><span>Household income</span><strong>{incomeOptions.find((item) => item.value === form.householdIncome)?.label}</strong></li>
+                  <li><span>Employment status</span><strong>{employmentOptions.find((item) => item.value === form.employmentStatus)?.label}</strong></li>
+                  <li><span>Household size</span><strong>{form.householdSize}</strong></li>
+                  <li><span>Dependants</span><strong>{form.dependants}</strong></li>
+                  <li><span>Current food access</span><strong>{foodAccessOptions.find((item) => item.value === form.foodAccess)?.label}</strong></li>
+                  <li><span>Dietary requirement</span><strong>{form.dietaryRequirement}</strong></li>
+                  <li><span>Food you look for most</span><strong>{categories.find((item) => item.value === form.preferredCategory)?.label}</strong></li>
+                  <li><span>Postcode</span><strong>{form.postcode || "Not provided"}</strong></li>
+                  <li><span>Maximum travel distance</span><strong>{form.travelDistance} km</strong></li>
+                  <li><span>Preferred pickup days</span><strong>{form.pickupDays.length ? form.pickupDays.join(", ") : "Any day"}</strong></li>
+                  <li><span>Preferred pickup time</span><strong>{pickupTimeLabels[form.pickupTime]}</strong></li>
+                </ul>
+              </aside>
+
+              <aside className="need-score-card" aria-label={`Your Need Score is ${score}`}>
+                <h2>Your Need Score</h2>
+                <div className="need-score-card__ring"><strong>{score}</strong><span>{score >= 70 ? "High need" : score >= 45 ? "Moderate need" : "Lower need"}</span></div>
+                <p className="need-score-card__qualified">You qualify for SAVR</p>
+                <p>Calculated by SAVR from your saved profile.</p>
+              </aside>
+            </div>
+
+            {savedMessage && <p className="form-success" role="status">Profile saved. Your Need Score is now {score}.</p>}
+            <div className="form-actions">
+              <button className="button button--primary" type="button" onClick={() => { setSavedMessage(false); setEditing(true); }}>Edit profile</button>
+              <Link className="button button--secondary" to="/preferences">Food preferences</Link>
+            </div>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="eligibility-page">
-      <div className="eligibility-page__layout">
-        <aside className="eligibility-progress" aria-label="Your progress">
-          <ol className="eligibility-progress__steps">
-            {journey.map((step, index) => (
-              <li
-                className={`eligibility-progress__step${index === 1 ? " eligibility-progress__step--active" : ""}${index < 1 || (submitted && index === 1) ? " eligibility-progress__step--complete" : ""}`}
-                aria-current={index === 1 ? "step" : undefined}
-                key={step}
-              >
-                <span className="eligibility-progress__number" aria-hidden="true">{index < 1 || (submitted && index === 1) ? "✓" : index + 1}</span>
-                {step}
-              </li>
-            ))}
-          </ol>
-          <p className="eligibility-progress__privacy"><strong>Your information is private and secure.</strong> We only use it to match food fairly by need, and businesses never see it.</p>
-        </aside>
-
+      <div className="eligibility-page__layout eligibility-page__layout--single">
         <section className="eligibility-form-panel" aria-labelledby="eligibility-title">
           <header className="page-heading">
-            <h1 id="eligibility-title">Your household profile</h1>
-            <p>Prefilled from your registration. Update it any time, and your Need Score changes with it.</p>
+            <h1 id="eligibility-title">Edit your profile</h1>
+            <p>Update any of the details below. Your Need Score recalculates when you save.</p>
           </header>
           <div className="eligibility-form-panel__content">
             <form className="eligibility-form" onSubmit={handleSubmit}>
               <div className="form-grid form-grid--two-columns">
-                <label className="form-field">Household income (before tax)<select value={form.householdIncome} onChange={(event) => setForm({ ...form, householdIncome: event.target.value })}><option value="under-25000">Under $25,000 per year</option><option value="25000-49999">$25,000-$49,999</option><option value="50000-74999">$50,000-$74,999</option><option value="75000-plus">$75,000 or more</option></select></label>
+                <label className="form-field">Household income (before tax)<select value={form.householdIncome} onChange={(event) => setForm({ ...form, householdIncome: event.target.value })}>{incomeOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
                 <label className="form-field">Employment status<select value={form.employmentStatus} onChange={(event) => setForm({ ...form, employmentStatus: event.target.value })}>{employmentOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
                 <label className="form-field">Household size<input type="number" min="1" required value={form.householdSize} onChange={(event) => setForm({ ...form, householdSize: Number(event.target.value) })} /></label>
                 <label className="form-field">Number of dependants<input type="number" min="0" required value={form.dependants} onChange={(event) => setForm({ ...form, dependants: Number(event.target.value) })} /></label>
@@ -168,19 +209,18 @@ export default function EligibilityPage() {
               </div>
 
               <aside className="need-score-help"><strong>About your Need Score</strong><p>Income, household size, dependants, employment and food access are combined into a Need Score. It only decides the order of requests when demand is higher than supply.</p></aside>
-              {submitted && <p className="form-success" role="status">Profile saved. Your Need Score is now {user?.needScore ?? score}.</p>}
               {saveError && <p className="form-error" role="alert">{saveError}</p>}
               <div className="form-actions">
-                <button className="button button--primary" type="submit" disabled={saving}>{saving ? "Saving…" : submitted ? "Save changes" : "Save and continue"}</button>
-                {submitted && <Link className="button button--secondary" to="/preferences">Set food preferences</Link>}
+                <button className="button button--secondary" type="button" onClick={() => { setSaveError(null); setEditing(false); }}>Cancel</button>
+                <button className="button button--primary" type="submit" disabled={saving}>{saving ? "Saving…" : "Save changes"}</button>
               </div>
             </form>
 
-            <aside className="need-score-card" aria-label={`Your estimated Need Score is ${score}`}>
+            <aside className="need-score-card" aria-label={`Your estimated Need Score is ${estimate}`}>
               <h2>Your Need Score</h2>
-              <div className="need-score-card__ring"><strong>{score}</strong><span>{score >= 70 ? "High need" : score >= 45 ? "Moderate need" : "Lower need"}</span></div>
+              <div className="need-score-card__ring"><strong>{estimate}</strong><span>{estimate >= 70 ? "High need" : estimate >= 45 ? "Moderate need" : "Lower need"}</span></div>
               <p className="need-score-card__qualified">You qualify for SAVR</p>
-              <p>{submitted ? "Calculated by SAVR from your saved profile." : "An estimate until you save. Nobody at the counter sees it."}</p>
+              <p>Updates live as you edit. Nobody at the counter sees it.</p>
               <ul>
                 <li><span>Income</span><strong>{form.householdIncome === "under-25000" ? "High need" : form.householdIncome === "25000-49999" ? "Moderate" : "Lower"}</strong></li>
                 <li><span>Household</span><strong>{form.householdSize > 3 ? "High need" : "Moderate"}</strong></li>
@@ -194,3 +234,4 @@ export default function EligibilityPage() {
     </main>
   );
 }
+

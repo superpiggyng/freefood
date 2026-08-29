@@ -13,7 +13,7 @@ const navigation: Array<{ id: RecipientNavItem; label: string; href: string }> =
   { id: "browse", label: "Browse food", href: "/marketplace" },
   { id: "suggested", label: "Suggested for you", href: "/suggested" },
   { id: "requests", label: "My requests", href: "/requests" },
-  { id: "profile", label: "Household profile", href: "/eligibility" },
+  { id: "profile", label: "Your profile", href: "/eligibility" },
   { id: "preferences", label: "Food preferences", href: "/preferences" },
 ];
 
