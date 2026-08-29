@@ -5,7 +5,7 @@ import { currentVendor } from '../../data/sponsors';
 import { tierFor, tierLadder } from '../../lib/sponsorship';
 
 const nav: DashboardNavItem[] = [
-  { label: 'Dashboard', icon: '▦', href: '/vendor' }, { label: 'Upload stock', icon: '⇪', href: '/vendor/upload' },
+  { label: 'Dashboard', icon: '▦', href: '/vendor' }, { label: 'Create listing', icon: '⇪', href: '/vendor/upload' },
   { label: 'Requests', icon: '♡', href: '/vendor/allocations' }, { label: 'Partner status', icon: '★', href: '/vendor/partner', active: true },
   { label: 'My listings', icon: '⌖', href: '/marketplace' },
 ];
@@ -20,7 +20,7 @@ export default function VendorPartnerStatus() {
   const copyBadge = () => { navigator.clipboard?.writeText(badgeSnippet); setCopied(true); };
 
   return <DashboardShell productLabel="for Business" navItems={nav} userName={currentVendor.name} userRole={current?.tier ?? 'View profile'}>
-    <header className="dashboard-heading"><div><h1>Community partner status</h1><p>Listing surplus food earns status, placement and marketing, on top of what the sponsor fund pays you.</p></div><a className="button button--primary" href="/vendor/upload">Upload today’s stock</a></header>
+    <header className="dashboard-heading"><div><h1>Community partner status</h1><p>Listing surplus food earns status, placement and marketing, on top of what the sponsor fund pays you.</p></div><a className="button button--primary" href="/vendor/upload">Create listing</a></header>
 
     <section className="partner-banner">
       <div className="partner-badge"><Award size={30}/><strong>{current?.tier ?? 'Not yet ranked'}</strong><small>{currentVendor.suburb} · since {currentVendor.joined}</small></div>

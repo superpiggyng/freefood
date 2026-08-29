@@ -26,7 +26,7 @@ export function Header({ marketplace = false, authOnly = false }: { marketplace?
       {authOnly ? <>
         <Link to="/register">Recipient signup</Link><Link to="/vendors/signup">Business signup</Link>
       </> : user?.role === 'vendor' ? <>
-        <Link to="/vendor">Dashboard</Link><Link to="/vendor/upload">Upload stock</Link><Link to="/vendor/allocations">Requests</Link><Link to="/vendor/partner">Partner status</Link><Link to="/marketplace">My listings</Link>
+        <Link to="/vendor">Dashboard</Link><Link to="/vendor/upload">Create listing</Link><Link to="/vendor/allocations">Requests</Link><Link to="/vendor/partner">Partner status</Link><Link to="/marketplace">My listings</Link>
       </> : user ? <>
         <Link to="/marketplace">Find food</Link><Link to="/suggested">Suggested</Link><Link to="/requests">My requests</Link>
       </> : <>

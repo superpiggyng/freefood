@@ -8,7 +8,7 @@ const requests: FoodRequest[] = [
   { id: 4, requester: "Daniel R.", need: 61, dietaryMatch: "Good match", distance: "1.8 km", pickupFit: "2 hr window", previous: "2 this month", priority: "Medium" },
 ];
 const nav: DashboardNavItem[] = [
-  { label: "Dashboard", icon: "▦", href: "/vendor" }, { label: "Upload stock", icon: "⇪", href: "/vendor/upload" },
+  { label: "Dashboard", icon: "▦", href: "/vendor" }, { label: "Create listing", icon: "⇪", href: "/vendor/upload" },
   { label: "Requests", icon: "♡", href: "/vendor/allocations", active: true }, { label: "Partner status", icon: "★", href: "/vendor/partner" },
   { label: "My listings", icon: "⌖", href: "/marketplace" },
 ];

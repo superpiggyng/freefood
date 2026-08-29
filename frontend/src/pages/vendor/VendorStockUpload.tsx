@@ -9,7 +9,7 @@ import { currentVendor } from '../../data/sponsors';
 import { estimateNutritionFromImage } from '../../lib/api';
 
 const nav: DashboardNavItem[] = [
-  { label: 'Dashboard', icon: '▦', href: '/vendor' }, { label: 'Upload stock', icon: '⇪', href: '/vendor/upload', active: true },
+  { label: 'Dashboard', icon: '▦', href: '/vendor' }, { label: 'Create listing', icon: '⇪', href: '/vendor/upload', active: true },
   { label: 'Requests', icon: '♡', href: '/vendor/allocations' }, { label: 'Partner status', icon: '★', href: '/vendor/partner' },
   { label: 'My listings', icon: '⌖', href: '/marketplace' },
 ];
@@ -227,7 +227,7 @@ export default function VendorStockUpload() {
   };
 
   return <DashboardShell productLabel="for Business" navItems={nav} userName="Bakers Lane" userRole="Silver Partner">
-    <header className="dashboard-heading"><div><h1>Upload today’s surplus</h1><p>Upload a food photo, add item names and quantities, then match available stock to nearby demand.</p></div><a className="button button--secondary" href="/vendor">Back to overview</a></header>
+    <header className="dashboard-heading"><div><h1>Create new listing</h1><p>Upload a food photo, add item names and quantities, then match available stock to nearby demand.</p></div><a className="button button--secondary" href="/vendor">Back to overview</a></header>
 
     <form className="stock-upload" onSubmit={analyse}>
       <section className="dashboard-panel stock-upload__input">
