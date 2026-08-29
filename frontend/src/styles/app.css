@@ -574,6 +574,11 @@ html{scrollbar-gutter:stable}
 .location-services{display:grid;justify-items:end;gap:6px}.location-services .button{gap:8px;white-space:nowrap}.location-services small{max-width:260px;color:#9b3f32;text-align:right}
 @media(max-width:700px){.location-services{justify-items:start}.location-services small{text-align:left}}
 
+/* Keep the shared sponsor artwork at exactly the same scale and crop between both routes. */
+.sponsors-page>.hero,.sponsor-map-hero{min-height:500px;background-position:center;background-size:cover}
+.sponsor-map-hero{display:flex;align-items:center;padding:112px 0 58px}
+@media(max-width:700px){.sponsors-page>.hero,.sponsor-map-hero{min-height:440px;background-position:center}.sponsor-map-hero{padding:92px 0 46px}}
+
 /* Sponsor-only image transition; the landing page remains unchanged. */
 .sponsors-page>.hero,.sponsor-map-hero{position:relative;isolation:isolate}.sponsors-page>.hero:after,.sponsor-map-hero:after{content:'';position:absolute;z-index:0;inset:auto 0 -1px;height:150px;background:linear-gradient(180deg,transparent 0%,#f4eddb 100%);pointer-events:none}.sponsors-page>.hero>*,.sponsor-map-hero>*{position:relative;z-index:1}
 
