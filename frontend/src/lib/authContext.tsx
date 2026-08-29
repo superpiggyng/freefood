@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { SavrUser } from './api';
 import { fetchSession, loginUser, logoutUser, registerUser, registerVendor, type RegisterPayload, type RegisterVendorPayload } from './api';
+import { preloadPublicListings } from './listingStore';
 
 interface AuthContextValue {
   user: SavrUser | null;
@@ -25,6 +26,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
+    // Food discovery is public, so do not serialize it behind session validation.
+    void preloadPublicListings().catch(() => undefined);
     (async () => {
       try {
         const { user: current } = await fetchSession();

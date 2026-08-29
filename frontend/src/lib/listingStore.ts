@@ -34,6 +34,10 @@ async function loadListings(scope: ListingScope) {
   return store.inflight;
 }
 
+export function preloadPublicListings() {
+  return loadListings('public');
+}
+
 function listingToPayload(item: Listing): CreateListingPayload {
   const now = new Date();
   const pickupStart = new Date(now.getTime() + 2 * 60 * 60 * 1000);

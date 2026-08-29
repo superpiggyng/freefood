@@ -18,7 +18,7 @@ export function Header({ marketplace = false, authOnly = false }: { marketplace?
       navigate('/', { replace: true });
     }
   };
-  return <header className="site-header" data-page={marketplace ? 'marketplace' : 'default'}>
+  return <header className="site-header" data-page={marketplace ? 'marketplace' : 'default'} data-role={user?.role ?? 'guest'}>
     <Logo to={homePath} />
     <button className="mobile-menu" onClick={() => setOpen(!open)} aria-label="Toggle navigation"><Menu /></button>
     <nav className={open ? 'main-nav open' : 'main-nav'}>

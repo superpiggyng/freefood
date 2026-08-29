@@ -81,7 +81,7 @@ function DetailRoute({ user, loading }: { user: SavrUser | null; loading: boolea
   const { id } = useParams();
   const navigate = useNavigate();
   const isVendor = user?.role === 'vendor';
-  const all = useListings(isVendor ? 'vendor' : 'public', !loading);
+  const all = useListings(isVendor ? 'vendor' : 'public', isVendor ? !loading : true);
   if (loading) {
     return <PublicLayout><AccessDeniedPage reason="loading" /></PublicLayout>;
   }
@@ -121,7 +121,7 @@ function DetailRoute({ user, loading }: { user: SavrUser | null; loading: boolea
 function MarketplaceRoute() {
   const { user, loading } = useAuth();
   const isVendor = user?.role === 'vendor';
-  const listings = useListings(isVendor ? 'vendor' : 'public', !loading).map(toCard);
+  const listings = useListings(isVendor ? 'vendor' : 'public', isVendor ? !loading : true).map(toCard);
   if (loading) {
     return <PublicLayout><AccessDeniedPage reason="loading" /></PublicLayout>;
   }
