@@ -549,6 +549,50 @@ html:has(.marketplace),body:has(.marketplace){background-color:#d9cdb6;backgroun
 @media(min-width:1001px){.site-header{display:grid;grid-template-columns:1fr auto 1fr}.site-header>.logo{justify-self:start}.site-header .main-nav{position:static;margin:0;transform:none}.site-header .header-actions{justify-self:end}}
 .location-request{display:flex;align-items:center;justify-content:flex-end;gap:12px}.location-request>span{max-width:260px;color:var(--muted);font-size:12px}.marketplace .location-request .button{white-space:nowrap}@media(max-width:700px){.location-request{align-items:flex-start;justify-content:flex-start;flex-direction:column}}
 
+/* Homepage content follows the cinematic hero with the same high-contrast type treatment. */
+.page-home .sponsor-strip,
+.page-home .impact-journey,
+.page-home > .section,
+.page-home .sponsor-band{background:#153124;color:#fffaf0}
+.page-home .sponsor-strip,
+.page-home .impact-journey{border-color:#ffffff2e}
+.page-home .section-heading h2,
+.page-home .impact-journey__heading h2,
+.page-home .impact-journey__heading > p:last-child,
+.page-home .impact-journey__note,
+.page-home .impact-journey__metric,
+.page-home .impact-journey__metric strong,
+.page-home .impact-journey__metric span,
+.page-home .impact-journey__metric svg,
+.page-home .impact-journey__step h3,
+.page-home .impact-journey__step p,
+.page-home .impact-journey__footer,
+.page-home .funding-points,
+.page-home .funding-points strong,
+.page-home .signup-paths h3,
+.page-home .signup-paths p{color:#fffaf0}
+.page-home .eyebrow,
+.page-home .section-heading > a,
+.page-home .impact-journey__link{color:#f0ad55}
+.page-home .impact-journey__metric{border-color:#ffffff2e;background:#ffffff12}
+.page-home .impact-journey__metric:hover,.page-home .impact-journey__metric:focus-visible{outline-color:#f0ad55;box-shadow:0 12px 24px #07140d66}
+.page-home .impact-journey__step,
+.page-home .signup-paths article,
+.page-home .funding-flow{background:#10281e;border-color:#ffffff2e}
+.page-home .impact-journey__footer{background:#ffffff14}
+.page-home .funding-flow__row,
+.page-home .funding-flow__pair div{border-color:#ffffff2e;background:#ffffff0d;color:#fffaf0}
+.page-home .funding-flow__pair small{color:#d5ded3}
+.page-home .funding-flow__row--result{background:#eff7e6;color:var(--dark)}
+
+/* Marketplace hero copy needs contrast against the grocery image. */
+.marketplace__header .eyebrow,
+.marketplace__header h1,
+.marketplace__header > div > p:last-child{color:#fffaf0;text-shadow:0 2px 12px #07140db3}
+
+/* Dull the artwork behind the marketplace controls without hiding the food imagery. */
+html:has(.marketplace),body:has(.marketplace){background-image:linear-gradient(180deg,#10281e9c 0 430px,#10281e70 600px,#f4eddbb8 820px),url('/grocery.avif')}
+
 /* Public-route consistency: every transparent header sits over artwork, never page content. */
 html:has(.detail-page),body:has(.detail-page),html:has(.access-page),body:has(.access-page){background-color:#d9cdb6;background-image:linear-gradient(#10281e42,#10281e42),url('/grocery.avif');background-position:center top;background-size:cover;background-repeat:no-repeat;background-attachment:fixed}
 .detail-page{width:min(1180px,calc(100% - 40px));padding-top:112px;padding-bottom:64px}.detail-page .breadcrumbs{width:max-content;max-width:100%;margin-bottom:18px;padding:9px 13px;border:1px solid #ffffff8c;border-radius:999px;background:#fffdf8df;color:var(--ink);backdrop-filter:blur(8px)}.detail-page .detail-layout{max-width:none;align-items:start}.detail-page .listing-detail,.detail-page .request-panel>section{border-color:#ffffffa3;border-radius:var(--radius-md);background:#fffdf8f2;box-shadow:var(--shadow-card);backdrop-filter:blur(8px)}.detail-page .request-panel{gap:16px}
