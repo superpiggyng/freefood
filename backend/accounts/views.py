@@ -1,8 +1,9 @@
 import json
 
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+
+from freefood.auth import login_required_json
 
 from .forms import UserSignupForm, VendorSignupForm
 
@@ -37,7 +38,17 @@ def vendor_signup(request):
     return _register(request, VendorSignupForm)
 
 
-@login_required
+@login_required_json
 def profile(request):
     user = request.user
-    return JsonResponse({"id": user.id, "username": user.username, "email": user.email, "firstName": user.first_name, "lastName": user.last_name, "role": user.role, "vendorName": user.vendor_name})
+    return JsonResponse({
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "firstName": user.first_name,
+        "lastName": user.last_name,
+        "role": user.role,
+        "vendorName": user.vendor_name,
+        "isStaff": user.is_staff,
+        "isSuperuser": user.is_superuser,
+    })

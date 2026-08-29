@@ -1,14 +1,15 @@
 import json
 
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+
+from freefood.auth import login_required_json
 
 from .models import FoodPreferenceProfile, PreferenceResponse, RestaurantMeal
 from .services import score_meal
 
 
-@login_required
+@login_required_json
 @require_http_methods(["GET", "PUT", "DELETE"])
 def preferences(request):
     profile, _ = FoodPreferenceProfile.objects.get_or_create(user=request.user)
@@ -30,7 +31,7 @@ def preferences(request):
     return JsonResponse({"allergens": profile.allergens_to_avoid, "dietaryStyles": profile.dietary_styles, "mealGoal": profile.meal_goal, "maxDistanceKm": profile.max_distance_km, "maxPrice": profile.max_price})
 
 
-@login_required
+@login_required_json
 def matches(request):
     profile, _ = FoodPreferenceProfile.objects.get_or_create(user=request.user)
     results = []

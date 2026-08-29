@@ -6,6 +6,8 @@ the response shape consumed by the TypeScript client.
 """
 from django.http import JsonResponse
 
+from freefood.auth import staff_required_json
+
 
 LISTINGS = [
     {"id": 1, "slug": "bakery-rescue-box", "name": "Bakery Rescue Box", "vendor": "Bakers Lane", "category": "Bakery", "price": "FREE", "originalPrice": None, "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=85", "tags": ["Bakery", "Vegetarian"], "quantityLeft": 2, "pickupTime": "5:30 – 6:30 PM", "distance": "0.7 km"},
@@ -28,5 +30,6 @@ def listing_item(request, slug):
     return JsonResponse(listing)
 
 
+@staff_required_json
 def platform_summary(request):
     return JsonResponse({"users": 12540, "vendors": 1285, "activeListings": 342, "mealsAllocated": 4612, "foodRescuedKg": 2860, "co2AvoidedKg": 7120})
