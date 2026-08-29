@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import Interest, Item, MarketplaceListing
+from .models import Allocation, Interest, Item, MarketplaceListing
 
 
 class MarketplaceApiTests(TestCase):
@@ -162,6 +162,106 @@ class MarketplaceApiTests(TestCase):
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(Interest.objects.get(user=self.user, listing=self.listing).status, Interest.STATUS_SUBMITTED)
+
+    def test_vendor_allocation_collection_shows_ranked_requests(self):
+        high_need = get_user_model().objects.create_user(
+            username="high-need",
+            password="SecurePass123!",
+            role="user",
+            needy_metric=92,
+        )
+        low_need = get_user_model().objects.create_user(
+            username="low-need",
+            password="SecurePass123!",
+            role="user",
+            needy_metric=31,
+        )
+        Interest.objects.create(listing=self.listing, user=low_need)
+        Interest.objects.create(listing=self.listing, user=high_need)
+        self.client.force_login(self.vendor)
+
+        response = self.client.get(reverse("marketplace:vendor-allocations"))
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["count"], 1)
+        self.assertEqual(payload["metrics"]["waitingRequests"], 2)
+        requests = payload["results"][0]["requests"]
+        self.assertEqual(requests[0]["requesterName"], "high-need")
+        self.assertEqual(requests[0]["needScore"], 92)
+        self.assertEqual(requests[0]["projectedStatus"], "projected")
+        self.assertEqual(requests[1]["requesterName"], "low-need")
+
+    def test_vendor_allocation_collection_only_shows_own_listings(self):
+        other_vendor = get_user_model().objects.create_user(
+            username="other-vendor",
+            password="SecurePass123!",
+            role="vendor",
+        )
+        other_item = Item.objects.create(name="Other meal", category="meals")
+        MarketplaceListing.objects.create(
+            vendor=other_vendor,
+            item=other_item,
+            quantity_available=3,
+            price=1,
+            pickup_location="456 Other Street",
+            pickup_start=timezone.now() + timedelta(hours=2),
+            pickup_end=timezone.now() + timedelta(hours=3),
+            interest_deadline=timezone.now() + timedelta(hours=1),
+        )
+        self.client.force_login(self.vendor)
+
+        response = self.client.get(reverse("marketplace:vendor-allocations"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["count"], 1)
+        self.assertEqual(response.json()["results"][0]["name"], "Bakery Rescue Box")
+
+    def test_vendor_can_run_matching_after_deadline(self):
+        self.listing.interest_deadline = timezone.now() - timedelta(minutes=1)
+        self.listing.save(update_fields=["interest_deadline"])
+        first = get_user_model().objects.create_user(
+            username="first",
+            password="SecurePass123!",
+            role="user",
+            needy_metric=80,
+        )
+        second = get_user_model().objects.create_user(
+            username="second",
+            password="SecurePass123!",
+            role="user",
+            needy_metric=70,
+        )
+        third = get_user_model().objects.create_user(
+            username="third",
+            password="SecurePass123!",
+            role="user",
+            needy_metric=10,
+        )
+        Interest.objects.create(listing=self.listing, user=third)
+        Interest.objects.create(listing=self.listing, user=first)
+        Interest.objects.create(listing=self.listing, user=second)
+        self.client.force_login(self.vendor)
+
+        response = self.client.post(
+            reverse("marketplace:vendor-run-matching", kwargs={"listing_id": self.listing.pk})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["result"]["allocatedCount"], 2)
+        self.assertEqual(response.json()["result"]["declinedCount"], 1)
+        self.assertEqual(Allocation.objects.filter(listing=self.listing).count(), 2)
+        self.assertEqual(response.json()["listing"]["stage"], "allocated")
+
+    def test_vendor_cannot_run_matching_before_deadline(self):
+        self.client.force_login(self.vendor)
+
+        response = self.client.post(
+            reverse("marketplace:vendor-run-matching", kwargs={"listing_id": self.listing.pk})
+        )
+
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(Allocation.objects.filter(listing=self.listing).count(), 0)
 
     def test_platform_summary_contract(self):
         staff_user = get_user_model().objects.create_user(

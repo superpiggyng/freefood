@@ -107,7 +107,7 @@ export default function NutritionMatchesPage() {
                     {warnings.map((warning) => <p className="meal-warning" key={warning}><AlertTriangle size={14}/>{warning}. Confirm before requesting.</p>)}
                     <div className="meal-match__footer"><span><MapPin size={14}/>{listing.distance}</span><strong>{listing.price}</strong></div>
                     {covered > 0 && <p className="meal-match__sponsor">Sponsor covers {money(covered)} · {listing.vendor} is paid in full</p>}
-                    <Link className="button button--wide" to={`/marketplace/${listing.slug}`}>View food</Link>
+                    <Link className="button button--wide meal-match__action" to={`/marketplace/${listing.slug}`}>View food</Link>
                   </div>
                 </article>
               );

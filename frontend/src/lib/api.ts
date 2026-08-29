@@ -262,6 +262,75 @@ export function createMarketplaceListing(payload: CreateListingPayload): Promise
   });
 }
 
+export interface VendorAllocationRequest {
+  id: number;
+  rank: number;
+  requesterName: string;
+  needScore: number;
+  priority: 'Very high' | 'High' | 'Medium' | 'Standard';
+  requestedQuantity: number;
+  requestedAt: string;
+  requestedAtLabel: string;
+  previousAllocationsCount: number;
+  status: 'submitted' | 'withdrawn' | 'allocated' | 'declined';
+  statusLabel: string;
+  projectedStatus: 'projected' | 'waitlisted' | 'allocated' | 'declined' | 'withdrawn' | 'not-selected';
+  projectedQuantity: number;
+  pickupCode: string;
+}
+
+export interface VendorAllocationListing {
+  id: number;
+  slug: string;
+  name: string;
+  category: string;
+  image: string;
+  quantityAvailable: number;
+  price: string;
+  pickupWindow: string;
+  pickupLocation: string;
+  interestDeadline: string;
+  interestDeadlineLabel: string;
+  deadlineRelative: string;
+  status: string;
+  stage: 'collecting' | 'ready' | 'matching' | 'allocated' | 'completed' | 'expired' | 'cancelled';
+  stageLabel: string;
+  canRunMatching: boolean;
+  requestCount: number;
+  submittedCount: number;
+  allocatedCount: number;
+  declinedCount: number;
+  remainingQuantity: number;
+  requests: VendorAllocationRequest[];
+}
+
+export interface VendorAllocationCollection {
+  results: VendorAllocationListing[];
+  count: number;
+  metrics: {
+    activeListings: number;
+    waitingRequests: number;
+    readyToMatch: number;
+    allocatedRecipients: number;
+  };
+}
+
+export function fetchVendorAllocations(): Promise<VendorAllocationCollection> {
+  return apiFetch('/api/vendor/allocations/');
+}
+
+export function runVendorMatching(listingId: number): Promise<{
+  result: {
+    listingId: number;
+    allocatedCount: number;
+    declinedCount: number;
+    remainingQuantity: number;
+  };
+  listing: VendorAllocationListing;
+}> {
+  return apiFetch(`/api/vendor/allocations/${listingId}/run/`, { method: 'POST' });
+}
+
 export interface NutritionEstimateItem {
   name: string;
   nutrition: NonNullable<Listing['nutrition']>;

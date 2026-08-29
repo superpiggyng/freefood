@@ -1,7 +1,7 @@
 import json
 from datetime import timedelta
 
-from django.db import IntegrityError
+from django.db import IntegrityError, models
 from django.http import JsonResponse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -13,7 +13,7 @@ from marketplace.ai_nutrition import (
     NutritionEstimateError,
     estimate_nutrition_from_image,
 )
-from marketplace.models import Interest, Item, MarketplaceListing
+from marketplace.models import Allocation, Interest, Item, MarketplaceListing
 
 
 CATEGORY_LABELS = {
@@ -72,6 +72,25 @@ def _pickup_window(listing):
     return f"{start} - {end}"
 
 
+def _date_time_label(value):
+    return timezone.localtime(value).strftime("%b %d, %I:%M %p")
+
+
+def _time_until(value, *, now=None):
+    current_time = now or timezone.now()
+    seconds = int((value - current_time).total_seconds())
+    if seconds <= 0:
+        return "Ready now"
+    minutes = max(1, round(seconds / 60))
+    if minutes < 60:
+        return f"{minutes} min left"
+    hours = round(minutes / 60)
+    if hours < 24:
+        return f"{hours} hr left"
+    days = round(hours / 24)
+    return f"{days} day left" if days == 1 else f"{days} days left"
+
+
 def _tag_list(value):
     return [tag.strip() for tag in (value or "").split(",") if tag.strip()]
 
@@ -113,6 +132,141 @@ def _listing_json(listing):
         "servings": f"{listing.quantity_available} available",
         "weight": "",
         "nutrition": _nutrition_json(listing.item),
+    }
+
+
+def _recipient_label(user):
+    first = (user.first_name or "").strip()
+    last = (user.last_name or "").strip()
+    if first and last:
+        return f"{first} {last[0]}."
+    if first:
+        return first
+    return user.username
+
+
+def _priority_label(score):
+    if score >= 80:
+        return "Very high"
+    if score >= 60:
+        return "High"
+    if score >= 40:
+        return "Medium"
+    return "Standard"
+
+
+def _allocation_stage(listing, *, now=None):
+    current_time = now or timezone.now()
+    if listing.status == MarketplaceListing.STATUS_OPEN:
+        if listing.interest_deadline <= current_time:
+            return "ready", "Ready to match"
+        return "collecting", "Collecting requests"
+    if listing.status == MarketplaceListing.STATUS_MATCHING:
+        return "matching", "Matching in progress"
+    if listing.status == MarketplaceListing.STATUS_ALLOCATED:
+        return "allocated", "Allocated"
+    if listing.status == MarketplaceListing.STATUS_COMPLETED:
+        return "completed", "Completed"
+    if listing.status == MarketplaceListing.STATUS_EXPIRED:
+        return "expired", "Expired"
+    return "cancelled", "Cancelled"
+
+
+def _listing_interests(listing):
+    prefetched = getattr(listing, "ranked_interests", None)
+    if prefetched is not None:
+        return list(prefetched)
+    return list(
+        Interest.objects.filter(listing=listing)
+        .select_related("user", "allocation")
+        .order_by("-user__needy_metric", "created_at", "pk")
+    )
+
+
+def _interest_allocation(interest):
+    try:
+        return interest.allocation
+    except Allocation.DoesNotExist:
+        return None
+
+
+def _vendor_allocation_listing_json(listing, *, now=None):
+    current_time = now or timezone.now()
+    category = _category_label(listing.item.category)
+    stage, stage_label = _allocation_stage(listing, now=current_time)
+    interests = _listing_interests(listing)
+    preview_remaining = listing.quantity_available
+    request_rows = []
+    allocated_count = 0
+    declined_count = 0
+
+    for index, interest in enumerate(interests, start=1):
+        allocation = _interest_allocation(interest)
+        projected_status = "not-selected"
+        projected_quantity = 0
+        if interest.status == Interest.STATUS_ALLOCATED:
+            projected_status = "allocated"
+            projected_quantity = allocation.allocated_quantity if allocation else interest.requested_quantity
+            allocated_count += 1
+        elif interest.status == Interest.STATUS_DECLINED:
+            projected_status = "declined"
+            declined_count += 1
+        elif interest.status == Interest.STATUS_SUBMITTED and listing.status == MarketplaceListing.STATUS_OPEN:
+            if preview_remaining > 0:
+                projected_status = "projected"
+                projected_quantity = min(interest.requested_quantity, preview_remaining)
+                preview_remaining -= projected_quantity
+            else:
+                projected_status = "waitlisted"
+        elif interest.status == Interest.STATUS_WITHDRAWN:
+            projected_status = "withdrawn"
+
+        request_rows.append({
+            "id": interest.id,
+            "rank": index,
+            "requesterName": _recipient_label(interest.user),
+            "needScore": interest.user.needy_metric,
+            "priority": _priority_label(interest.user.needy_metric),
+            "requestedQuantity": interest.requested_quantity,
+            "requestedAt": interest.created_at.isoformat(),
+            "requestedAtLabel": _date_time_label(interest.created_at),
+            "previousAllocationsCount": interest.user.previous_allocations_count,
+            "status": interest.status,
+            "statusLabel": interest.get_status_display(),
+            "projectedStatus": projected_status,
+            "projectedQuantity": projected_quantity,
+            "pickupCode": allocation.pickup_code if allocation else "",
+        })
+
+    submitted_count = sum(1 for interest in interests if interest.status == Interest.STATUS_SUBMITTED)
+    can_run_matching = (
+        listing.status == MarketplaceListing.STATUS_OPEN
+        and listing.quantity_available > 0
+        and listing.interest_deadline <= current_time
+    )
+    return {
+        "id": listing.id,
+        "slug": _listing_slug(listing),
+        "name": listing.item.name,
+        "category": category,
+        "image": listing.item.image_url or CATEGORY_IMAGES[category],
+        "quantityAvailable": listing.quantity_available,
+        "price": _price_label(_money_value(listing.price)),
+        "pickupWindow": _pickup_window(listing),
+        "pickupLocation": listing.pickup_location,
+        "interestDeadline": listing.interest_deadline.isoformat(),
+        "interestDeadlineLabel": _date_time_label(listing.interest_deadline),
+        "deadlineRelative": _time_until(listing.interest_deadline, now=current_time),
+        "status": listing.status,
+        "stage": stage,
+        "stageLabel": stage_label,
+        "canRunMatching": can_run_matching,
+        "requestCount": len(interests),
+        "submittedCount": submitted_count,
+        "allocatedCount": allocated_count,
+        "declinedCount": declined_count,
+        "remainingQuantity": listing.quantity_available,
+        "requests": request_rows,
     }
 
 
@@ -208,6 +362,66 @@ def vendor_listing_collection(request):
         interest_deadline=_parse_datetime(data.get("interestDeadline"), now + timedelta(hours=1)),
     )
     return JsonResponse(_listing_json(listing), status=201)
+
+
+@role_required_json("vendor")
+@require_http_methods(["GET"])
+def vendor_allocation_collection(request):
+    ranked_interests = (
+        Interest.objects.select_related("user", "allocation")
+        .order_by("-user__needy_metric", "created_at", "pk")
+    )
+    listings = list(
+        MarketplaceListing.objects.select_related("item", "vendor")
+        .prefetch_related(
+            models.Prefetch("interests", queryset=ranked_interests, to_attr="ranked_interests")
+        )
+        .filter(vendor=request.user)
+        .order_by("interest_deadline", "pickup_start", "pk")
+    )
+    now = timezone.now()
+    results = [_vendor_allocation_listing_json(listing, now=now) for listing in listings]
+    return JsonResponse({
+        "results": results,
+        "count": len(results),
+        "metrics": {
+            "activeListings": sum(1 for item in results if item["stage"] in {"collecting", "ready", "matching"}),
+            "waitingRequests": sum(item["submittedCount"] for item in results),
+            "readyToMatch": sum(1 for item in results if item["canRunMatching"]),
+            "allocatedRecipients": sum(item["allocatedCount"] for item in results),
+        },
+    })
+
+
+@role_required_json("vendor")
+@require_http_methods(["POST"])
+def vendor_run_matching(request, listing_id):
+    from matching.services import allocate_listing, listing_is_ready_for_matching
+
+    try:
+        listing = MarketplaceListing.objects.select_related("item", "vendor").get(
+            pk=listing_id,
+            vendor=request.user,
+        )
+    except MarketplaceListing.DoesNotExist:
+        return JsonResponse({"detail": "Listing not found."}, status=404)
+
+    if not listing_is_ready_for_matching(listing):
+        return JsonResponse({
+            "detail": f"Matching can run after {_date_time_label(listing.interest_deadline)}.",
+        }, status=409)
+
+    result = allocate_listing(listing.pk, now=timezone.now())
+    listing = MarketplaceListing.objects.select_related("item", "vendor").get(pk=listing.pk)
+    return JsonResponse({
+        "result": {
+            "listingId": result.listing_id,
+            "allocatedCount": result.allocated_count,
+            "declinedCount": result.declined_count,
+            "remainingQuantity": result.remaining_quantity,
+        },
+        "listing": _vendor_allocation_listing_json(listing, now=timezone.now()),
+    })
 
 
 @role_required_json("vendor")
