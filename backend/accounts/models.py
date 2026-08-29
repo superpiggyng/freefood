@@ -99,6 +99,7 @@ class User(AbstractUser):
         null=True,
         validators=[MinValueValidator(30), MaxValueValidator(260)],
     )
+    
     weight_kg = models.DecimalField(
         max_digits=5,
         decimal_places=2,
