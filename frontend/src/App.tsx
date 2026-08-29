@@ -37,8 +37,8 @@ const toCard = (item: Listing): FoodListing => ({
   nutrition: item.nutrition,
 });
 
-function PublicLayout({ children, marketplace = false }: { children: ReactNode; marketplace?: boolean }) {
-  return <><Header marketplace={marketplace}/>{children}</>;
+function PublicLayout({ children, marketplace = false, authOnly = false }: { children: ReactNode; marketplace?: boolean; authOnly?: boolean }) {
+  return <><Header marketplace={marketplace} authOnly={authOnly}/>{children}</>;
 }
 
 function ProtectedRoute({ children, allowedRoles, staffOnly = false }: { children: ReactNode; allowedRoles?: string[]; staffOnly?: boolean }) {
@@ -46,11 +46,11 @@ function ProtectedRoute({ children, allowedRoles, staffOnly = false }: { childre
   const location = useLocation();
 
   if (loading) {
-    return <PublicLayout><AccessDeniedPage reason="loading" /></PublicLayout>;
+    return <PublicLayout authOnly><AccessDeniedPage reason="loading" /></PublicLayout>;
   }
 
   if (!user) {
-    return <PublicLayout><AccessDeniedPage reason="login" from={location.pathname} /></PublicLayout>;
+    return <PublicLayout authOnly><AccessDeniedPage reason="login" from={location.pathname} /></PublicLayout>;
   }
 
   if (staffOnly && !user.isStaff && !user.isSuperuser) {
@@ -109,7 +109,7 @@ export default function App() {
     <Route path="/" element={<PublicLayout><LandingPage heroImageUrl="/savr-icon.png"/></PublicLayout>}/>
     <Route path="/marketplace" element={<PublicLayout marketplace><MarketplacePage listings={listings} categories={[{slug:'bakery',name:'Bakery'},{slug:'groceries',name:'Groceries'},{slug:'meals',name:'Meals'},{slug:'snacks',name:'Snacks'}]} initialLocation="Marrickville, NSW"/></PublicLayout>}/>
     <Route path="/marketplace/:id" element={<DetailRoute user={user}/>}/>
-    <Route path="/access-denied" element={<PublicLayout><AccessDeniedPage reason="login" /></PublicLayout>}/>
+    <Route path="/access-denied" element={<PublicLayout authOnly><AccessDeniedPage reason="login" /></PublicLayout>}/>
     <Route path="/register" element={<RegisterPage/>}/>
     <Route path="/login" element={<LoginPage/>}/>
     <Route path="/vendors/signup" element={<RegisterPage/>}/>

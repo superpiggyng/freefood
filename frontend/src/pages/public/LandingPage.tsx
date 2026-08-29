@@ -76,7 +76,7 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
         <section className="section section--flush page-shell" aria-labelledby="nearby-title">
           <div className="section-heading">
             <div><p className="eyebrow">Available today</p><h2 id="nearby-title">Good food near you</h2></div>
-            <a href="/marketplace">Browse all <ArrowRight size={15} /></a>
+            <a href="/register">Get food support <ArrowRight size={15} /></a>
           </div>
           <div className="listing-grid">{featuredListings.map((listing) => <ListingCard key={listing.id} listing={listing} />)}</div>
         </section>
