@@ -1,39 +1,43 @@
-from django.contrib import messages
-from django.contrib.auth import get_user_model
-from django.shortcuts import render, redirect
+import json
+
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 
 from .forms import UserSignupForm, VendorSignupForm
 
-User = get_user_model()
+
+def _payload(request):
+    if request.content_type == "application/json":
+        try:
+            return json.loads(request.body or "{}")
+        except json.JSONDecodeError:
+            return None
+    return request.POST
 
 
-def landing(request):
-    return render(request, "accounts/landing.html")
+def _register(request, form_class):
+    data = _payload(request)
+    if data is None:
+        return JsonResponse({"detail": "Invalid JSON."}, status=400)
+    form = form_class(data, request.FILES or None)
+    if not form.is_valid():
+        return JsonResponse({"errors": form.errors.get_json_data()}, status=422)
+    user = form.save()
+    return JsonResponse({"id": user.id, "username": user.username, "email": user.email, "role": user.role}, status=201)
 
 
+@require_http_methods(["POST"])
 def user_signup(request):
-    if request.method == "POST":
-        form = UserSignupForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Your profile was created successfully.")
-            return redirect("dashboard")
-    else:
-        form = UserSignupForm()
-    return render(request, "accounts/user_signup.html", {"form": form})
+    return _register(request, UserSignupForm)
 
 
+@require_http_methods(["POST"])
 def vendor_signup(request):
-    if request.method == "POST":
-        form = VendorSignupForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Your vendor profile was created successfully.")
-            return redirect("dashboard")
-    else:
-        form = VendorSignupForm()
-    return render(request, "accounts/vendor_signup.html", {"form": form})
+    return _register(request, VendorSignupForm)
 
 
-def dashboard(request):
-    return render(request, "accounts/dashboard.html", {"user": request.user})
+@login_required
+def profile(request):
+    user = request.user
+    return JsonResponse({"id": user.id, "username": user.username, "email": user.email, "firstName": user.first_name, "lastName": user.last_name, "role": user.role, "vendorName": user.vendor_name})

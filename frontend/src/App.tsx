@@ -11,6 +11,8 @@ import RequestsPage from './pages/recipient/RequestsPage';
 import VendorAllocations from './pages/vendor/VendorAllocations';
 import VendorDashboard from './pages/vendor/VendorDashboard';
 import { saveRequest } from './lib/mvpStore';
+import HealthProfilePage from './pages/health/HealthProfilePage';
+import NutritionMatchesPage from './pages/health/NutritionMatchesPage';
 
 const listings: FoodListing[] = sourceListings.map((item) => ({
   id: item.slug, title: item.name, vendorName: item.vendor, category: item.category,
@@ -27,7 +29,7 @@ function PublicLayout({ children, marketplace = false }: { children: React.React
 function DetailRoute() {
   const { id } = useParams();
   const base = listings.find((item) => String(item.id) === id) ?? listings[0];
-  const detail: ListingDetail = { ...base, description: 'A surprise box of delicious baked goods that couldn’t be sold today. Typically includes a mix of bread, rolls, pastries and muffins.', dietaryTags: ['Vegetarian', 'Nut-free'], allergenInformation: 'May contain gluten', servings: '4–6 servings', weight: '1.8 kg', co2Avoided: '3.2 kg', vendorVerified: true, isAvailable: true };
+  const detail: ListingDetail = { ...base, description: 'A surprise box of delicious baked goods that couldn’t be sold today. Typically includes a mix of bread, rolls, pastries and muffins.', dietaryTags: ['Vegetarian', 'Nut-free'], allergenInformation: 'May contain gluten', servings: '4-6 servings', weight: '1.8 kg', co2Avoided: '3.2 kg', vendorVerified: true, isAvailable: true };
   return <PublicLayout><ListingDetailPage listing={detail} onRequest={(item) => {
     saveRequest({ id: String(item.id), title: item.title, vendor: item.vendorName, pickupWindow: item.pickupWindow });
     window.location.assign('/requests');
@@ -41,6 +43,8 @@ export default function App() {
     <Route path="/marketplace/:id" element={<DetailRoute/>}/>
     <Route path="/eligibility" element={<EligibilityPage/>}/>
     <Route path="/requests" element={<RequestsPage/>}/>
+    <Route path="/health-profile" element={<HealthProfilePage/>}/>
+    <Route path="/nutrition-matches" element={<NutritionMatchesPage/>}/>
     <Route path="/vendor" element={<VendorDashboard/>}/>
     <Route path="/vendor/allocations" element={<VendorAllocations/>}/>
     <Route path="/platform" element={<AdminDashboard/>}/>
