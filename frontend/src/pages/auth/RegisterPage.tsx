@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Building2, HandHeart } from 'lucide-react';
 import { useAuth } from '../../lib/authContext';
 import { ApiError } from '../../lib/api';
 
@@ -206,9 +207,10 @@ function RecipientRegister({ redirectTo }: { redirectTo: string }) {
 
         <section className="eligibility-form-panel" aria-labelledby="register-title">
           <header className="page-heading">
-            <h1 id="register-title">Create your account</h1>
+            <p className="account-type-badge"><HandHeart size={14}/> Recipient signup</p>
+            <h1 id="register-title">Create recipient account</h1>
             <p>
-              {step === 0 && 'Choose a username and password to get started.'}
+              {step === 0 && 'Create a personal account to request affordable surplus food.'}
               {step === 1 && 'Tell us what food you look for and how far you can travel.'}
               {step === 2 && 'A few household questions so we can fairly match food by need.'}
               {step === 3 && 'A little about your financial situation. This stays private and secure.'}
@@ -284,10 +286,10 @@ function RecipientRegister({ redirectTo }: { redirectTo: string }) {
                 {step > 0 && <button className="button button--secondary" type="button" onClick={goBack}>Back</button>}
                 {step < steps.length - 1
                   ? <button className="button button--primary" type="submit">Continue</button>
-                  : <button className="button button--primary" type="submit" disabled={submitting}>{submitting ? 'Creating account…' : 'Create account'}</button>}
+                  : <button className="button button--primary" type="submit" disabled={submitting}>{submitting ? 'Creating account…' : 'Create recipient account'}</button>}
               </div>
             </form>
-            <p className="auth-switch">Already have an account? <Link to="/login">Log in</Link></p>
+            <p className="auth-switch">Need a business account? <Link to="/vendors/signup">Business signup</Link>. Already have an account? <Link to="/login">Log in</Link>.</p>
           </div>
         </section>
       </div>
@@ -376,8 +378,9 @@ function BusinessRegister() {
       <div className="eligibility-page__layout eligibility-page__layout--single">
         <section className="eligibility-form-panel" aria-labelledby="business-title">
           <header className="page-heading">
-            <h1 id="business-title">List surplus food</h1>
-            <p>Create a business account. You are paid in full for every serve. Recipients pay a capped contribution and a corporate sponsor covers the rest.</p>
+            <p className="account-type-badge"><Building2 size={14}/> Business signup</p>
+            <h1 id="business-title">Create business account</h1>
+            <p>For cafes, restaurants, grocers and bakeries listing surplus food. You are paid in full for every serve while recipients pay a capped contribution.</p>
           </header>
           <form className="eligibility-form" onSubmit={submit}>
             <div className="form-grid form-grid--two-columns">
@@ -393,7 +396,7 @@ function BusinessRegister() {
             {error && <p className="form-error" role="alert">{error}</p>}
             <div className="form-actions"><button className="button button--primary" type="submit" disabled={submitting}>{submitting ? 'Creating account…' : 'Create business account'}</button></div>
           </form>
-          <p className="auth-switch">Looking for food instead? <Link to="/register">Create a personal account</Link>. Already registered? <Link to="/login">Log in</Link>.</p>
+          <p className="auth-switch">Looking for food instead? <Link to="/register">Recipient signup</Link>. Already registered? <Link to="/login">Log in</Link>.</p>
         </section>
       </div>
     </main>

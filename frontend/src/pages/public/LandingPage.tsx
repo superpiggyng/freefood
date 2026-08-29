@@ -40,9 +40,10 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
           <h1 id="hero-title">Good food shouldn’t go to waste when someone nearby needs it.</h1>
           <p className="hero__lead">SAVR connects surplus food from local businesses with the people who need it most, matched fairly by household need rather than first come, first served.</p>
           <div className="button-row">
-            <a className="button button--primary" href="/marketplace">Find food near you <ArrowRight size={17} /></a>
-            <a className="button button--secondary" href="/vendors/signup">List surplus food</a>
+            <a className="button button--primary" href="/register">Get food support <ArrowRight size={17} /></a>
+            <a className="button button--secondary" href="/vendors/signup">Business signup</a>
           </div>
+          <p className="hero__choice-note">Recipients create a personal account. Businesses create a vendor account. Everyone logs in from the same portal.</p>
           <dl className="hero__proof">
             <div><dt>People helped</dt><dd>{stats.peopleHelped}</dd></div>
             <div><dt>Businesses</dt><dd>{stats.businesses}</dd></div>
@@ -89,6 +90,24 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
             <li><span>2</span><h3>Find local food</h3><p>Browse fresh surplus from trusted businesses in your community, priced from free.</p></li>
             <li><span>3</span><h3>Request and collect</h3><p>Requests are matched fairly by need. Collect at your confirmed pickup time.</p></li>
           </ol>
+        </div>
+      </section>
+
+      <section className="section page-shell" aria-labelledby="signup-path-title">
+        <div className="section-heading section-heading--center"><div><p className="eyebrow">Choose your path</p><h2 id="signup-path-title">Create the right SAVR account</h2></div></div>
+        <div className="signup-paths">
+          <article>
+            <span aria-hidden="true"><HandHeart size={19}/></span>
+            <h3>Recipient account</h3>
+            <p>For individuals and families looking for affordable surplus food nearby.</p>
+            <a className="button button--primary" href="/register">Get food support</a>
+          </article>
+          <article>
+            <span aria-hidden="true"><Store size={19}/></span>
+            <h3>Business account</h3>
+            <p>For cafes, restaurants, grocers and bakeries listing food that would otherwise be wasted.</p>
+            <a className="button button--secondary" href="/vendors/signup">List surplus food</a>
+          </article>
         </div>
       </section>
 

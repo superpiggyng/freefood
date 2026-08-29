@@ -24,7 +24,7 @@ export function Header({ marketplace = false }: { marketplace?: boolean }) {
       {user?.role === 'vendor' ? <>
         <Link to="/vendor">Dashboard</Link><Link to="/vendor/upload">Upload stock</Link><Link to="/vendor/partner">Partner status</Link><Link to="/sponsors">For sponsors</Link>
       </> : <>
-        <Link to="/marketplace">Find food</Link><Link to="/suggested">Suggested</Link>{user && <Link to="/requests">My requests</Link>}<Link to="/vendors/signup">For businesses</Link><Link to="/sponsors">For sponsors</Link>
+        <Link to="/marketplace">Find food</Link><Link to="/suggested">Suggested</Link>{user && <Link to="/requests">My requests</Link>}<Link to="/vendors/signup">Business signup</Link><Link to="/sponsors">For sponsors</Link>
       </>}
     </nav>
     <div className="header-actions">
@@ -32,7 +32,7 @@ export function Header({ marketplace = false }: { marketplace?: boolean }) {
       {user ? (
         <><Link className="header-user header-user--link" to={user.role === 'vendor' ? '/vendor' : '/profile'} title={user.role === 'vendor' ? 'Open vendor dashboard' : 'Open my profile'}><UserRound size={15}/><span>{user.role === 'vendor' ? user.vendorName || user.username : user.username}</span></Link><button className="button button-sm" type="button" onClick={handleLogout}>Log out</button></>
       ) : (
-        <><Link className="icon-button" to="/login">Log in</Link><Link className="button button-sm" to="/register">Get started</Link></>
+        <><Link className="icon-button" to="/login">Log in</Link><Link className="button button--secondary button-sm" to="/vendors/signup">Business signup</Link><Link className="button button-sm" to="/register">Get food support</Link></>
       )}
     </div>
   </header>;
