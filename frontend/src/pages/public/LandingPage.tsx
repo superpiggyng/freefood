@@ -1,4 +1,4 @@
-import { ArrowRight, Building2, ClipboardCheck, Cloud, HandHeart, Leaf, ShoppingBasket, Store } from "lucide-react";
+import { ArrowRight, Building2, Cloud, HandHeart, Leaf, Store } from "lucide-react";
 import ListingCard, { type FoodListing } from "../../components/ListingCard";
 import SponsorMarquee from "../../components/SponsorMarquee";
 
@@ -30,9 +30,9 @@ const impactCards = [
 ] as const;
 
 const journeySteps = [
-  { number: "1", icon: ClipboardCheck, title: "Tell us what you need", copy: "Share your household needs, dietary preferences and how far you can travel.", href: "/register" },
-  { number: "2", icon: ShoppingBasket, title: "Find local food", copy: "Browse fresh surplus from trusted businesses in your community, priced from free.", href: "/marketplace" },
-  { number: "3", icon: Building2, title: "Request and collect", copy: "Requests are matched fairly by need. Collect at your confirmed pickup time.", href: "/requests" },
+  { number: "1", image: "/step-pencil.png", imageAlt: "Illustrated pencil", title: "Tell us what you need", copy: "Share your household needs, dietary preferences and how far you can travel.", href: "/register" },
+  { number: "2", image: "/step-grocery-basket.png", imageAlt: "Hand-drawn grocery basket", title: "Find local food", copy: "Browse fresh surplus from trusted businesses in your community, priced from free.", href: "/marketplace" },
+  { number: "3", image: "/step-storefront.png", imageAlt: "Hand-drawn local storefront", title: "Request and collect", copy: "Requests are matched fairly by need. Collect at your confirmed pickup time.", href: "/requests" },
 ] as const;
 
 export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }: LandingPageProps) {
@@ -90,10 +90,10 @@ export function LandingPage({ featuredListings = [], heroImageUrl, impact = {} }
             <p>Less waste. More good.</p>
           </header>
           <div className="impact-journey__steps">
-            {journeySteps.map(({ number, icon: Icon, title, copy, href }) => (
+            {journeySteps.map(({ number, image, imageAlt, title, copy, href }) => (
               <a className="impact-journey__step" href={href} key={number}>
                 <span className="impact-journey__number">{number}</span>
-                <Icon aria-hidden="true" />
+                <img className={`impact-journey__art impact-journey__art--${number}`} src={image} alt={imageAlt} />
                 <h3>{title}</h3>
                 <p>{copy}</p>
                 <span className="impact-journey__link">Get started <ArrowRight size={15} /></span>
