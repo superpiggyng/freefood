@@ -1,7 +1,7 @@
 import base64
 import hashlib
 
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -16,7 +16,7 @@ class SecureEncryptedTextField(models.TextField):
         return base64.urlsafe_b64encode(digest[:32])
 
     def from_db_value(self, value, expression, connection):
-        if value is None:
+        if value is None or value == "":
             return None
         return self._decrypt(value)
 
@@ -40,7 +40,10 @@ class SecureEncryptedTextField(models.TextField):
         f = Fernet(self._key())
         if isinstance(value, memoryview):
             value = value.tobytes().decode("utf-8")
-        return f.decrypt(value.encode("utf-8")).decode("utf-8")
+        try:
+            return f.decrypt(value.encode("utf-8")).decode("utf-8")
+        except InvalidToken:
+            return value
 
 
 class User(AbstractUser):

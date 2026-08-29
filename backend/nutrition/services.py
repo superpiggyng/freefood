@@ -70,6 +70,7 @@ def _nutrition_fit(nutrition, targets):
     reasons = []
 
     protein = _number(nutrition.get("proteinG"))
+    carbs = _number(nutrition.get("carbsG"))
     fiber = _number(nutrition.get("fiberG"))
     calories = _number(nutrition.get("calories"))
 
@@ -84,6 +85,12 @@ def _nutrition_fit(nutrition, targets):
         score += round(8 * coverage)
         if coverage >= 0.15:
             reasons.append(f"Adds {round(fiber)}g fiber")
+
+    if carbs and targets["carbsG"]:
+        coverage = min(1, carbs / targets["carbsG"])
+        score += round(6 * coverage)
+        if coverage >= 0.15:
+            reasons.append(f"Adds {round(carbs)}g carbohydrates for energy")
 
     if calories:
         if 250 <= calories <= 800:

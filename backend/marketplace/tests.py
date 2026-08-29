@@ -1,6 +1,8 @@
 from datetime import timedelta
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -85,6 +87,37 @@ class MarketplaceApiTests(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(MarketplaceListing.objects.count(), 2)
         self.assertEqual(response.json()["name"], "Dinner Surprise Pack")
+
+    def test_vendor_can_request_ai_nutrition_estimate(self):
+        self.client.force_login(self.vendor)
+
+        with patch("marketplace.views.estimate_nutrition_from_image") as estimate:
+            estimate.return_value = {
+                "items": [
+                    {
+                        "name": "Dinner Surprise Pack",
+                        "nutrition": {
+                            "calories": 520,
+                            "proteinG": 24,
+                            "carbsG": 58,
+                            "fatG": 18,
+                            "fiberG": 6,
+                            "sodiumMg": 760,
+                        },
+                        "confidence": "medium",
+                    }
+                ]
+            }
+            response = self.client.post(
+                reverse("marketplace:vendor-nutrition-estimate"),
+                data={
+                    "image": SimpleUploadedFile("food.jpg", b"fake-image", content_type="image/jpeg"),
+                    "items": '["Dinner Surprise Pack"]',
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["items"][0]["nutrition"]["proteinG"], 24)
 
     def test_user_can_submit_interest(self):
         self.client.force_login(self.user)

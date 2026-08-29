@@ -9,6 +9,10 @@ from django.utils.text import slugify
 from django.views.decorators.http import require_http_methods
 
 from freefood.auth import role_required_json, staff_required_json
+from marketplace.ai_nutrition import (
+    NutritionEstimateError,
+    estimate_nutrition_from_image,
+)
 from marketplace.models import Interest, Item, MarketplaceListing
 
 
@@ -203,6 +207,29 @@ def vendor_listing_collection(request):
         interest_deadline=_parse_datetime(data.get("interestDeadline"), now + timedelta(hours=1)),
     )
     return JsonResponse(_listing_json(listing), status=201)
+
+
+@role_required_json("vendor")
+@require_http_methods(["POST"])
+def vendor_nutrition_estimate(request):
+    image = request.FILES.get("image")
+    if image is None:
+        return JsonResponse({"detail": "Food image is required."}, status=400)
+
+    try:
+        item_names = json.loads(request.POST.get("items", "[]"))
+    except json.JSONDecodeError:
+        return JsonResponse({"detail": "Items must be valid JSON."}, status=400)
+
+    if not isinstance(item_names, list):
+        return JsonResponse({"detail": "Items must be a list of food names."}, status=400)
+
+    try:
+        estimate = estimate_nutrition_from_image(image, item_names)
+    except NutritionEstimateError as error:
+        return JsonResponse({"source": "fallback", "warning": str(error), "items": []})
+
+    return JsonResponse(estimate)
 
 
 @role_required_json("user")

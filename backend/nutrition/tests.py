@@ -42,9 +42,10 @@ class MealSuggestionTests(SimpleTestCase):
 
         result = score_meal(
             self.profile(),
-            self.meal(nutrition={"calories": 520, "proteinG": 28, "fiberG": 7}),
+            self.meal(nutrition={"calories": 520, "proteinG": 28, "carbsG": 50, "fiberG": 7}),
             user=user,
         )
 
         self.assertGreater(result.score, 70)
         self.assertIn("protein", " ".join(result.reasons).lower())
+        self.assertIn("carbohydrates", " ".join(result.reasons).lower())

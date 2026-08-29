@@ -8,5 +8,6 @@ urlpatterns = [
     path("listings/<slug:slug>/", views.listing_item, name="listing"),
     path("listings/<slug:slug>/interest/", views.submit_interest, name="submit-interest"),
     path("vendor/listings/", views.vendor_listing_collection, name="vendor-listings"),
+    path("vendor/nutrition-estimate/", views.vendor_nutrition_estimate, name="vendor-nutrition-estimate"),
     path("platform/summary/", views.platform_summary, name="platform-summary"),
 ]
