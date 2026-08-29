@@ -35,7 +35,7 @@ export function ListingCard({ listing, href = `/marketplace/${listing.id}`, clas
         {listing.imageUrl ? (
           <img src={listing.imageUrl} alt={listing.imageAlt ?? listing.title} loading="lazy" />
         ) : (
-          <span className="listing-card__placeholder" aria-hidden="true"><img src="/carrot-icon.png" alt="" /></span>
+          <span className="listing-card__placeholder" aria-hidden="true">🥕</span>
         )}
         <span className="listing-card__price">{formatPrice(listing.price)}</span>
         {listing.originalValue != null && (

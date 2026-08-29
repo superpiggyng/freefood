@@ -27,7 +27,7 @@ export function ListingDetailPage({ listing, onRequest, onSave }: ListingDetailP
       <div className="detail-layout">
         <article className="listing-detail">
           <div className="listing-detail__media">
-            {listing.imageUrl ? <img src={listing.imageUrl} alt={listing.imageAlt ?? listing.title} /> : <div className="listing-detail__placeholder" aria-hidden="true"><img src="/carrot-icon.png" alt="" /></div>}
+            {listing.imageUrl ? <img src={listing.imageUrl} alt={listing.imageAlt ?? listing.title} /> : <div className="listing-detail__placeholder" aria-hidden="true">🥖</div>}
             <span className="listing-card__price">{listing.price === 0 ? "Free" : `$${listing.price.toFixed(2)}`}</span>
           </div>
           <header className="listing-detail__header">

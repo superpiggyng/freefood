@@ -34,12 +34,8 @@ const toCard = (item: Listing): FoodListing => ({
   vendorPrice: item.vendorPrice, sponsored: item.sponsored, partnerTier: item.partnerTier,
 });
 
-function PromoBar() {
-  return <aside className="promo-bar"><p>Sponsored meals are available near you tonight. <a href="/marketplace">See what is going</a></p></aside>;
-}
-
 function PublicLayout({ children, marketplace = false }: { children: ReactNode; marketplace?: boolean }) {
-  return <><PromoBar/><Header marketplace={marketplace}/>{children}</>;
+  return <><Header marketplace={marketplace}/>{children}</>;
 }
 
 function ProtectedRoute({ children, allowedRoles, staffOnly = false }: { children: ReactNode; allowedRoles?: string[]; staffOnly?: boolean }) {
@@ -106,7 +102,7 @@ export default function App() {
   const listings = useListings().map(toCard);
 
   return <Routes>
-    <Route path="/" element={<PublicLayout><LandingPage/></PublicLayout>}/>
+    <Route path="/" element={<PublicLayout><LandingPage heroImageUrl="/savr-icon.png"/></PublicLayout>}/>
     <Route path="/marketplace" element={<PublicLayout marketplace><MarketplacePage listings={listings} categories={[{slug:'bakery',name:'Bakery'},{slug:'groceries',name:'Groceries'},{slug:'meals',name:'Meals'},{slug:'snacks',name:'Snacks'}]} initialLocation="Marrickville, NSW"/></PublicLayout>}/>
     <Route path="/marketplace/:id" element={<DetailRoute user={user}/>}/>
     <Route path="/access-denied" element={<PublicLayout><AccessDeniedPage reason="login" /></PublicLayout>}/>

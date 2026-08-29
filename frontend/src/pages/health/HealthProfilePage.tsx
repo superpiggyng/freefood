@@ -26,7 +26,7 @@ export default function HealthProfilePage() {
   };
 
   return <main className="health-page">
-    <header className="health-header"><Link className="logo" to="/"><span className="logo__mark" aria-hidden="true"><img src="/carrot-icon.png" alt=""/></span><span className="logo__word">SAVR</span></Link><Link to="/eligibility">Skip</Link></header>
+    <header className="health-header"><Link className="logo" to="/"><img src="/savr-icon.png" alt=""/><span>SAVR</span></Link><Link to="/eligibility">Skip</Link></header>
     <div className="health-shell preference-shell">
       <div className="health-intro"><p className="eyebrow">Optional</p><h1>Make food easier to find</h1><p>Tell us what to avoid and what you like. You can skip this or change it anytime.</p></div>
       <form className="preference-card" onSubmit={submit}>

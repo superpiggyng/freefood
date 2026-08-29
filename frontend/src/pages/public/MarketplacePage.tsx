@@ -58,7 +58,7 @@ export function MarketplacePage({ listings = [], categories = [], initialLocatio
       {results.length ? (
         <section className="listing-grid" aria-label="Available food">{results.map((listing) => <ListingCard key={listing.id} listing={listing} />)}</section>
       ) : (
-        <section className="empty-state" aria-live="polite"><img className="empty-state__mascot" src="/carrot-icon.png" alt=""/><h2>No food matches those filters yet</h2><p>Try widening your location or removing a filter. New food is added throughout the day.</p><button className="button button--primary" type="button" onClick={() => { setQuery(""); setCategory("all"); }}>Clear filters</button></section>
+        <section className="empty-state" aria-live="polite"><span aria-hidden="true">🥕</span><h2>No food matches those filters yet</h2><p>Try widening your location or removing a filter. New food is added throughout the day.</p><button className="button button--primary" type="button" onClick={() => { setQuery(""); setCategory("all"); }}>Clear filters</button></section>
       )}
     </main>
   );
